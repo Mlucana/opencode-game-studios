@@ -198,3 +198,26 @@ aparece en toda la referencia. Refrescarlo con `/setup-engine`; **no bloquea** a
 `technical-preferences.md` fija **GUT**; `coding-standards.md` especifica el comando de **gdUnit4**. Hay que elegir antes de escribir el test de C4a — que en cualquiera de los dos exige un **espía manual de lista compartida**, porque ningún framework prueba orden *entre señales distintas* de forma nativa.
 
 ### Nomenclatura · Tríadas por **función** (Humanidad / Cosmos / Cercanía a Dios) en art bible y GDDs, para no chocar con la numeración teológica de `game-concept.md`.
+
+---
+
+## [HANDOFF] Migracion a OpenCode completada — 2026-09-03
+
+El proyecto del rar (`Videojuego.rar`, juego NOVENA Godot 4.7 + GDScript) se migro
+a este repo (`opencode-game-studios`, `master`, commit `cc81442`).
+Origen extraido en staging temporal (no forma parte del repo).
+`Desktop\Videojuego` es OTRO proyecto: no tocar.
+
+**Estado fijado**: `production/stage.txt` = `Systems Design`, `review-mode.txt` = `full`
+(elegido por el usuario; el rar traia `lean`).
+Stack en `AGENTS.md`/`CLAUDE.md` = Godot 4.7 / GDScript.
+
+**Adoptado del rar**: fix de deteccion de Python en `validate-commit.sh` y
+`validate-assets.sh` + hook nuevo `check-state-size.sh` (cableado en
+`.claude/settings.json` → `SessionEnd` y en `.opencode/plugins/ccgs-hooks.js`).
+
+**PROXIMO PASO (otra sesion)**: correr `/project-stage-detect` y despues `/adopt`
+para auditar fase, huecos y conformidad de formato de los GDDs en espanol.
+Hay GDDs (parry-absorcion, maquina-estados-jefe, concepto) pero sin ADRs ni
+`architecture.md`. `src/` solo tiene combate; hay prototipo jugable en
+`prototypes/parry-absorcion-concept/` y tests GdUnit4 en `tests/`.
