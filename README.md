@@ -1,77 +1,104 @@
 <p align="center">
-  <h1 align="center">Claude Code Game Studios</h1>
+  <h1 align="center">OpenCode Game Studios</h1>
   <p align="center">
-    Turn a single Claude Code session into a full game development studio.
+    Convierte una sesión de OpenCode en un estudio completo de desarrollo de videojuegos.
     <br />
-    49 agents. 73 skills. One coordinated AI team.
+    49 agentes. 73 comandos. Un equipo de IA coordinado.
   </p>
 </p>
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
-  <a href=".claude/agents"><img src="https://img.shields.io/badge/agents-49-blueviolet" alt="49 Agents"></a>
-  <a href=".claude/skills"><img src="https://img.shields.io/badge/skills-73-green" alt="73 Skills"></a>
-  <a href=".claude/hooks"><img src="https://img.shields.io/badge/hooks-12-orange" alt="12 Hooks"></a>
-  <a href=".claude/rules"><img src="https://img.shields.io/badge/rules-11-red" alt="11 Rules"></a>
-  <a href="https://docs.anthropic.com/en/docs/claude-code"><img src="https://img.shields.io/badge/built%20for-Claude%20Code-f5f5f5?logo=anthropic" alt="Built for Claude Code"></a>
-  <a href="https://www.buymeacoffee.com/donchitos3"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support%20this%20project-FFDD00?logo=buymeacoffee&logoColor=black" alt="Buy Me a Coffee"></a>
-  <a href="https://github.com/sponsors/Donchitos"><img src="https://img.shields.io/badge/GitHub%20Sponsors-Support%20this%20project-ea4aaa?logo=githubsponsors&logoColor=white" alt="GitHub Sponsors"></a>
+  <a href=".opencode/agents"><img src="https://img.shields.io/badge/agents-49-blueviolet" alt="49 agentes"></a>
+  <a href=".opencode/commands"><img src="https://img.shields.io/badge/commands-73-green" alt="73 comandos"></a>
+  <a href=".opencode/plugins"><img src="https://img.shields.io/badge/hooks-12-orange" alt="12 hooks"></a>
+  <a href="opencode.json"><img src="https://img.shields.io/badge/rules-11-red" alt="11 reglas"></a>
+  <a href="https://opencode.ai/docs"><img src="https://img.shields.io/badge/built%20for-OpenCode-444444" alt="Hecho para OpenCode"></a>
 </p>
 
----
-
-## Why This Exists
-
-Building a game solo with AI is powerful — but a single chat session has no structure. No one stops you from hardcoding magic numbers, skipping design docs, or writing spaghetti code. There's no QA pass, no design review, no one asking "does this actually fit the game's vision?"
-
-**Claude Code Game Studios** solves this by giving your AI session the structure of a real studio. Instead of one general-purpose assistant, you get 49 specialized agents organized into a studio hierarchy — directors who guard the vision, department leads who own their domains, and specialists who do the hands-on work. Each agent has defined responsibilities, escalation paths, and quality gates.
-
-The result: you still make every decision, but now you have a team that asks the right questions, catches mistakes early, and keeps your project organized from first brainstorm to launch.
+> **Adaptado por [Mlucana](https://github.com/Mlucana)** a partir de
+> [Claude Code Game Studios](https://github.com/Donchitos/Claude-Code-Game-Studios)
+> de Donchitos (licencia MIT). Todo el sistema del estudio — agentes, flujos de
+> trabajo, hooks y estándares — se ha portado de Claude Code a
+> [OpenCode](https://opencode.ai/docs). Ver [Diferencias con el original](#diferencias-con-el-original).
 
 ---
 
-## Table of Contents
+## Por qué existe
 
-- [What's Included](#whats-included)
-- [Studio Hierarchy](#studio-hierarchy)
-- [Slash Commands](#slash-commands)
-- [Getting Started](#getting-started)
-- [Upgrading](#upgrading)
-- [Project Structure](#project-structure)
-- [How It Works](#how-it-works)
-- [Design Philosophy](#design-philosophy)
-- [Customization](#customization)
-- [Platform Support](#platform-support)
-- [Community](#community)
-- [Supporting This Project](#supporting-this-project)
-- [License](#license)
+Crear un juego en solitario con IA es muy potente, pero una sola sesión de chat
+no tiene estructura. Nadie te frena si pones números mágicos en el código, te
+saltas los documentos de diseño o escribes código espagueti. No hay revisión de
+QA, ni revisión de diseño, ni nadie que pregunte "¿esto encaja con la visión
+del juego?".
+
+**OpenCode Game Studios** resuelve esto dándole a tu sesión de IA la estructura
+de un estudio real. En lugar de un asistente genérico, obtienes 49 agentes
+especializados organizados en una jerarquía de estudio: directores que protegen
+la visión, líderes que dominan su área y especialistas que hacen el trabajo
+práctico. Cada agente tiene responsabilidades definidas, rutas de escalado y
+puertas de calidad.
+
+El resultado: tú sigues tomando cada decisión, pero ahora tienes un equipo que
+hace las preguntas correctas, detecta errores pronto y mantiene tu proyecto
+organizado desde el primer brainstorm hasta el lanzamiento.
 
 ---
 
-## What's Included
+## Índice
 
-| Category | Count | Description |
-|----------|-------|-------------|
-| **Agents** | 49 | Specialized subagents across design, programming, art, audio, narrative, QA, and production |
-| **Skills** | 73 | Slash commands for every workflow phase (`/start`, `/design-system`, `/create-epics`, `/create-stories`, `/dev-story`, `/story-done`, etc.) |
-| **Hooks** | 12 | Automated validation on commits, pushes, asset changes, session lifecycle, agent audit trail, and gap detection |
-| **Rules** | 11 | Path-scoped coding standards enforced when editing gameplay, engine, AI, UI, network code, and more |
-| **Templates** | 41 | Document templates for GDDs, UX specs, ADRs, sprint plans, HUD design, accessibility, and more |
+- [Qué incluye](#qué-incluye)
+- [Diferencias con el original](#diferencias-con-el-original)
+- [Jerarquía del estudio](#jerarquía-del-estudio)
+- [Comandos slash](#comandos-slash)
+- [Primeros pasos](#primeros-pasos)
+- [Estructura del proyecto](#estructura-del-proyecto)
+- [Cómo funciona](#cómo-funciona)
+- [Filosofía de diseño](#filosofía-de-diseño)
+- [Personalización](#personalización)
+- [Plataformas](#plataformas)
+- [Comunidad](#comunidad)
+- [Licencia](#licencia)
 
-## Studio Hierarchy
+---
 
-Agents are organized into three tiers, matching how real studios operate:
+## Qué incluye
+
+| Categoría | Cantidad | Descripción |
+|-----------|----------|-------------|
+| **Agentes** | 49 | Subagentes especializados en diseño, programación, arte, audio, narrativa, QA y producción |
+| **Comandos** | 73 | Comandos slash para cada fase (`/start`, `/design-system`, `/create-epics`, `/create-stories`, `/dev-story`, `/story-done`, etc.) |
+| **Skills** | 73 | Textos completos de cada flujo, cargables con la herramienta `skill` |
+| **Hooks** | 12 | Validación automática en commits, pushes, cambios de assets, ciclo de sesión, auditoría de agentes y detección de huecos |
+| **Reglas** | 11 | Estándares de código por ruta (gameplay, engine, IA, UI, red, etc.) |
+| **Plantillas** | 38+ | Plantillas de GDDs, specs UX, ADRs, planes de sprint, diseño de HUD, accesibilidad y más |
+
+## Diferencias con el original
+
+| Original (Claude Code) | Este port (OpenCode) |
+|------------------------|----------------------|
+| `.claude/agents/*.md` (49) | `.opencode/agents/*.md` (49, `mode: subagent`) — se invocan con `@nombre` o la herramienta `task`. Originales conservados en `.claude/agents/` |
+| `.claude/skills/*/SKILL.md` como slash commands | `.opencode/commands/*.md` (73: `/start`, `/brainstorm`, `/dev-story`…) — envoltorios autocontenidos. Los textos originales siguen en `.claude/skills/` y OpenCode los descubre solo vía `skill` |
+| Hooks en `.claude/settings.json` | `.opencode/plugins/ccgs-hooks.js` — reutiliza los `.sh` originales sin modificarlos |
+| Reglas path-scoped de Claude | Las 11 reglas van en `opencode.json` → `instructions` |
+| Herramienta `AskUserQuestion` | Herramienta `question` |
+| Herramienta `TodoWrite` | Herramienta `todowrite` |
+| Modelos `opus`/`sonnet`/`haiku` fijados | Sin modelo fijado: heredan el de tu sesión de OpenCode (funciona con cualquier proveedor). El tier original se anota en cada agente por si quieres fijarlo |
+
+## Jerarquía del estudio
+
+Los agentes están organizados en tres niveles, como en un estudio real:
 
 ```
-Tier 1 — Directors (Opus)
+Nivel 1 — Directores
   creative-director    technical-director    producer
 
-Tier 2 — Department Leads (Sonnet)
+Nivel 2 — Líderes de departamento
   game-designer        lead-programmer       art-director
   audio-director       narrative-director    qa-lead
   release-manager      localization-lead
 
-Tier 3 — Specialists (Sonnet/Haiku)
+Nivel 3 — Especialistas
   gameplay-programmer  engine-programmer     ai-programmer
   network-programmer   tools-programmer      ui-programmer
   systems-designer     level-designer        economy-designer
@@ -82,231 +109,231 @@ Tier 3 — Specialists (Sonnet/Haiku)
   live-ops-designer    community-manager
 ```
 
-### Engine Specialists
+### Especialistas por motor
 
-The template includes agent sets for all three major engines. Use the set that matches your project:
+El template incluye agentes para los tres motores principales. Usa el juego que
+corresponda a tu proyecto:
 
-| Engine | Lead Agent | Sub-Specialists |
-|--------|-----------|-----------------|
-| **Godot 4** | `godot-specialist` | GDScript, Shaders, GDExtension |
+| Motor | Agente líder | Sub-especialistas |
+|-------|-------------|-------------------|
+| **Godot 4** | `godot-specialist` | GDScript, C#, Shaders, GDExtension |
 | **Unity** | `unity-specialist` | DOTS/ECS, Shaders/VFX, Addressables, UI Toolkit |
-| **Unreal Engine 5** | `unreal-specialist` | GAS, Blueprints, Replication, UMG/CommonUI |
+| **Unreal Engine 5** | `unreal-specialist` | GAS, Blueprints, Replicación, UMG/CommonUI |
 
-## Slash Commands
+## Comandos slash
 
-Type `/` in Claude Code to access all 73 skills:
+Escribe `/` en OpenCode para acceder a los 73 comandos:
 
-**Onboarding & Navigation**
+**Onboarding y navegación**
 `/start` `/help` `/project-stage-detect` `/setup-engine` `/adopt`
 
-**Game Design**
+**Diseño de juego**
 `/brainstorm` `/map-systems` `/design-system` `/quick-design` `/review-all-gdds` `/propagate-design-change`
 
-**Art & Assets**
+**Arte y assets**
 `/art-bible` `/asset-spec` `/asset-audit`
 
-**UX & Interface Design**
+**Diseño UX e interfaces**
 `/ux-design` `/ux-review`
 
-**Architecture**
+**Arquitectura**
 `/create-architecture` `/architecture-decision` `/architecture-review` `/create-control-manifest`
 
-**Stories & Sprints**
+**Historias y sprints**
 `/create-epics` `/create-stories` `/dev-story` `/sprint-plan` `/sprint-status` `/story-readiness` `/story-done` `/estimate`
 
-**Reviews & Analysis**
+**Revisiones y análisis**
 `/design-review` `/code-review` `/balance-check` `/content-audit` `/scope-check` `/perf-profile` `/tech-debt` `/gate-check` `/consistency-check` `/security-audit`
 
-**QA & Testing**
+**QA y testing**
 `/qa-plan` `/smoke-check` `/soak-test` `/regression-suite` `/test-setup` `/test-helpers` `/test-evidence-review` `/test-flakiness` `/skill-test` `/skill-improve`
 
-**Production**
+**Producción**
 `/milestone-review` `/retrospective` `/bug-report` `/bug-triage` `/reverse-document` `/playtest-report`
 
-**Release**
+**Lanzamiento**
 `/release-checklist` `/launch-checklist` `/changelog` `/patch-notes` `/hotfix` `/day-one-patch`
 
-**Creative & Content**
-`/prototype` `/onboard` `/localize`
+**Creatividad y contenido**
+`/prototype` `/vertical-slice` `/onboard` `/localize`
 
-**Team Orchestration** (coordinate multiple agents on a single feature)
+**Orquestación de equipos** (varios agentes sobre una misma feature)
 `/team-combat` `/team-narrative` `/team-ui` `/team-release` `/team-polish` `/team-audio` `/team-level` `/team-live-ops` `/team-qa`
 
-## Getting Started
+## Primeros pasos
 
-### Prerequisites
+### Requisitos
 
 - [Git](https://git-scm.com/)
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (`npm install -g @anthropic-ai/claude-code`)
-- **Recommended**: [jq](https://jqlang.github.io/jq/) (for hook validation) and Python 3 (for JSON validation)
+- [OpenCode](https://opencode.ai/docs) instalado y configurado con tu proveedor
+- **Recomendado**: [jq](https://jqlang.github.io/jq/) (validación de hooks), Python 3 (validación JSON) y Git Bash en Windows (ejecuta los scripts de hooks)
 
-All hooks fail gracefully if optional tools are missing — nothing breaks, you just lose validation.
+Todos los hooks fallan con gracia si faltan herramientas opcionales: nada se
+rompe, solo pierdes esa validación.
 
-### Setup
+### Instalación
 
-1. **Clone or use as template**:
+1. **Clona el repo**:
    ```bash
-   git clone https://github.com/Donchitos/Claude-Code-Game-Studios.git my-game
+   git clone https://github.com/Mlucana/opencode-game-studios.git my-game
    cd my-game
    ```
 
-2. **Open Claude Code** and start a session:
-   ```bash
-   claude
-   ```
+2. **Abre OpenCode** en esa carpeta e inicia una sesión.
 
-3. **Run `/start`** — the system asks where you are (no idea, vague concept,
-   clear design, existing work) and guides you to the right workflow. No assumptions.
+3. **Ejecuta `/start`** — el sistema pregunta en qué punto estás (sin idea,
+   idea vaga, concepto claro, trabajo existente) y te guía al flujo correcto.
+   Sin suposiciones.
 
-   Or jump directly to a specific skill if you already know what you need:
-   - `/brainstorm` — explore game ideas from scratch
-   - `/setup-engine godot 4.6` — configure your engine if you already know
-   - `/project-stage-detect` — analyze an existing project
+   O salta directo a lo que necesites:
+   - `/brainstorm` — explora ideas de juego desde cero
+   - `/setup-engine godot 4.6` — configura tu motor si ya lo tienes claro
+   - `/project-stage-detect` — analiza un proyecto existente
 
-## Upgrading
-
-Already using an older version of this template? See [UPGRADING.md](UPGRADING.md)
-for step-by-step migration instructions, a breakdown of what changed between
-versions, and which files are safe to overwrite vs. which need a manual merge.
-
-## Project Structure
+## Estructura del proyecto
 
 ```
-CLAUDE.md                           # Master configuration
+AGENTS.md                           # Configuración maestra (este estudio)
+opencode.json                       # Instrucciones, permisos y reglas de OpenCode
+CLAUDE.md                           # Config original (compatibilidad)
+.opencode/
+  agents/                           # 49 subagentes (mode: subagent, invocables con @nombre)
+  commands/                         # 73 comandos slash (uno por skill)
+  plugins/
+    ccgs-hooks.js                   # Plugin de hooks (reutiliza .claude/hooks/*.sh)
 .claude/
-  settings.json                     # Hooks, permissions, safety rules
-  agents/                           # 49 agent definitions (markdown + YAML frontmatter)
-  skills/                           # 73 slash commands (subdirectory per skill)
-  hooks/                            # 12 hook scripts (bash, cross-platform)
-  rules/                            # 11 path-scoped coding standards
-  statusline.sh                     # Status line script (context%, model, stage, epic breadcrumb)
+  settings.json                     # Config original de Claude Code (referencia)
+  agents/                           # 49 definiciones originales
+  skills/                           # 73 flujos completos (subdirectorio por skill)
+  hooks/                            # 12 scripts bash (multiplataforma)
+  rules/                            # 11 estándares por ruta
+  statusline.sh                     # Línea de estado (solo Claude Code)
   docs/
-    workflow-catalog.yaml           # 7-phase pipeline definition (read by /help)
-    templates/                      # 41 document templates
-src/                                # Game source code
-assets/                             # Art, audio, VFX, shaders, data files
-design/                             # GDDs, narrative docs, level designs
-docs/                               # Technical documentation and ADRs
-tests/                              # Test suites (unit, integration, performance, playtest)
-tools/                              # Build and pipeline tools
-prototypes/                         # Throwaway prototypes (isolated from src/)
-production/                         # Sprint plans, milestones, release tracking
+    workflow-catalog.yaml           # Pipeline de 7 fases (lo lee /help)
+    templates/                      # Plantillas de documentos
+src/                                # Código fuente del juego
+assets/                             # Arte, audio, VFX, shaders, datos
+design/                             # GDDs, narrativa, niveles
+docs/                               # Documentación técnica y ADRs
+tests/                              # Suites de test
+tools/                              # Pipeline y herramientas
+prototypes/                         # Prototipos desechables (aislados de src/)
+production/                         # Sprints, hitos, lanzamientos y estado de sesión
 ```
 
-## How It Works
+## Cómo funciona
 
-### Agent Coordination
+### Coordinación de agentes
 
-Agents follow a structured delegation model:
+Los agentes siguen un modelo de delegación estructurado:
 
-1. **Vertical delegation** — directors delegate to leads, leads delegate to specialists
-2. **Horizontal consultation** — same-tier agents can consult each other but can't make binding cross-domain decisions
-3. **Conflict resolution** — disagreements escalate up to the shared parent (`creative-director` for design, `technical-director` for technical)
-4. **Change propagation** — cross-department changes are coordinated by `producer`
-5. **Domain boundaries** — agents don't modify files outside their domain without explicit delegation
+1. **Delegación vertical** — los directores delegan en líderes, los líderes en especialistas
+2. **Consulta horizontal** — los agentes del mismo nivel pueden consultarse, pero no toman decisiones vinculantes fuera de su dominio
+3. **Resolución de conflictos** — los desacuerdos escalan al padre común (`creative-director` en diseño, `technical-director` en técnica)
+4. **Propagación de cambios** — los cambios entre departamentos los coordina `producer`
+5. **Fronteras de dominio** — ningún agente modifica archivos fuera de su dominio sin delegación explícita
 
-### Collaborative, Not Autonomous
+En OpenCode la delegación se hace con la herramienta `task` o mencionando
+`@nombre` en tu mensaje.
 
-This is **not** an auto-pilot system. Every agent follows a strict collaboration protocol:
+### Colaborativo, no autónomo
 
-1. **Ask** — agents ask questions before proposing solutions
-2. **Present options** — agents show 2-4 options with pros/cons
-3. **You decide** — the user always makes the call
-4. **Draft** — agents show work before finalizing
-5. **Approve** — nothing gets written without your sign-off
+Esto **no** es un piloto automático. Cada agente sigue un protocolo estricto de
+colaboración:
 
-You stay in control. The agents provide structure and expertise, not autonomy.
+1. **Pregunta** — los agentes preguntan antes de proponer soluciones
+2. **Presenta opciones** — muestran 2-4 opciones con pros y contras
+3. **Tú decides** — el usuario siempre tiene la última palabra
+4. **Borrador** — enseñan el trabajo antes de finalizarlo
+5. **Aprobación** — nada se escribe sin tu visto bueno
 
-### Automated Safety
+Tú mantienes el control. Los agentes aportan estructura y experiencia, no
+autonomía.
 
-**Hooks** run automatically on every session:
+### Seguridad automatizada
 
-| Hook | Trigger | What It Does |
-|------|---------|--------------|
-| `validate-commit.sh` | PreToolUse (Bash) | Checks for hardcoded values, TODO format, JSON validity, design doc sections — exits early if the command is not `git commit` |
-| `validate-push.sh` | PreToolUse (Bash) | Warns on pushes to protected branches — exits early if the command is not `git push` |
-| `validate-assets.sh` | PostToolUse (Write/Edit) | Validates naming conventions and JSON structure — exits early if the file is not in `assets/` |
-| `session-start.sh` | Session open | Shows current branch and recent commits for orientation |
-| `detect-gaps.sh` | Session open | Detects fresh projects (suggests `/start`) and missing design docs when code or prototypes exist |
-| `pre-compact.sh` | Before compaction | Preserves session progress notes |
-| `post-compact.sh` | After compaction | Reminds Claude to restore session state from `active.md` |
-| `notify.sh` | Notification event | Shows Windows toast notification via PowerShell |
-| `session-stop.sh` | Session close | Archives `active.md` to session log and records git activity |
-| `log-agent.sh` | Agent spawned | Audit trail start — logs subagent invocation |
-| `log-agent-stop.sh` | Agent stops | Audit trail stop — completes subagent record |
-| `validate-skill-change.sh` | PostToolUse (Write/Edit) | Advises running `/skill-test` after any `.claude/skills/` change |
+El plugin `.opencode/plugins/ccgs-hooks.js` reutiliza los 12 scripts originales
+en cada sesión:
 
-> **Note**: `validate-commit.sh`, `validate-assets.sh`, and `validate-skill-change.sh` fire on every Bash/Write tool call and exit immediately (exit 0) when the command or file path is not relevant. This is normal hook behavior — not a performance concern.
+| Script | Evento OpenCode | Qué hace |
+|--------|----------------|----------|
+| `validate-commit.sh` | Antes de `bash` | Revisa valores hardcodeados, formato de TODOs, JSON válido, secciones de diseño — ignora lo que no sea `git commit` |
+| `validate-push.sh` | Antes de `bash` | Avisa al hacer push a ramas protegidas — ignora lo que no sea `git push` |
+| `validate-assets.sh` | Después de escribir/editar | Valida nombres y estructura JSON — ignora lo que no esté en `assets/` |
+| `session-start.sh` | Sesión creada | Muestra rama actual y commits recientes para orientarte |
+| `detect-gaps.sh` | Sesión creada | Detecta proyectos nuevos (sugiere `/start`) y docs de diseño faltantes |
+| `pre-compact.sh` | Antes de compactar | Conserva las notas de progreso de la sesión |
+| `post-compact.sh` | Después de compactar | Recuerda restaurar el estado desde `active.md` |
+| `notify.sh` | Sesión en espera | Toast de Windows vía PowerShell |
+| `session-stop.sh` | Sesión cerrada/inactiva | Archiva `active.md` en el log y registra actividad git |
+| `log-agent.sh` | Subagente invocado (`task`) | Inicio de auditoría |
+| `log-agent-stop.sh` | Subagente terminado | Fin de auditoría |
+| `validate-skill-change.sh` | Después de escribir/editar | Recomienda `/skill-test` tras cambiar una skill |
 
-**Permission rules** in `settings.json` auto-allow safe operations (git status, test runs) and block dangerous ones (force push, `rm -rf`, reading `.env` files).
+> **Nota**: varios hooks se evalúan en cada llamada y terminan de inmediato
+> (exit 0) cuando no aplican. Es el comportamiento normal, no un problema de
+> rendimiento.
 
-### Path-Scoped Rules
+**Permisos** en `opencode.json`: las lecturas/escrituras peligrosas piden
+confirmación y las operaciones destructivas están denegadas (force push,
+`rm -rf`, leer `.env`).
 
-Coding standards are automatically enforced based on file location:
+### Reglas por ruta
 
-| Path | Enforces |
-|------|----------|
-| `src/gameplay/**` | Data-driven values, delta time usage, no UI references |
-| `src/core/**` | Zero allocations in hot paths, thread safety, API stability |
-| `src/ai/**` | Performance budgets, debuggability, data-driven parameters |
-| `src/networking/**` | Server-authoritative, versioned messages, security |
-| `src/ui/**` | No game state ownership, localization-ready, accessibility |
-| `design/gdd/**` | Required 8 sections, formula format, edge cases |
-| `tests/**` | Test naming, coverage requirements, fixture patterns |
-| `prototypes/**` | Relaxed standards, README required, hypothesis documented |
+Los estándares se aplican según la ubicación del archivo (ver tabla en
+[AGENTS.md](AGENTS.md)):
 
-## Design Philosophy
+| Ruta | Obliga |
+|------|--------|
+| `src/gameplay/**` | Valores data-driven, delta time, sin referencias a UI |
+| `src/core/**` | Cero allocations en rutas calientes, thread safety |
+| `src/ai/**` | Presupuestos de rendimiento, parámetros data-driven |
+| `src/networking/**` | Servidor autoritativo, mensajes versionados |
+| `src/ui/**` | Sin estado propio, listo para localización y accesibilidad |
+| `design/gdd/**` | 8 secciones obligatorias, fórmulas, casos borde |
+| `tests/**` | Nomenclatura, cobertura, fixtures |
+| `prototypes/**` | Estándares relajados, README e hipótesis obligatorios |
 
-This template is grounded in professional game development practices:
+## Filosofía de diseño
 
-- **MDA Framework** — Mechanics, Dynamics, Aesthetics analysis for game design
-- **Self-Determination Theory** — Autonomy, Competence, Relatedness for player motivation
-- **Flow State Design** — Challenge-skill balance for player engagement
-- **Bartle Player Types** — Audience targeting and validation
-- **Verification-Driven Development** — Tests first, then implementation
+Este template se basa en prácticas profesionales de desarrollo de videojuegos:
 
-## Customization
+- **Framework MDA** — análisis de Mecánicas, Dinámicas y Estéticas
+- **Teoría de la autodeterminación** — Autonomía, Competencia, Pertenencia
+- **Diseño de flow** — equilibrio reto-habilidad
+- **Tipos de jugador de Bartle** — segmentación de audiencia
+- **Desarrollo guiado por verificación** — primero los tests, luego la implementación
 
-This is a **template**, not a locked framework. Everything is meant to be customized:
+## Personalización
 
-- **Add/remove agents** — delete agent files you don't need, add new ones for your domains
-- **Edit agent prompts** — tune agent behavior, add project-specific knowledge
-- **Modify skills** — adjust workflows to match your team's process
-- **Add rules** — create new path-scoped rules for your project's directory structure
-- **Tune hooks** — adjust validation strictness, add new checks
-- **Pick your engine** — use the Godot, Unity, or Unreal agent set (or none)
-- **Set review intensity** — `full` (all director gates), `lean` (phase gates only), or `solo` (none). Set during `/start` or edit `production/review-mode.txt`. Override per-run with `--review solo` on any skill.
+Esto es un **template**, no un framework cerrado. Todo está para personalizarse:
 
-## Platform Support
+- **Añade/quita agentes** — borra los que no necesites, crea los de tus dominios
+- **Edita sus prompts** — ajusta comportamiento, añade conocimiento de tu proyecto
+- **Modifica comandos y skills** — adapta los flujos a tu proceso (si tocas una skill, pasa `/skill-test`)
+- **Añade reglas** — crea estándares por ruta para tu estructura
+- **Ajusta el plugin** — cambia la dureza de las validaciones
+- **Elige tu motor** — Godot, Unity o Unreal (o ninguno)
+- **Intensidad de revisión** — `full`, `lean` o `solo`, vía `/start` o `production/review-mode.txt`
 
-Primary development and testing on **Windows 10** with Git Bash. All hooks use POSIX-compatible patterns (`grep -E`, not `grep -P`) and include fallbacks for missing tools, so they should run on macOS and Linux. The `notify.sh` hook uses PowerShell for Windows toast notifications and is a no-op elsewhere — desktop notifications on macOS/Linux are not yet wired. Cross-platform testing is ongoing; please file issues for any platform-specific breakage.
+## Plataformas
 
-## Community
+Desarrollo y pruebas principales en **Windows 10/11** con Git Bash. Todos los
+hooks usan patrones POSIX (`grep -E`, no `grep -P`) e incluyen alternativas si
+faltan herramientas, así que deberían funcionar en macOS y Linux. `notify.sh`
+usa PowerShell (sin efecto fuera de Windows). Si algo falla en tu plataforma,
+abre un issue.
 
-- **Discussions** — [GitHub Discussions](https://github.com/Donchitos/Claude-Code-Game-Studios/discussions) for questions, ideas, and showcasing what you've built
-- **Issues** — [Bug reports and feature requests](https://github.com/Donchitos/Claude-Code-Game-Studios/issues)
+## Comunidad
 
----
-
-## Supporting This Project
-
-Claude Code Game Studios is free and open source. If it saves you time or helps you ship your game, consider supporting continued development:
-
-<p>
-  <a href="https://www.buymeacoffee.com/donchitos3"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me a Coffee"></a>
-  &nbsp;
-  <a href="https://github.com/sponsors/Donchitos"><img src="https://img.shields.io/badge/GitHub%20Sponsors-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="GitHub Sponsors"></a>
-</p>
-
-- **[Buy Me a Coffee](https://www.buymeacoffee.com/donchitos3)** — one-time support
-- **[GitHub Sponsors](https://github.com/sponsors/Donchitos)** — recurring support through GitHub
-
-Sponsorships help fund time spent maintaining skills, adding new agents, keeping up with Claude Code and engine API changes, and responding to community issues.
+- **Issues** — [reportes y peticiones](https://github.com/Mlucana/opencode-game-studios/issues)
+- **Original** — [Claude Code Game Studios](https://github.com/Donchitos/Claude-Code-Game-Studios) de Donchitos, proyecto del que deriva este port
 
 ---
 
-*Built for Claude Code. Maintained and extended — contributions welcome via [GitHub Discussions](https://github.com/Donchitos/Claude-Code-Game-Studios/discussions).*
+*Hecho para OpenCode. Adaptado por [Mlucana](https://github.com/Mlucana) a partir del trabajo de Donchitos.*
 
-## License
+## Licencia
 
-MIT License. See [LICENSE](LICENSE) for details.
+Licencia MIT. Ver [LICENSE](LICENSE): copyright original de Donchitos con línea
+de adaptación añadida.

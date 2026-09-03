@@ -70,7 +70,7 @@ Start a new Claude Code session. You should see output from the
 `session-start.sh` hook:
 
 ```
-=== Claude Code Game Studios -- Session Context ===
+=== OpenCode Game Studios -- Session Context ===
 Branch: main
 Recent commits:
   abc1234 Initial commit

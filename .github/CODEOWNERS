@@ -3,14 +3,20 @@
 # Last match wins. Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
 # Default owner for everything
-*                           @Donchitos
+*                           @Mlucana
 
 # Core configuration — owner review required
-CLAUDE.md                   @Donchitos
-.claude/                    @Donchitos
-settings.json               @Donchitos
+AGENTS.md                   @Mlucana
+CLAUDE.md                   @Mlucana
+opencode.json               @Mlucana
+.claude/                    @Mlucana
+.opencode/                  @Mlucana
+settings.json               @Mlucana
 
 # Skills and agents — high-impact, review carefully
-.claude/skills/             @Donchitos
-.claude/agents/             @Donchitos
-.claude/hooks/              @Donchitos
+.claude/skills/             @Mlucana
+.claude/agents/             @Mlucana
+.claude/hooks/              @Mlucana
+.opencode/agents/           @Mlucana
+.opencode/commands/         @Mlucana
+.opencode/plugins/          @Mlucana
