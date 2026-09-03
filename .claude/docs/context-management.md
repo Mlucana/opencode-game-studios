@@ -20,6 +20,48 @@ after each significant milestone:
 The state file should contain: current task, progress checklist, key decisions
 made, files being worked on, and open questions.
 
+#### Pruning — mandatory at session close
+
+`active.md` must be **pruned when a session wraps up**, not left to accumulate.
+It is a *checkpoint*, not a log: the review logs, GDDs, ADRs and git history are
+where history belongs.
+
+**Why this is a rule and not a preference**: left unpruned, the file grows by
+accretion and starts carrying *contradictory* state from different sessions —
+a checklist marked complete in one section and empty in another, a resolved
+blocker still flagged as pending, an engine version that three other files
+already moved past. At that point the file actively misleads the next session,
+which is worse than having no state file at all. This is not hypothetical: it
+happened by 2026-08-03, when the file had reached 355 lines spanning four
+sessions with all four of those defects present.
+
+**When to prune** (any of these — do not wait to be asked):
+- The user signals the session is wrapping up
+- A major workflow completes (a GDD approved, a review closed, a sprint task done)
+- Before recommending `/clear`, and at natural compaction points
+
+**What to do:**
+1. **Promote** the current session's outcome to the top, as the authoritative state
+2. **Condense** durable knowledge worth carrying forward — decisions and their
+   rationale, open gaps, cross-system constraints, risks
+3. **Delete** anything superseded: completed checklists, resolved alerts, stale
+   `<!-- STATUS -->` blocks, duplicated sections
+4. **Reconcile contradictions rather than keeping both sides.** Verify against the
+   actual files before declaring something resolved — never resolve a
+   contradiction from memory of the conversation
+5. **Say what was removed** in the reply, so the user can object if something
+   mattered
+
+**What never gets pruned**: unresolved blockers, open questions with an owner,
+constraints one system imposes on another, and architecture decisions deferred to
+`/create-architecture`. When in doubt, condense it — do not drop it.
+
+**Safety net**: a `SessionEnd` hook (`.claude/hooks/check-state-size.sh`) warns
+when `active.md` exceeds **200 lines**, so an unpruned file gets flagged instead
+of silently rotting. Override the threshold with `ACTIVE_MD_MAX_LINES=300 claude`.
+The hook is a backstop, not the mechanism — it fires *after* the session, so it
+cannot prune anything. Pruning is still your job during the session.
+
 ### Status Line Block (Production+ only)
 
 When the project is in Production, Polish, or Release stage, include a structured

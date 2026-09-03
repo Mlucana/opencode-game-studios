@@ -108,6 +108,8 @@ export const CcgsHooks = async ({ directory, client }) => {
         }
         if (type === "session.idle" || type === "session.deleted") {
           runScript(cwd, hook("session-stop.sh"), "", 10000)
+          const size = runScript(cwd, hook("check-state-size.sh"), "", 5000)
+          if (size.output.trim()) await log(client, size.output.trim())
         }
       } catch {
         // never break the session

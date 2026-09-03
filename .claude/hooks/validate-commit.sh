@@ -45,10 +45,15 @@ fi
 # Validate JSON data files -- block invalid JSON
 DATA_FILES=$(echo "$STAGED" | grep -E '^assets/data/.*\.json$')
 if [ -n "$DATA_FILES" ]; then
-    # Find a working Python command
+    # Find a working Python command.
+    # Probe EXECUTION, not presence: on Windows the Microsoft Store execution
+    # aliases put `python`/`python3` on PATH as stubs that exit 49 instead of
+    # running. `command -v` finds those, so a presence check reports an
+    # interpreter that does not work — and the json.tool call below then reads
+    # that exit code as "invalid JSON" and blocks a perfectly valid file.
     PYTHON_CMD=""
     for cmd in python python3 py; do
-        if command -v "$cmd" >/dev/null 2>&1; then
+        if "$cmd" -c "pass" >/dev/null 2>&1; then
             PYTHON_CMD="$cmd"
             break
         fi

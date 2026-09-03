@@ -41,10 +41,16 @@ fi
 # Invalid JSON will break runtime loading -- this is a build-breaking error
 if echo "$FILE_PATH" | grep -qE '(^|/)assets/data/.*\.json$'; then
     if [ -f "$FILE_PATH" ]; then
-        # Find a working Python command
+        # Find a working Python command.
+        # Probe EXECUTION, not presence: on Windows the Microsoft Store
+        # execution aliases put `python`/`python3` on PATH as stubs that exit 49
+        # instead of running. `command -v` finds those, so a presence check
+        # reports an interpreter that does not work — and the json.tool call
+        # below then reads that exit code as "invalid JSON" and reports a
+        # blocking error on a perfectly valid file.
         PYTHON_CMD=""
         for cmd in python python3 py; do
-            if command -v "$cmd" >/dev/null 2>&1; then
+            if "$cmd" -c "pass" >/dev/null 2>&1; then
                 PYTHON_CMD="$cmd"
                 break
             fi
@@ -54,6 +60,11 @@ if echo "$FILE_PATH" | grep -qE '(^|/)assets/data/.*\.json$'; then
             if ! "$PYTHON_CMD" -m json.tool "$FILE_PATH" > /dev/null 2>&1; then
                 ERRORS="$ERRORS\n  FORMAT: $FILE_PATH is not valid JSON — fix syntax errors before continuing"
             fi
+        else
+            # Say so out loud. A validator that silently does not validate is
+            # worse than no validator: it reads as a clean pass. Matches the
+            # warning validate-commit.sh already emits in this same situation.
+            WARNINGS="$WARNINGS\n  SKIPPED: cannot check JSON validity of $FILE_PATH (no working Python interpreter found)"
         fi
     fi
 fi

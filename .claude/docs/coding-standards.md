@@ -61,6 +61,11 @@ All stories must have appropriate test evidence before they can be marked Done:
 - No merge if tests fail — tests are a blocking gate in CI
 - Never disable or skip failing tests to make CI pass — fix the underlying issue
 - Engine-specific CI commands:
-  - **Godot**: `godot --headless --script tests/gdunit4_runner.gd`
+  - **Godot**: `godot --headless --path . -s res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a tests/unit --ignoreHeadlessMode`
+    *(verificado contra gdUnit4 6.2.0 el 2026-08-05. La versión anterior de esta línea
+    nombraba `tests/gdunit4_runner.gd`, un fichero que no existía y cuya API era una
+    conjetura; gdUnit4 ya distribuye su propio runner CLI. `--ignoreHeadlessMode` es
+    obligatorio: el framework rechaza headless por defecto.)*
+  - **Godot, sin addon**: `godot --headless --script tests/standalone_check.gd`
   - **Unity**: `game-ci/unity-test-runner@v4` (GitHub Actions)
   - **Unreal**: headless runner with `-nullrhi` flag

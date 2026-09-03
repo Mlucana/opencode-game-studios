@@ -31,13 +31,63 @@
 #   What inventory.md uses:  Grep pattern="referenced_by.*inventory"
 #   All gold values:          Grep pattern="value_gold:"
 #   Deprecated entries:      Grep pattern="status: deprecated"
+#   Who emits an event:      Grep pattern="emitter: design/gdd/..."
+#   Who consumes an event:   Grep pattern="consumers" -A 5
 #
 # FORMAT: YAML. Consistent indentation is critical for grep reliability.
-#   Sections: entities | items | formulas | constants
+#   Sections: entities | items | formulas | constants | events
 #   Each entry: name, status, source, referenced_by[], attributes{}, added, revised
+#   (events use emitter/consumers/payload instead of source/referenced_by)
 
-version: 1
-last_updated: ""
+version: 8                    # v8 (2026-08-04): changeset 2, ítem 3 — CHANGESET COMPLETO.
+                              # severidad_accion_especial pasa de PAGO EN VIDA a
+                              # EQUIVALENCIA: el ítem 0 contradecía al sistema 2, que
+                              # declara dos veces que la Acción Especial nunca reduce la
+                              # Vida del jugador. Regla de conversión derivada de la tasa
+                              # de acierto del prototipo (0.72). calidad_timing acotada a
+                              # Golpe (el ítem 1 la había ensanchado a la unión).
+                              # Eventos 14/15/16 de Ventana Especial en Visual/Audio.
+                              # v7 (2026-08-04): changeset 2, ítem 2. El contrato con el
+                              # sistema 9 se reescribe sobre MAGNITUDES, no mecanismos:
+                              # invariante R10 (golpes_sobrevividos +1 máx · ciclos
+                              # efectivos exactos CONTANDO CICLOS, no golpes de castigo ·
+                              # parries_por_ciclo exactos a calidad 0 · cobertura efectiva).
+                              # Cierra el hueco de alcance de R5 vs bono_reliquias, la
+                              # reliquia estructural que R4 no cubría, la colisión R4->Vida
+                              # y un cuarto no listado: reducción de daño recibido, que la
+                              # Fórmula 8 del ítem 0 acababa de hacer posible.
+                              # HALLAZGO DE R5 CERRADO: medía puntos donde la magnitud son
+                              # golpes sobrevividos.
+                              # v6 (2026-08-04): changeset 2, ítem 1. umbral_precision
+                              # canonicalizado de 0.08s a 5 TICKS — era la última
+                              # duración del documento en segundos, mismo defecto de
+                              # 4.8 ticks no enteros que ya se corrigió en hitstop_parry
+                              # (raíz A); calidad_timing declarada ESCALONADA (7 valores
+                              # por Delta en ticks, con corrección de medio tick);
+                              # umbral_parry_justo y bono_hitstop_parry_justo añadidos —
+                              # "Parry Justo" tenía 5 consumidores y ninguna magnitud
+                              # (raíz C, 5ª aparición); parry declarado DIGITAL, sin eje
+                              # analógico mapeable; R2 pasa a comparación entera.
+                              # v5 (2026-08-04): changeset 2, ítem 0, de la 3ª pasada
+                              # de /design-review sobre el sistema 1. Fórmula 8
+                              # (dano_golpe_enemigo) creada — el daño al jugador NO
+                              # tenía fórmula pese a que tres reglas del sistema 2
+                              # razonan sobre él; golpes_para_morir_base añadido;
+                              # severidad_accion_especial añadido con la invariante R9a
+                              # (banda por ventana + suma por duelo) que cierra la
+                              # Ventana Especial dominada por ignorarla; R9b registrada
+                              # como restricción hacia el sistema 5; clamp de la Vida
+                              # del JUGADOR añadido (v4 clampó solo la del jefe).
+                              # v4 (2026-08-04): changeset 1 de la 3ª pasada de
+                              # /design-review sobre el sistema 1. Clamp de Vida del
+                              # jefe (faltaba, pese a que la Postura sí lo tenía);
+                              # 2ª esquina fallida de R5 documentada con suelos
+                              # efectivos de vida_base; hueco de alcance de R5 frente
+                              # a bono_reliquias marcado como bloqueante pendiente.
+                              # v3 (2026-08-04): convención de borde de ventana_castigo
+                              # REVERTIDA a conteo inclusivo (114, no 113); `restantes`
+                              # registrado como fórmula; evento "duelo perdido" añadido
+last_updated: 2026-08-04
 
 # ─── ENTITIES ────────────────────────────────────────────────────────────────
 # Named game-world objects: enemies, NPCs, characters, factions, bosses.
@@ -106,7 +156,301 @@ items: []
 #   output_range[min, max], added
 # Optional: expression (the actual formula), notes
 
-formulas: []
+formulas:
+  - name: postura_dano
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+      - design/gdd/maquina-estados-jefe.md
+    variables:
+      - dano_base
+      - calidad_timing
+      - umbral_precision
+      - bono_precision
+    output_range: [10, 14]
+    expression: "dano_base * (1 + calidad_timing * bono_precision)"
+    notes: "Daño de Postura por parry exitoso. En combos se aplica UNA sola vez,
+      usando la calidad_timing del último parry del combo (Regla C.9).
+      output_range corregido 2026-08-01: era [10, 15]; el techo de 15 solo se
+      alcanza con bono_precision=0.5 (techo del rango de tuning), NO en la
+      configuración de lanzamiento (bono_precision=0.4 → máximo 14). El propio GDD
+      ya advertía de no usar 1.5x como referencia.
+      INVARIANTE R1: dano_base * (1 + bono_precision) < postura_base — en los techos
+      (15 × 1.5 = 22.5) contra el suelo de postura_base (20), un solo Parry Justo
+      rompería la Postura entera. Verificar en cualquier retune.
+      ESCALONADO POR TICKS (2026-08-04, changeset 2 ítem 1): calidad_timing dejó de ser
+      continua. Toma exactamente 7 valores, indexados por Delta = distancia en TICKS
+      ENTEROS entre el tick de detección del input y el tick de inicio de la ventana
+      parable: calidad = clamp(1 - (Delta - 0.5)/umbral_precision, 0, 1). Con
+      umbral_precision = 5: Delta 0..>=6 -> 1.0 / 0.9 / 0.7 / 0.5 / 0.3 / 0.1 / 0.0, y
+      postura_dano -> 14.0 / 13.6 / 12.8 / 12.0 / 11.2 / 10.4 / 10.0 (AC D1).
+      El término -0.5 compensa el sesgo de muestreo: detectar en el tick T implica
+      pulsación en (T-1, T], así que el Delta medido sobrepasa al real medio tick de
+      media, SIEMPRE en la dirección que castiga.
+      Por qué importa: escrita como continua, la fórmula invitaba a implementarla con
+      reloj real — el drift que la Regla 2 existe para evitar. El AC D14 lo detecta: la
+      aparición de UN SOLO valor intermedio es prueba de implementación por wall-clock."
+    added: 2026-07-31
+    revised: 2026-08-04
+
+  - name: postura_max
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+      - design/gdd/maquina-estados-jefe.md
+    variables:
+      - postura_base
+      - incremento_postura_triada
+      - indice_triada
+    output_range: [30, 50]
+    expression: "postura_base + incremento_postura_triada * indice_triada"
+    notes: "Postura máxima del ángel por tríada. indice_triada: 0=Humanidad,
+      1=Cosmos, 2=Cercanía a Dios. Con dano_base=10 equivale a 3/4/5 parries para
+      romper compostura. Será referenciada por el GDD de IA de Combate de Jefes.
+      Expresión corregida 2026-08-01: antes hardcodeaba los literales 30 y 10, lo
+      que la desincronizaba de sus propios tuning knobs (postura_base 20-40,
+      incremento_postura_triada 5-15) y violaba el estándar data-driven."
+    added: 2026-07-31
+    revised: 2026-08-01
+
+  - name: punish_dano_pct
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+    variables:
+      - ciclos_objetivo_base
+      - ciclos_objetivo
+    output_range: [16.7, 25]
+    expression: "100 / ciclos_objetivo, donde ciclos_objetivo = ciclos_objetivo_base + indice_triada"
+    notes: "Porcentaje de Vida máxima del ángel que quita un Golpe de Castigo.
+      4/5/6 ciclos por tríada → 25%/20%/16.7%. Nunca permite matar en 1 ciclo.
+      Expresión corregida 2026-08-01: antes hardcodeaba el literal 4 en vez del knob
+      ciclos_objetivo_base. Ese knob está algebraicamente forzado a 4 exacto — es la
+      única forma de satisfacer 4 <= base + indice <= 6 para las tres tríadas a la
+      vez con la estructura actual de la fórmula (verificado por systems-designer)."
+    added: 2026-07-31
+    revised: 2026-08-01
+
+  - name: vida_maxima
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+    variables:
+      - vida_base
+      - angeles_absorbidos
+      - bono_vida_por_absorcion
+      - bono_reliquias
+    output_range: [100, null]
+    expression: "vida_base + (angeles_absorbidos * bono_vida_por_absorcion) + bono_reliquias"
+    notes: "Vida máxima del jugador. angeles_absorbidos es propiedad del Sistema de
+      Gracia (decisión independiente por ángel); bono_reliquias es propiedad de
+      Elección de Reliquias. Ciclo de dependencia documentado en systems-index.md.
+      Sin tope superior fijado — pendiente de acotar al diseñar Gracia/Reliquias.
+      BLOQUEANTE CERRADO el 2026-08-04 por R10a (changeset 2 ítem 2) — el alcance de R5
+      era el equivocado (hallazgo de economy-designer, 3ª pasada). R5 guarda
+      solo el término (angeles_absorbidos * bono_vida_por_absorcion), pero
+      bono_reliquias entra ADITIVAMENTE en la misma suma y está declarado '0+', SIN
+      TOPE, en una fórmula que este GDD posee. Si el sistema 9 publica una sola
+      reliquia del orden de una absorción (15-20 HP no es una petición grande),
+      'rechazar todos los ángeles' pasa a estar mecánicamente no dominado y la
+      premisa que justifica R5 ('absorber es la única palanca de supervivencia') se
+      vuelve falsa por la propia matemática del sistema. La colisión es PREDECIBLE,
+      no casual: al cerrar multiplicador_ataque en 1.0 (R4), el GDD recomienda
+      explícitamente a las reliquias la vía de la Vida máxima — empuja al sistema 9
+      hacia el único término que dejó sin guardar.
+      CÓMO SE CERRÓ: invariante R10, que reescribe el contrato con el sistema 9 sobre
+      CUATRO MAGNITUDES OBSERVABLES en vez de sobre mecanismos — golpes_sobrevividos,
+      ciclos_efectivos, parries_por_ciclo y cobertura temporal efectiva. R10a exige que
+      las reliquias no compren más de UN golpe sobrevivido, para las cuatro cuentas de
+      absorción; el presupuesto vinculante es el de 0 absorciones (+25 de Vida, o -20%
+      de daño recibido), NO el de 3 (+46) — un test que solo midiera al jugador
+      totalmente absorbido dejaría pasar casi el doble. bono_reliquias deja de estar
+      declarado '0+'. R5 se conserva como guarda del PAR DE KNOBS de este GDD, pero deja
+      de ser la que protege la premisa: eso lo hace R10a, sobre los tres términos de la
+      suma y sobre cualquier mecanismo. Verificado por C26 (validación de datos: todo
+      efecto debe declararse como delta sobre las cuatro magnitudes, no existe 'efecto
+      no clasificado'), D15 y D16."
+    added: 2026-07-31
+    revised: 2026-08-04
+
+  - name: dano_golpe_castigo
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+      - design/gdd/maquina-estados-jefe.md   # añadido 2026-08-03: faltaba desde la 1ª pasada
+    variables:
+      - vida_max_angel
+      - punish_dano_pct
+      - multiplicador_ataque
+    output_range: [null, null]
+    expression: "vida_max_angel * (punish_dano_pct / 100) * multiplicador_ataque"
+    notes: "ÚNICA fuente de daño del jugador — no hay ataque básico fuera de la
+      ventana de Aturdimiento. vida_max_angel es propiedad de IA de Combate de
+      Jefes; multiplicador_ataque (base 1.0) es propiedad de Elección de Reliquias.
+      INVARIANTE R4 (corregida dos veces): multiplicador_ataque = 1.0 EXACTAMENTE,
+      constante cerrada en ambos sentidos. La restricción original (punish_dano_pct *
+      multiplicador_ataque < 100) era la desigualdad equivocada — solo prevenía el
+      one-shot. Como punish_dano_pct ya es 100/ciclos_objetivo, los ciclos reales son
+      ciclos_objetivo/multiplicador, así que cualquier multiplicador > 1.0 rompe el
+      suelo de 4/5/6 ciclos de la Fórmula 3 (una reliquia a 1.5 mataba a Cercanía a
+      Dios en 4 golpes en vez de 6). La segunda corrección ('<= 1.0') era la
+      desigualdad correcta pero de un solo lado, y dejaba abierto el colapso a 0.
+      Consecuencia: las reliquias NO pueden tocar el daño de castigo en absoluto;
+      deben expresar su poder en otra dimensión (ver Open Questions).
+      NOTA DE INTEGRACIÓN: el sistema 9 tampoco es libre en las dimensiones que SÍ
+      puede usar — cualquier modificador de parry_window o recuperacion_whiff debe
+      reverificar la invariante R6 sobre los valores efectivos (AC D10).
+      REGLA DE CLAMP DE LA VIDA DEL JEFE (añadida 2026-08-04, changeset 1 de la 3ª
+      pasada; hallazgo convergente de systems-designer y qa-lead): si la Vida
+      resultante queda por debajo de 0, se CLAMPA A 0 — el exceso no se transfiere,
+      no se acumula y no produce efecto alguno. Un residuo de valor absoluto <= 1e-6
+      se trata como 0. TRAS EL CLAMP, Vida == 0 clasifica el golpe como LETAL (AC
+      E11) y Vida > 0 como NO LETAL (AC E10): la partición es total y sin
+      solapamiento. Verificado por el AC E12, nuevo.
+      Por qué hacía falta: punish_dano_pct = 100/ciclos_objetivo no es representable
+      en binario para dos de las tres tríadas — Cercanía a Dios da 100/6 = 16.666...%
+      y en doble precisión 6 * (200/6) = 200.00000000000003, así que el sexto castigo
+      dejaba la Vida en un negativo minúsculo en vez de en 0 exacto. La Postura tenía
+      su regla de overkill desde la primera versión (AC E5); la Vida del jefe NUNCA la
+      tuvo, de modo que E10/E11 no eran partición exhaustiva y el fixture de E11 no
+      era construible de forma fiable. Es la raíz C de la 3ª pasada: la guarda puesta
+      sobre un recurso y no sobre el otro."
+    added: 2026-07-31
+    revised: 2026-08-04
+
+  - name: dano_golpe_enemigo
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+    variables:
+      - vida_base
+      - golpes_para_morir_base
+    output_range: [13.3, 50]
+    expression: "vida_base / golpes_para_morir_base"
+    notes: "Fórmula 8. Daño que un Golpe no parado inflige a la Vida del jugador. Con
+      los valores de lanzamiento (100 / 4) = 25 exacto. AÑADIDA 2026-08-04, changeset 2
+      ítem 0 de la 3ª pasada: hasta entonces la Regla 6 decía 'reduce su Vida actual'
+      SIN FÓRMULA NI MAGNITUD, pese a que tres reglas normativas del sistema 2 razonan
+      sobre ese daño. Era además el bloqueo mutuo del ítem 0: sin ella no se podía
+      cuantificar el coste de dejar que el jefe complete una Acción Especial, que es
+      justo el número del que depende que la Ventana Especial deje de estar dominada
+      (ver severidad_accion_especial y R9a).
+      ANCLA: vida_base, NUNCA vida_maxima. Es decisión de diseño, no conveniencia
+      aritmética — si el daño escalase con vida_maxima, absorber no compraría
+      supervivencia (mismo número de golpes hasta morir hiciera lo que hiciera) y la
+      'decisión de diseño clave' de la Fórmula 5, pivote mecánico del dilema moral,
+      quedaría decorativa. Fijado por el AC D11, cuyo caso de 3 absorciones es el ÚNICO
+      que distingue las dos anclas: a 0 absorciones ambas implementaciones pasan.
+      NO ESCALA POR TRÍADA y NO tiene multiplicador por tipo de ataque. Los tres
+      índices dan el mismo número; la dificultad diferencial ya está en la longitud del
+      duelo (el mismo presupuesto de 4 errores sobre 12 parries en Humanidad frente a
+      30 en Cercanía a Dios: la tolerancia cae del 33% al 13% sin tocar una cifra).
+      Es el Pilar 1 aplicado literalmente y el preámbulo de la sección Formulas.
+      Se omite severidad_golpe por tipo porque un multiplicador sin acotar por ambos
+      lados ya mordió en multiplicador_ataque (R4, corregido dos veces) y en
+      bono_reliquias (bloqueante abierto); si el sistema 20 lo necesita, entra con
+      banda de dos lados desde el primer día.
+      FORMA: división directa, no vida_base * (pct/100). La forma en porcentaje es la
+      que obligó a escribir el clamp de la Vida del jefe (viaje de ida y vuelta por un
+      porcentaje no representable en binario). NO elimina la necesidad del clamp — ver
+      la regla de clamp de la Vida del jugador abajo.
+      REGLA DE CLAMP DE LA VIDA DEL JUGADOR (añadida en el mismo changeset): si la Vida
+      resultante queda por debajo de 0, se CLAMPA A 0; el exceso no se transfiere, no
+      se acumula, no produce efecto. Residuo de valor absoluto <= 1e-6 se trata como 0.
+      TRAS EL CLAMP, Vida == 0 es la condición EXACTA que dispara 'duelo perdido', sin
+      comparación < 0. Verificado por el AC E13.
+      Por qué faltaba: el changeset 1 justificó el clamp del jefe como 'el único recurso
+      agotable sin ella', afirmación FALSA al escribirse — la Vida del jugador tampoco
+      lo tenía. No se detectó porque hasta este changeset el daño al jugador no era una
+      cantidad calculada. Con vida_base en 80-150 el cociente no es entero en la mayor
+      parte del rango (con el suelo efectivo 110 de R5: 110/4 = 27.5). CUARTA aparición
+      de la raíz C. La simetría E5 (Postura) / E12 (Vida del jefe) / E13 (Vida del
+      jugador) queda ahora completa.
+      Junto con la severidad de una Acción Especial completada (R9a), es la única
+      fuente de daño al jugador. Una Ventana Especial no parada NO usa esta fórmula:
+      no daña en absoluto (corolario de la Regla 6)."
+    added: 2026-08-04
+    revised: 2026-08-04
+
+  - name: gracia_ganada
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+      - design/gdd/maquina-estados-jefe.md   # añadido 2026-08-03 (Ventana Especial)
+    variables:
+      - gracia_base
+      - modificador_combo
+    output_range: [null, null]
+    expression: "gracia_base * modificador_combo"
+    notes: "modificador_combo = 1.0 en golpe simple, 0.5 por cada parry dentro de un
+      combo. gracia_base NO es propiedad de este GDD — la fija el Sistema de Gracia.
+      Consecuencia de diseño: los combos son ricos en gracia y pobres en postura.
+      INVARIANTE R7 (nueva, 2026-08-01 re-review): modificador_combo > 1 / N_min. La
+      Regla 9 promete que 'un combo genera más gracia total que un golpe simple', lo
+      que equivale a N * modificador_combo > 1. Con el valor SHIPPEADO (0.5) y N=2 el
+      producto es exactamente 1.0 — IGUAL, no mayor: la garantía fallaba en el valor
+      de lanzamiento, no en un extremo de tuning. En el suelo del rango antiguo (0.3)
+      daba 0.6, es decir MENOS gracia que un golpe simple a cambio de dos parries
+      consecutivos sin margen. Detectado por systems-designer.
+      RESUELTO fijando N_min = 3 (ver constante longitud_combo) en vez de retunear un
+      valor ya calibrado. El umbral exacto es 1/3 = 0.3333; el rango seguro del knob
+      se eleva de 0.3-0.8 a 0.35-0.8, con el suelo en 0.35 por margen de seguridad
+      (el tramo estrictamente ilegal es [0.30, 0.3333]).
+      Verificado por los ACs D7 y D9.
+      TERCERA VÍA DE CONCESIÓN (2026-08-03, decisión de usuario en la 2ª pasada del
+      sistema 2): un parry exitoso resuelto contra una VENTANA ESPECIAL —el par de
+      eventos propio de una Acción Especial interrumpible— concede gracia COMPLETA
+      (modificador_combo = 1.0), pese a no aplicar daño de Postura ni Repliegue.
+      Razón: arrebatarle a un ángel su habilidad divina es la fantasía de robo del
+      Pilar 2, y por el Pilar 1 el triunfo también corrompe. Ver la excepción de
+      Ventana Especial en la Regla 4 de Combate."
+    added: 2026-07-31
+    revised: 2026-08-03   # was: revised 2026-08-01
+
+  - name: restantes
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+      - design/gdd/maquina-estados-jefe.md
+    variables:
+      - ventana_castigo
+      - T
+    output_range: [1, 180]   # = [1, ventana_castigo]; 180 es el TECHO del rango seguro
+                             # (72-180 ticks). Con los valores de lanzamiento: [1, 120]
+    expression: "restantes(T) = ventana_castigo + 1 - T"
+    notes: "Ticks que RESTAN de la ventana de Aturdimiento en el tick T, contados de
+      forma INCLUSIVA: restantes(T) cuenta el tick T mismo como todavía disponible.
+      T es el índice de tick BASE 1 dentro de Aturdido: T=1 el primer tick,
+      T=ventana_castigo el último. output_range depende por tanto del knob, no es fijo.
+      USO NORMATIVO: la desambiguación de input de Combate exige restantes(T) >
+      gracia_salida_castigo (ESTRICTO) para clasificar una pulsación como Golpe de
+      Castigo. Despejando: T <= ventana_castigo - gracia_salida_castigo. Es decir
+          T_max_castigo = ventana_castigo - gracia_salida_castigo
+      y el primer tick de Parry es el siguiente. Con los valores de lanzamiento:
+      120 - 6 = 114 -> Castigo, 115 -> Parry.
+      INVARIANTE DE ANCHURA: bajo este conteo inclusivo la zona de gracia mide
+      EXACTAMENTE gracia_salida_castigo ticks para CUALQUIER par de valores, porque su
+      anchura es ventana_castigo - T_max_castigo = g idénticamente. Bajo conteo
+      exclusivo mide g + 1. Ese tick de más no era un error de cuenta puntual sino una
+      propiedad del conteo elegido — por eso reaparecía cada vez que se recalculaba el
+      borde a mano. NO ESCRIBIR 114 COMO LITERAL en documentos nuevos.
+      REGISTRADO 2026-08-04 (enmienda E del GDD de Combate). Es la corrección del
+      defecto de fondo del desacuerdo D1 de la 3ª pasada del sistema 2: aquel GDD
+      DEFINIÓ NORMATIVAMENTE ESTE TÉRMINO SIN POSEERLO, y lo hizo con conteo exclusivo
+      (ventana_castigo - T), bajo el cual la zona de gracia mide 7 ticks — el defecto
+      exacto que su nota de corrección decía prevenir. ventana_castigo es propiedad de
+      Combate, luego el término derivado de ella también lo es. El sistema 2 lo CONSUME.
+      Verificado por el AC C11 de Combate (bordes 114/115 fijados por cifra)."
+    added: 2026-08-04
+    revised: ""
 
 # Example:
 #
@@ -139,7 +483,671 @@ formulas: []
 #
 # Required fields: name, status, source, referenced_by, value, unit, added
 
-constants: []
+constants:
+  - name: parry_window
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+    value: 0.22
+    unit: segundos
+    notes: "VALIDADO EMPÍRICAMENTE en el prototipo de concepto (72% de acierto,
+      dentro del rango objetivo 65-80%). Duración durante la cual el parry
+      permanece ACTIVO tras presionar — no es un instante puntual. Rango seguro
+      0.15-0.30s. Por debajo de 0.15 el parry se siente aleatorio (45% medido).
+      Debe ser configurable externamente para el modo de accesibilidad.
+      FUENTE DE VERDAD CANÓNICA: 13 ticks de simulación fija a 60Hz (0.2167s). El
+      valor 0.22 es el valor de diseño/legibilidad del que se deriva, no el valor
+      runtime.
+      INVARIANTE R2 (corregida dos veces): se evalúa EN TICKS, no en segundos —
+      parry_window_ticks > 2 * umbral_precision * 60. La primera versión señalaba solo
+      el punto 0.15; la segunda amplió a región pero seguía evaluando en segundos
+      continuos, y con umbral_precision en su techo (0.12s) daba un límite de 0.24s.
+      Es incorrecto: floor(0.24*60) = 14 ticks = 0.2333s, que YA FALLA. El límite real
+      es 15 ticks (0.25s de diseño), y la región insegura es [0.15, 0.25) — el 66.7%
+      del rango declarado seguro, no el 60%. Era la misma mezcla ticks/segundos que la
+      Regla 2 existe para prevenir, colándose en la invariante que la cita.
+      CIERRE DEFINITIVO (2026-08-04, changeset 2 ítem 1): la corrección anterior arregló
+      la INVARIANTE y dejó el KNOB en segundos, con la conversión * 60 viviendo dentro de
+      la propia guarda. Al canonicalizar umbral_precision a ticks (5, rango 3-7), R2 pasa
+      a ser la comparación entera parry_window_ticks > 2 * umbral_precision_ticks
+      (13 > 10) y el * 60 desaparece. El síntoma llevaba escrito en la invariante desde
+      entonces: nadie convierte unidades dentro de una guarda si el dato ya está en las
+      unidades correctas. Región de fallo sin cambios: umbral_precision = 7 exige
+      parry_window >= 15 ticks.
+      INVARIANTE R6 (nueva, 2026-08-01 re-review): ACOPLADO con recuperacion_whiff.
+      cobertura = parry_window_ticks / (parry_window_ticks + recuperacion_whiff) <=
+      0.65, equivalente a parry_window_ticks <= 1.857 * recuperacion_whiff. Con los
+      valores actuales (13 y 9) = 59%. Este acoplamiento existía como prosa desde la
+      revisión anterior pero NO era invariante normativa, así que quedó fuera del AC
+      D9 — y 18 de las 70 combinaciones del producto cartesiano de sus rangos
+      'seguros' individuales (25.7%) lo violaban sin que nada lo detectara.
+      R6 APLICA A LOS VALORES EFECTIVOS TRAS RELIQUIAS, no solo a los de lanzamiento:
+      una reliquia de '+2 fotogramas de ventana' reabriría el mash en silencio.
+      Verificado por el AC D10.
+      NOTA: dentro de una cadena de aciertos la cobertura sube legítimamente al ~84%
+      (la recuperación de un parry EXITOSO es de 2-3 ticks). Eso es intencional — los
+      combos lo exigen — y R6 no debe cerrarlo. La mitigación es la varianza de
+      separación intra-combo exigida al sistema 20. Medido por el AC C12b.
+      Debe ser configurable externamente para el modo de accesibilidad, JUNTO CON
+      recuperacion_whiff y tuneado como par (bajar solo el segundo viola R6)."
+    added: 2026-07-31
+    revised: 2026-08-01
+
+  - name: vida_base
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+    value: 100
+    unit: puntos de vida
+    notes: "Vida del jugador al inicio de cada run, antes de bonos de absorción o
+      reliquias. Rango seguro 80-150 POR KNOB — NO en combinación.
+      ACOPLADO A bono_vida_por_absorcion POR R5 (documentado 2026-08-04, changeset 1
+      de la 3ª pasada). El suelo 80 NO es libre mientras angeles_max=3: con
+      bono_vida_por_absorcion en su TECHO (20) hace falta vida_base >= 110 para
+      cumplir R5; con el bono en su SUELO (15), vida_base >= 82. Es decir, el valor
+      80 declarado aquí viola R5 en AMBOS extremos del rango del bono.
+      Ver la nota de bono_vida_por_absorcion y el bloque 'Sobre R5' del GDD.
+      ANCLA DE LA FÓRMULA 8 (añadido 2026-08-04, changeset 2 ítem 0): vida_base es el
+      ancla de dano_golpe_enemigo, NO vida_maxima. Cambiar este valor mueve el daño
+      enemigo en la misma proporción, pero NO el número de golpes hasta morir, que
+      queda fijado por golpes_para_morir_base por construcción."
+    added: 2026-07-31
+    revised: 2026-08-04
+
+  - name: umbral_precision
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+    value: 5
+    unit: ticks de simulación fija (60Hz) — 0.0833s derivado
+    notes: "Ancho de la escala de calidad_timing (Fórmula 1). Rango seguro 3-7 TICKS.
+      CANONICALIZADO A TICKS el 2026-08-04, changeset 2 ítem 1. Valía '0.08s', que a
+      60Hz son 4.8 ticks: exactamente el mismo valor no entero, por la misma razón, que
+      la regla normativa 3 de la Regla 2 ya había corregido para hitstop_parry. El
+      barrido de canonicalización visitó las duraciones de la máquina de estados
+      (parry_window, recuperacion_whiff, retreat_base, ventana_castigo,
+      gracia_salida_castigo, recuperacion_recepcion, hitstop_parry) y se saltó LA ÚNICA
+      QUE VIVE DENTRO DE UNA FÓRMULA. Raíz A. La invariante R2 lo delataba desde
+      entonces: multiplicaba * 60 dentro de sí misma, es decir sabía que necesitaba
+      ticks y dejaba el knob en segundos.
+      SUELO: por debajo de 3 quedan menos de 4 escalones y calidad_timing deja de
+      discriminar precisión — el bono se vuelve casi binario.
+      TECHO: acoplado con parry_window por R2 (parry_window_ticks > 2 *
+      umbral_precision_ticks). Con umbral_precision = 7 hace falta parry_window >= 15,
+      y el valor actual es 13: la esquina (9, 7) es la violación esperada de R2 en D9."
+    added: 2026-07-31
+    revised: 2026-08-04
+
+  - name: umbral_parry_justo
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+    value: 0.9
+    unit: valor de calidad_timing (adimensional)
+    notes: "Predicado ÚNICO que clasifica un parry exitoso como 'Parry Justo'. Rango
+      seguro 0.7-1.0. AÑADIDO 2026-08-04, changeset 2 ítem 1.
+      QUÉ CIERRA: 'Parry Justo' se nombraba en doce sitios del GDD y gobernaba CINCO
+      consumidores — la variante de esquirla #FFF8E7, la capa de audio del evento 4, el
+      bono de hitstop de +1-2 ticks, el AC V4 y el Feel AC de 'los playtesters lo
+      distinguen sin que se les explique', más el peor caso de P0 — y NINGÚN sitio decía
+      qué valor de calidad_timing lo producía, ni qué distinguía el +1 del +2. Raíz C,
+      quinta aparición, sobre la escala de recompensa más visible del sistema: cinco
+      capas reaccionando a un predicado inexistente. Solo se volvió cerrable al escalonar
+      calidad_timing. Verificado por el AC C25, que exige que las tres señales disparen
+      sobre el mismo predicado y ninguna por debajo de él.
+      SE EXPRESA EN CALIDAD, NUNCA EN TICKS: con umbral_precision de 5 a 7 equivale a
+      Delta <= 1, y con 3 o 4 a Delta = 0. Mismo tratamiento que el borde de Castigo —
+      se deriva de los knobs, no se escribe como literal.
+      SUELO: a 0.7 o menos deja de ser una distinción de precisión y el Feel AC se
+      vuelve infalsable."
+    added: 2026-08-04
+    revised: 2026-08-04
+
+  - name: bono_hitstop_parry_justo
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+    value: 2                    # en calidad_timing = 1.0; +1 en 0.9; +0 por debajo
+    unit: ticks de simulación fija
+    notes: "Micro-extensión del hitstop que diferencia el Parry Justo. Reparto por
+      escalón de calidad_timing: 1.0 -> +2 ticks, 0.9 -> +1, por debajo de
+      umbral_parry_justo -> +0. PROMOVIDO DE PROSA A KNOB el 2026-08-04, changeset 2
+      ítem 1: R8 y el AC D9 lo nombraban desde el changeset 1 sin que existiera fila
+      propia en Tuning Knobs — mismo defecto DE TIPO que tuvo recuperacion_recepcion (un
+      contrato que nombra algo que no existe). Y el reparto nunca se declaró: Impact
+      Moments decía '+1-2 ticks' sin decir qué elegía entre 1 y 2, sobre una
+      calidad_timing que además era continua.
+      ACOTADO POR R8: hitstop_parry + bono_hitstop_parry_justo <= 8 ticks. Con los
+      valores actuales 5 + 2 = 7. Por eso el techo de hitstop_parry se recortó a 6.
+      SUELO: por debajo de +1 el Parry Justo pierde su canal háptico y queda solo en
+      color y audio — relevante para la pregunta de accesibilidad, donde creative-director
+      recomendó reforzar precisamente el canal háptico antes que el visual o el sonoro."
+    added: 2026-08-04
+    revised: 2026-08-04
+
+  - name: golpes_para_morir_base
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+    value: 4
+    unit: golpes no parados
+    notes: "Presupuesto de error del duelo: Golpe's no parados que matan a un jugador a
+      Vida base, sin absorciones ni reliquias. Rango seguro 3-6. Denominador de la
+      Fórmula 8. AÑADIDO 2026-08-04, changeset 2 ítem 0.
+      Por qué 4 (decisión de usuario): 100/4 = 25 es exacto; en Humanidad jugador y
+      ángel se intercambian al mismo ritmo (25% de daño cada uno, = punish_dano_pct de
+      la Fórmula 3). El valor 6 se descartó explícitamente porque 100/6 = 16.666...
+      reintroduce en el recurso del jugador el decimal periódico que en el changeset 1
+      obligó a escribir el clamp de la Vida del jefe.
+      SUELO: por debajo de 4 el lockout de whiff se vuelve desproporcionado — un Golpe
+      que abre durante los 9 ticks de Recuperación de whiff es imparable por
+      construcción, así que a 3 golpes el jugador que explora el timing puede perder un
+      duelo por un coste que la Regla 7 declara 'de tiempo, no de recurso'.
+      ACOPLADO A R9a: la suma de severidad_accion_especial sobre un duelo no puede
+      exceder golpes_para_morir_base - 1 (= 3 con el valor actual). Bajar este knob
+      estrecha automáticamente el presupuesto de Ventanas Especiales del sistema 20.
+      Verificado por los ACs D11, D12 y D13(b)."
+    added: 2026-08-04
+    revised: 2026-08-04
+
+  - name: severidad_accion_especial
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+    value: null                 # la declara el sistema 20 por habilidad; este GDD solo
+                                # acota la banda legal (constraint-handoff)
+    unit: múltiplos de dano_golpe_enemigo
+    notes: "Coste que impone al jugador una Acción Especial COMPLETADA — es decir, el
+      precio de ignorar una Ventana Especial. Lo declara la IA de Combate de Jefes
+      (sistema 20) por habilidad; este GDD no lo posee pero SÍ posee la invariante que
+      se rompería, así que declara la banda (mismo constraint-handoff que 3 <= N <= 5,
+      R4, precedencia armónica y R6 sobre efectivos). AÑADIDO 2026-08-04, changeset 2
+      ítem 0. La componente acotada aquí se paga en VIDA; el sistema 20 puede añadir
+      consecuencias no-Vida por encima.
+      INVARIANTE R9a — DOS CLÁUSULAS, ambas obligatorias:
+        (a) por ventana:  1.0 <= severidad_accion_especial <= 2.0
+        (b) por duelo:    suma de severidades <= golpes_para_morir_base - 1  (= 3)
+      Un patrón que viole cualquiera de las dos debe FALLAR LA VALIDACIÓN DE DATOS AL
+      CARGAR, no degradarse en silencio (AC D13, misma forma que C16 para 3 <= N <= 5).
+      QUÉ CIERRA: antes de R9a, ignorar la Ventana Especial DOMINABA ESTRICTAMENTE a
+      pararla — mismo beneficio de combate (ninguno: ni Postura ni Repliegue, Regla 4)
+      y menos coste (pararla gasta Gracia = corrupción; ignorarla no gastaba nada, pues
+      sin pulsación no hay whiff por la Regla 7 y la ventana no daña por el corolario de
+      la Regla 6). El único coste declarado era la frase 'el jefe completa su habilidad',
+      severidad que el GDD nombraba sin exigir a nadie garantizarla. Hallazgo de
+      game-designer en la 3ª pasada, PERDIDO EN LA SÍNTESIS y recuperado al cerrar.
+      POR QUÉ (b) NO ES REDUNDANTE: la banda acota un TÉRMINO; lo que mata es la SUMA, y
+      cuántas Ventanas Especiales emite un duelo es propiedad del sistema 20. Con solo
+      (a), tres VEs a 2.0 imponen 150 de daño ignorable a un jugador de 100 de Vida y
+      pararlas pasa a ser OBLIGATORIO, destruyendo el dilema por el lado opuesto. Sin (b)
+      habría sido la cuarta aparición de la raíz C (guarda sobre un término, no sobre la
+      magnitud) y la cuarta inecuación de un solo lado tras R4, R5 y R8.
+      DISEÑO: con un coste garantizado, parar e ignorar dejan de ser comparables en una
+      sola dimensión (parar evita el coste y gasta corrupción; ignorar al revés), y la
+      Ventana Especial pasa a ser la instancia por-encuentro del dilema por-duelo de la
+      Fórmula 5. Medido por el AC C23 (oposición de signos entre las dos monedas).
+      CORREGIDO 2026-08-04 (changeset 2 ítem 3) — ES UNA EQUIVALENCIA, NO UN PAGO EN VIDA.
+      La formulación del ítem 0 exigía pagarlo en Vida y CONTRADECÍA FRONTALMENTE al
+      sistema 2, que declara dos veces y en negrita que 'el estado Acción Especial nunca
+      reduce la Vida del jugador, en ninguna rama' (decisión de usuario 2026-08-03, razón:
+      una curación que además fuese ataque sería doble castigo por un solo error). El ítem
+      0 fijó la moneda sin comprobar la tabla de Edge Cases del sistema 2. Como ese GDD
+      está congelado y su regla es correcta, la corrección cae entera en el sistema 1.
+      REGLA DE CONVERSIÓN: el coste se paga en la moneda en la que la habilidad opera y el
+      sistema 20 declara su equivalencia:
+        coste_equivalente = parries_extra_forzados * (1 - tasa_acierto_objetivo)
+      con tasa_acierto_objetivo = 0.72, la MEDIDA EN EL PROTOTIPO, no un número inventado.
+      Un Golpe no parado cuesta 1 unidad por definición.
+      EJEMPLO (Cosmos, dano_golpe_castigo=40, parries_por_ciclo=4): una curación de 40
+      equivale a 4*0.28 = 1.12 unidades (en banda); una de 80 da 2.24 (fuera). Techo de la
+      banda: H <= 71 para esa tríada. Acota por primera vez el riesgo alto sin mitigación
+      de 'curación de jefes' de systems-index.md, aunque no lo cierra: una habilidad NO
+      interrumpible sigue fuera de esta banda.
+      El AC D13 exige además que todo patrón interrumpible DECLARE su equivalencia; no
+      existe la categoría 'coste no cuantificado'.
+      DEPENDE DE R9b (restricción hacia el sistema 5): la Gracia obtenida al parar una
+      Ventana Especial debe tener coste NO NULO en la economía de corrupción. Si Gracia
+      se diseñara como beneficio sin contrapartida, la dominación reaparecería INVERTIDA
+      (parar dominaría a ignorar) y R9a no lo detectaría."
+    added: 2026-08-04
+    revised: 2026-08-04
+
+  - name: bono_vida_por_absorcion
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+    value: 18
+    unit: puntos de vida
+    notes: "KNOB MÁS DELICADO DEL SISTEMA. Vida máxima ganada por cada decisión
+      'absorber'. Rango canónico 15-20 (corregido 2026-08-01: estas notas decían
+      '>25', contradiciendo el rango único 15-20 que el propio GDD ya había fijado).
+      Prioridad alta de vigilancia en playtesting. Valor provisional — validar junto
+      al GDD de Sistema de Gracia.
+      INVARIANTE R5: (bono_vida_por_absorcion * angeles_max) / vida_base <= 0.55.
+      Actual: (18*3)/100 = 54%. Este knob y vida_base están ACOPLADOS y deben
+      tunearse como par — el rango 15-20 solo es seguro con vida_base=100.
+      DOS de las cuatro esquinas violan R5, no una (corregido 2026-08-04, changeset 1
+      de la 3ª pasada; hallazgo de systems-designer): (bono=20, vida_base=80) da 75%,
+      Y (bono=15, vida_base=80) da (15*3)/80 = 56.25%, que TAMBIÉN incumple. Es decir,
+      incluso el valor más conservador de este knob viola R5 cuando vida_base está en
+      su propio suelo legal. La formulación anterior de estas notas documentaba solo
+      la esquina del techo e inducía a leer 'no exceder 20' como la guía completa.
+      Suelos efectivos de vida_base: 110 (para todo el rango del bono), 82 (solo para
+      el suelo). El AC D9(b) declara ahora 2 violaciones esperadas en R5, no 1.
+      AVISO 1: R5 solo está calibrada para angeles_max=3 (v1.0/Alpha). Con los 9 coros
+      de la visión completa daría (18*9)/100 = 162% — y encoger la constante para
+      cumplir daría ~6.1 HP/ángel, lo que cierra el agujero agregado pero DESTRUYE el
+      peso por decisión. Es la FORMA de la fórmula lo que debe cambiar (rendimiento
+      decreciente POR CONTEO, no por identidad, para preservar la independencia de
+      orden de la Regla 8 y el AC E9), no solo el valor. Hallazgo de economy-designer.
+      AVISO 2 — BLOQUEANTE PENDIENTE (changeset 2): R5 guarda UN término de una suma
+      de TRES. bono_reliquias entra aditivamente en vida_maxima y está declarado sin
+      tope, así que una sola reliquia del orden de una absorción vuelve falsa la
+      premisa que justifica R5. Ver la nota de vida_maxima.
+      AVISO 3 — CERRADO el 2026-08-04 por R10a (changeset 2 ítem 2). Detectado al derivar
+      la Fórmula 8 y registrado sin cerrar por la regla 'ningún hallazgo se cierra en la
+      sesión en que se encuentra'; cerrado en la sesión siguiente: R5 acota la razón en PUNTOS DE VIDA (54%, bajo el techo de 55%), pero
+      la moneda que el jugador percibe son GOLPES SOBREVIVIDOS, y el redondeo hacia
+      arriba la amplifica: ceil(100/25) = 4 golpes sin absorber frente a ceil(154/25) = 7
+      con las tres absorciones, un +75% y no un +54%. R5 se calibró sobre el término y no
+      sobre la magnitud — misma forma de la raíz C, aplicada a la invariante que guarda
+      este knob. Hecho visible por el AC D12.
+      NO se cerró moviendo el techo de R5 (arrastraría bono_vida_por_absorcion, vida_base
+      y los suelos 110/82, y seguiría midiendo puntos), sino declarando R10a directamente
+      en golpes sobrevividos y sobre los TRES términos de la suma. Una invariante por
+      unidad: R5 en puntos para el tuning propio de este GDD, R10a en golpes para el
+      contrato con el sistema 9."
+    added: 2026-07-31
+    revised: 2026-08-04
+
+  - name: retreat_base
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+      - design/gdd/maquina-estados-jefe.md
+    value: 0.7
+    unit: segundos (42 ticks de simulación fija a 60Hz — valor runtime canónico)
+    notes: "Ventana de bajo riesgo tras cada parry exitoso, antes del siguiente
+      Telegrafiado. No escala por tríada. Rango seguro 0.5-1.2s (30-72 ticks).
+      NO se aplica entre golpes de un mismo combo — se dispara una única vez, al
+      resolverse el combo completo o en el instante de su interrupción por fallo.
+      Canonicalizado en ticks 2026-08-01 (re-review) por coherencia con la política de
+      'todo en ticks' que la Regla 2 se exige a sí misma; 0.7 * 60 = 42 exacto, sin
+      residuo de redondeo.
+      TRES ENTRADAS, NO UNA (ampliado 2026-08-03): el estado Repliegue del sistema 2 se
+      alcanza por tres caminos, los tres con esta misma duración —
+        (1) parry exitoso de un Golpe simple o de un En Combo completo (Postura > 0);
+        (2) ABORTO DE COMBO por fallo — se paga aquí el Repliegue que quedó DIFERIDO
+            durante el combo (Combate: Regla 4 excepción, Regla 9, Fórmula 4, AC D4);
+        (3) COLCHÓN post-Golpe de Castigo conectado (sistema 2, Core Rule 4), que
+            reutiliza esta constante en vez de introducir una nueva. 42/14 = 3 exacto
+            frente al techo de recuperacion_castigo.
+      ATENCIÓN, LECCIÓN DE PROCESO: la cláusula (2) ya estaba escrita en esta nota desde
+      el 2026-08-01, y aun así el GDD del sistema 2 declaró lo contrario (Enfriamiento)
+      durante dos días y DOS pasadas de /design-review, que verificaron los valores
+      numéricos pero nunca consultaron este registry. Costó 6 agentes redescubrirlo.
+      Consultar el registry ANTES de la revisión adversarial, no después."
+    added: 2026-07-31
+    revised: 2026-08-03   # was: revised 2026-08-01
+
+  - name: ventana_castigo
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+      - design/gdd/maquina-estados-jefe.md
+    value: 2.0
+    unit: segundos (120 ticks de simulación fija a 60Hz — valor runtime canónico)
+    notes: "Duración del estado Aturdido del enemigo tras romper Postura, durante la
+      cual el jugador puede conectar el Golpe de Castigo. Rango seguro 1.2-3.0s
+      (72-180 ticks). Añadido tras un gap de especificación detectado por qa-lead.
+      RESTAURACIÓN DE POSTURA (aclarado 2026-08-01, re-review): la Postura se restaura
+      POR COMPLETO a postura_max en AMBAS salidas del Aturdimiento — tanto si la
+      ventana expira sin usarse como si el Golpe de Castigo CONECTA. La única
+      diferencia entre ambas es si se aplicó daño a la Vida del ángel. Hasta la
+      re-review solo estaba declarado el caso de expiración; el caso más común (el
+      castigo exitoso) quedaba INFERIDO desde la aritmética de la Fórmula 3, pese a
+      ser la premisa silenciosa del conteo 12/20/30 y del ejemplo de ~35-40 parries.
+      Detectado por systems-designer. Verificado por el AC E10.
+      Canonicalizado en ticks: 2.0 * 60 = 120 exacto.
+      CONVENCIÓN DE BORDE (normativa — REVERTIDA 2026-08-04, ver más abajo):
+      restantes(T) = ventana_castigo + 1 - T. Conteo INCLUSIVO: cuenta el tick T mismo
+      como disponible. T es base 1. restantes(1) = ventana_castigo; restantes(último) = 1.
+      Registrada como fórmula propia: ver `restantes` en la sección formulas.
+      De ahí se derivan los dos bordes, que NO son el mismo número:
+        - último tick en que una PULSACIÓN se clasifica como Castigo:
+              T_max_castigo = ventana_castigo - gracia_salida_castigo
+          (la desambiguación exige restantes(T) > gracia_salida_castigo, ESTRICTO, de
+          donde ventana_castigo + 1 - T > g  <=>  T <= ventana_castigo - g).
+          Con los valores de lanzamiento: 120 - 6 = 114 -> Castigo; 115 -> Parry.
+        - el CONTACTO cae más tarde: con 6-8 ticks de inicio + 4-6 activos, una
+          pulsación en el tick T impacta entre T+6 y T+14.
+      El sistema 2 gobierna el CONTACTO; Combate gobierna la PULSACIÓN.
+      INVARIANTE DE ANCHURA (la razón estructural del bug, no una cifra corregida):
+      bajo conteo INCLUSIVO la zona de gracia mide EXACTAMENTE gracia_salida_castigo
+      ticks, sean cuales sean los valores de los dos knobs — porque su anchura es
+      ventana_castigo - T_max_castigo = g, idénticamente. Bajo conteo EXCLUSIVO mide
+      g + 1. Ahí está el tick de más: no es un error aritmético puntual sino una
+      propiedad del conteo elegido, y por eso reaparecía cada vez que alguien
+      recalculaba el borde a mano.
+      NO ESCRIBIR 114 COMO LITERAL en documentos nuevos: derivarlo de los dos knobs.
+      ventana_castigo tiene rango seguro 72-180 y gracia_salida_castigo 4-10, así que
+      el borde se mueve con cualquier retune. Este registry ya corrigió el mismo defecto
+      de literal-en-vez-de-knob en postura_max y en punish_dano_pct; la nota del 113
+      volvía a cometerlo y la enmienda del 2026-08-04 lo heredó antes de corregirse en
+      la auditoría de la propia enmienda.
+      REVERSIÓN 2026-08-04 (era: restantes(T) = ventana_castigo - T, borde 113).
+      La corrección del 2026-08-03 estaba INVERTIDA y produjo el defecto que decía
+      prevenir: bajo conteo exclusivo la zona de gracia mide 7 ticks (114-120), no 6.
+      Las TRES formulaciones de Combate — 'los últimos gracia_salida_castigo
+      fotogramas' (Regla 5), 'quedan más de gracia_salida_castigo' (desambiguación de
+      input) y el AC C11, que contiene ambas y las declara equivalentes — son
+      consistentes entre sí SOLO bajo conteo inclusivo. Detectado por systems-designer
+      y verificado de forma independiente por creative-director en la 3ª pasada del
+      sistema 2 (desacuerdo D1); re-verificado al aplicar la enmienda.
+      DEFECTO DE FONDO: el sistema 2 definió normativamente un término que NO POSEE.
+      ventana_castigo es de Combate, luego restantes(T) también. Combate lo declara
+      desde el 2026-08-04 (Regla 5, enmienda E); el sistema 2 lo CONSUME.
+      DEUDA ABIERTA (4ª pasada del sistema 2, raíz R5): su AC E3b sigue diciendo 113.
+      No pudo editarse en el mismo changeset porque ese GDD está congelado.
+      DEUDA ABIERTA SEPARADA (hallazgo A4, 3ª pasada): la BANDA DE CONTACTO de una
+      pulsación legal tardía rebasa ventana_castigo — el golpe no hace nada y no avisa
+      mientras el jugador queda 10-14 ticks comprometido. Es un borde distinto del de
+      la pulsación y NO lo cierra la enmienda E. Sigue abierto."
+    added: 2026-07-31
+    revised: 2026-08-04   # was: revised 2026-08-03 (y antes 2026-08-01)
+
+  - name: recuperacion_whiff
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+    value: 9
+    unit: fotogramas (ticks de simulación fija a 60Hz)
+    notes: "Recuperación tras un parry que vence sin encontrar ningún Golpe (whiff),
+      durante la cual no puede iniciarse otro parry y los inputs se DESCARTAN (no se
+      encolan en buffer). Un parry EXITOSO no paga esta recuperación — mantiene los
+      2-3 fotogramas mínimos, para no romper las cadenas de parry de un combo.
+      Rango seguro 6-12. Por debajo de 6 la cobertura temporal supera el 68% y el
+      mash vuelve a ser viable — es un suelo duro, no una preferencia.
+      RAZÓN DE EXISTIR: sin este coste, la ventana activa de 13 ticks sobre un ciclo
+      de 15-16 cubría el 81-87% del tiempo y machacar el botón era una estrategia de
+      supervivencia que NINGUNA variabilidad de cadencia del sistema 20 podía
+      derrotar. Es aritmética, no diseño de IA. Con 9, la cobertura del que machaca
+      cae a ~59% y el que lee el patrón no paga nada. Coste de TIEMPO, no de recurso
+      — la Regla 7 y el Pilar 2 quedan intactos.
+      Añadido 2026-08-01 tras revisión adversarial (game-designer + creative-director).
+      REVISADO 2026-08-01 (re-review) — tres límites de esta decisión, ahora acotados:
+      (1) INVARIANTE R6: el acoplamiento con parry_window nunca se promovió a
+      invariante normativa, y 18 de las 70 combinaciones de sus rangos 'seguros'
+      individuales (25.7%) violaban el objetivo del 65%. Formalizado. Ver parry_window.
+      (2) El 59% describe el bucle de whiff PURO; dentro de una cadena de aciertos la
+      cobertura sube al ~84% (la recuperación de un parry exitoso es de 2-3 ticks), lo
+      que hace que un masher afortunado entre en cobertura casi total durante un combo.
+      Mitigado por la varianza intra-combo exigida al sistema 20; medido por C12b.
+      (3) ACCESIBILIDAD: este knob debe exponerse al sistema 21 igual que parry_window
+      — el coste no distingue entre 'machacó' y 'jugador con dificultad motora falló
+      honestamente', y el segundo lo paga mucho más a menudo. Deben tunearse COMO PAR
+      o el modo de asistencia violará R6.
+      RECHAZADO en la re-review: cancelar el lockout si un Golpe empieza dentro de él
+      (propuesta de game-designer). Anularía el coste exactamente en el único momento
+      en que importa. Confirmado por creative-director y por el usuario.
+      Verificado por los ACs C10, C12a, C17 y D9."
+    added: 2026-08-01
+    revised: 2026-08-01
+
+  - name: gracia_salida_castigo
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+      - design/gdd/maquina-estados-jefe.md
+    value: 6
+    unit: fotogramas (ticks de simulación fija a 60Hz)
+    notes: "Ventana de gracia al FINAL de ventana_castigo: durante estos últimos
+      fotogramas, y en el instante exacto en que la Postura se restaura, la pulsación
+      del botón se interpreta como PARRY y no como Golpe de Castigo. Rango seguro
+      4-10.
+      RAZÓN DE EXISTIR: sin ella, pulsar 2 fotogramas tarde compromete al jugador a
+      10-14 fotogramas de recuperación de Castigo justo cuando el enemigo reanuda su
+      ciclo — un golpe inevitable por un borde de estado, no por una lectura
+      equivocada. Mismo principio de perdón que la Regla 3, aplicado al borde opuesto.
+      Añadido 2026-08-01 tras revisión adversarial (ux-designer + qa-lead,
+      reformulado por creative-director).
+      BORDE EXACTO (REVERTIDO 2026-08-04 — era 113): el último tick en que una pulsación
+      se clasifica como Castigo es ventana_castigo - gracia_salida_castigo, y el primero
+      en que se clasifica como Parry es el siguiente. Con los valores de lanzamiento,
+      120 - 6 = 114 -> Castigo y 115 -> Parry. La regla exige restantes(T) >
+      gracia_salida_castigo (ESTRICTO) y, con conteo INCLUSIVO (restantes(T) = 121 - T),
+      en 114 restan 7 y en 115 restan 6. Ver la convención de conteo en ventana_castigo
+      y la fórmula `restantes`.
+      ESTE KNOB FIJA LA ANCHURA DE SU PROPIA ZONA: bajo conteo inclusivo la ventana de
+      gracia mide EXACTAMENTE gracia_salida_castigo ticks, para cualquier valor de los
+      dos knobs. Bajo conteo exclusivo medía g + 1 — de ahí el tick de más. Subir este
+      knob a su techo (10) mueve el borde a 110 sin tocar nada más; no escribir el 114
+      como literal en documentos nuevos.
+      EL 'DEFECTO CONOCIDO' ANTERIOR QUEDA RETIRADO: esta nota afirmaba que la prosa de
+      la Regla 5 de Combate ('los últimos gracia_salida_castigo fotogramas' = ticks
+      115-120) discrepaba de la regla normativa de desambiguación, y adjudicaba la razón
+      a esta última. Era al revés. La prosa de Combate era CORRECTA en las tres
+      formulaciones; lo que discrepaba era el conteo exclusivo importado del sistema 2,
+      bajo el cual la zona de gracia medía 7 ticks en vez de los 6 declarados.
+      Se retira también, por falsa, la acusación de 'causa raíz señalada a Combate'.
+      Verificado por el AC C11 de Combate, que ahora fija las cifras 114/115 en vez de
+      pedir genéricamente 'ambos lados del borde' — un AC sin cifra no podía detectar
+      esta divergencia, que es justo lo que ocurrió durante dos pasadas."
+    added: 2026-08-01
+    revised: 2026-08-04   # was: revised 2026-08-03
+
+  - name: multiplicador_ataque
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+    value: 1.0
+    unit: multiplicador
+    notes: "CONSTANTE, NO RANGO: exactamente 1.0, cerrada en AMBOS sentidos
+      (invariante R4). Gancho de integración hacia el sistema 9 (Elección de
+      Reliquias), pero la RESTRICCIÓN la posee este GDD porque es quien posee la
+      invariante que se rompería (el suelo de 4/5/6 ciclos de la Fórmula 3).
+      Registrado en 2026-08-01 precisamente para que el GDD de Reliquias no pueda
+      contradecirlo silenciosamente: el rango original (1.0-1.5+) era incompatible con
+      la Fórmula 3 y nadie lo detectó durante dos revisiones.
+      REVISADO 2026-08-01 (re-review): la corrección anterior ('techo duro <= 1.0') era
+      la desigualdad correcta pero de UN SOLO LADO. Con 0.5, Cercanía a Dios pasa de 6
+      a 12 golpes de castigo (attrition-fest); con multiplicador -> 0, dano_golpe_
+      castigo -> 0 y el duelo es MECÁNICAMENTE INGANABLE, siendo esta la única fuente
+      de daño del jugador. Decisión de usuario: constante fija.
+      SEGUNDA CONTINGENCIA (2026-08-03, systems-designer en la 2ª pasada del sistema 2):
+      R4 solo garantiza que CADA golpe hace daño positivo, no que la Vida del jefe
+      CONVERJA a 0. Una Acción Especial de curación que restaure más deprisa de lo que
+      el jugador quita hace el duelo inganable por el extremo opuesto, sin violar
+      ninguna fórmula. El sistema 20 debe acotar la tasa de curación contra esta
+      fórmula. Es la mitad cuantitativa del riesgo 'jefe con curación sin castigo'. Las reliquias no pueden
+      tocar el daño de castigo ni al alza ni a la baja. NO debe aparecer en ninguna
+      tabla de tuning del sistema 9. Verificado por el AC D8."
+    added: 2026-08-01
+    revised: 2026-08-01
+
+  - name: hitstop_parry
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+    value: 5
+    unit: ticks de simulación fija a 60Hz (0.0833s de reloj real)
+    notes: "Duración del hitstop de un parry exitoso. Rango seguro 3-6 ticks.
+      CANONICALIZADO EN TICKS 2026-08-01 (re-review): el GDD declaraba '0.08s de tiempo
+      real', pero 0.08 * 60 = 4.8 ticks — un valor NO ENTERO que ninguna implementación
+      basada en el contador entero autoritativo (Regla 2, regla normativa 1) puede
+      producir. Era una contradicción interna dentro de la propia sección de 'autoridad
+      única del tiempo'. Detectado por godot-specialist.
+      Son 5 ticks de RELOJ REAL, no 5 ticks de tiempo diegético escalado —
+      interpretarlos como tiempo de juego al 4% daría ~2 segundos reales.
+      INVARIANTE R8: hitstop_parry + bono_hitstop_parry_justo (+1-2) <= 8 ticks. Por eso
+      el techo se recorta a 6 y no a 8: con hitstop_parry=8, un Parry Justo daría 9-10
+      ticks, por encima del punto de ruptura de flujo que el propio knob declara.
+      Detectado por systems-designer en la verificación de la re-review — era una
+      instancia NUEVA del mismo defecto de 'rangos seguros por knob, no en combinación'
+      introducida al añadir este knob.
+      La escala de tiempo diegética NO afecta a la capa de HUD/UI (Regla 2, regla
+      normativa 2). Engine.time_scale queda DESCARTADO como mecanismo: es global y
+      Godot 4.7 no permite eximir subárboles. Verificado por los ACs C13 y C14.
+      DIVERGENCIA CERRADA 2026-08-04 (changeset 1 de la 3ª pasada): este registry
+      llevaba el rango correcto (3-6) desde la re-review, pero la tabla 'Impact
+      Moments' del GDD seguía declarando 3-8, contradiciendo a su propia tabla de
+      Tuning Knobs y a R8. El desalineado era el GDD, no el registry; ya alineado.
+      Detectado independientemente por systems-designer y godot-specialist, que se
+      negó a certificar implementabilidad mientras el documento no convergiera.
+      EXPOSICIÓN DEL EXTREMO CORTO (godot-specialist, 3ª pasada): el suelo de 3 ticks
+      (50ms) hace NO OPCIONAL fijar Tween y AnimationPlayer en modo de física —
+      ambos evalúan por defecto en frames de render (TWEEN_PROCESS_IDLE,
+      ANIMATION_CALLBACK_MODE_PROCESS_IDLE), y a 40Hz eso son hasta 25ms de
+      desalineación: el 50% de la ventana en el suelo del rango, frente al ~19% que
+      suponían contra el techo antiguo de 8."
+    added: 2026-08-01
+    revised: 2026-08-04
+
+  - name: physics_ticks_per_second
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+      - design/gdd/maquina-estados-jefe.md
+    value: 60
+    unit: ticks por segundo
+    notes: "INVARIANTE DE PROYECTO, NO UN AJUSTE. Toda la canonicalización en ticks del
+      GDD de Combate (13, 9, 6, 5, 42, 120) descansa en esta tasa. Bajarla — una
+      palanca real de ahorro de batería en Steam Deck — convertiría silenciosamente
+      parry_window de 0.2167s a 0.325s a 40Hz sin tocar una sola línea de ningún
+      documento. Cualquier cambio obliga a rederivar TODOS los valores en ticks.
+      OJO: el 'modo 40Hz' del Steam Deck es una limitación de REFRESCO DE PANTALLA, no
+      de tasa de física — y es justamente la razón por la que el diseño no cuenta
+      frames de render. La física debe permanecer en 60 en todos los perfiles de
+      energía. Registrado 2026-08-01 a señalamiento de godot-specialist.
+      Verificado por el AC P3 (debe ser inalcanzable desde configuración externa, no
+      configurable) y por C18 (comportamiento con render/física desacoplados)."
+    added: 2026-08-01
+    revised: ""
+
+  - name: longitud_combo
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+      - design/gdd/maquina-estados-jefe.md
+    value: "3-5"
+    unit: número de golpes encadenados (N)
+    notes: "RANGO LEGAL de longitud de combo. La COMPOSICIÓN de combos por ángel es
+      propiedad de IA de Combate de Jefes (sistema 20), pero el RANGO lo impone este
+      GDD — mismo patrón que multiplicador_ataque, porque es quien posee las dos
+      invariantes que se romperían.
+      SUELO N >= 3: lo exige la Fórmula 7 vía la invariante R7. Con
+      modificador_combo_gracia = 0.5 y N=2, un combo produce 2*0.5 = 1.0 * gracia_base
+      — EXACTAMENTE lo mismo que un golpe simple, incumpliendo la garantía escrita en
+      la Regla 9 ('un combo genera más gracia que un golpe simple'). Fallaba en el
+      propio valor shippeado, no en un extremo de tuning.
+      TECHO N <= 5: lo exige el diseño de audio. El cue ascendente de los eventos 7->8
+      'cierra' armónicamente en el último golpe; sin techo, la frase musical obliga a
+      elegir entre clipping, un loop que rompe la ilusión de frase única, o una meseta
+      muda. También acota la acumulación de esquirlas contra el presupuesto de 250
+      partículas del art bible 8.6.
+      Un patrón de 2 golpes NO es un combo: es una cadena de dos golpes simples, con
+      Repliegue entre ellos y dos instancias de Postura.
+      Fijado 2026-08-01 (re-review) por decisión de usuario, cerrando una Open Question
+      que bloqueaba la autoría del sistema 16. Verificado por el AC C16.
+      DEFENSA EN PROFUNDIDAD (2026-08-03): además del gate primario (AC C16 de Combate,
+      validación de datos al cargar), el sistema 2 asevera 3 <= N <= 5 al entrar en el
+      estado En Combo y falla ruidosamente si no se cumple (su AC C7). No duplica la
+      PROPIEDAD de la regla — evita que un fallo del gate primario se manifieste como
+      comportamiento indefinido silencioso dentro del bucle contado del contenedor.
+      NOTA DE ÍNDICE (2026-08-03): la condición de aborto de combo es 'falla CUALQUIER
+      golpe i, con 1 <= i <= N', incluido el último. El sistema 2 la tenía escrita como
+      i < N, lo que dejaba el fallo del remate fuera de ambas ramas de su regla.
+      SEGUNDA MITAD DEL MISMO CONTRATO, CORREGIDA 2026-08-04 (enmienda B): el AC C15 de
+      COMBATE conservaba también 'i < N', y su cláusula de verificación pedía 'i
+      intermedio y penúltimo' — excluyendo el remate por partida doble. Es el caso que
+      importa: es donde el jugador ha parado N-1 golpes y lo pierde todo. Ejemplar del
+      hallazgo de proceso de la 3ª pasada: el sistema 2 arregló SU lado de un contrato
+      de dos lados y dejó el otro intacto. C15 exige ahora verificar i=1, uno intermedio
+      e i=N, notando que en i=N el conjunto i+1..N es VACÍO y aun así debe dispararse
+      Repliegue una sola vez sin aplicar Postura."
+    added: 2026-08-01
+    revised: 2026-08-04   # was: revised 2026-08-03
+
+  - name: recuperacion_recepcion
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+      - design/gdd/maquina-estados-jefe.md
+    value: "8-12"
+    unit: fotogramas (ticks de simulación fija a 60Hz)
+    notes: "Recuperación del jugador tras recibir un Golpe no parado (estado 'Recepción
+      de golpe'). Interrumpe cualquier estado en curso; el movimiento y el Parry quedan
+      bloqueados durante ella.
+      REGISTRADO 2026-08-03 (/consistency-check): dejó de ser un detalle interno de
+      Combate el día que el sistema 2 lo convirtió en entrada dura de una invariante
+      propia. Su TECHO (12) es el término de la CORE RULE 9 del sistema 2 —
+      'duracion(Enfriamiento) + duracion(Telegrafiado) >= 12 + margen_reaccion_min' —
+      que existe para que un golpe conectado no encadene un segundo golpe imparable por
+      borde de estado. Verificado por el AC C9 del sistema 2.
+      CONSECUENCIA: cualquier retune de este rango en Combate cambia el piso de justicia
+      de otro GDD en silencio. No tocarlo sin revisar la Core Rule 9.
+      PROMOVIDO A SÍMBOLO EN EL GDD FUENTE 2026-08-04 (enmienda C). Hasta esa fecha esta
+      entrada del registry apuntaba a algo que EN COMBATE NO EXISTÍA como símbolo: la
+      cifra '8-12 fotogramas' vivía solo como prosa en States and Transitions y en
+      Animation Feel Targets, sin nombre, sin propietario y sin rango declarado — de modo
+      que el AC C9 del sistema 2, que dice consumirlo 'por referencia, no duplicado', era
+      literalmente inimplementable. Anomalía de TIPO, no de valor. Combate declara ahora
+      la fila de Tuning Knobs y la regla de consumo.
+      REGLA DE CONSUMO (normativa, fijada por Combate 2026-08-04): todo sistema que use
+      recuperacion_recepcion dentro de una INVARIANTE DE SEGURIDAD — cualquier propiedad
+      de la forma 'el jugador debe tener tiempo de reaccionar' — debe evaluarla en su
+      TECHO (12), nunca en el nominal ni en el suelo. Evaluarla en el suelo vuelve la
+      invariante auto-satisfacible. Es lo que la Core Rule 9 del sistema 2 ya hace."
+    added: 2026-08-03
+    revised: 2026-08-04
+
+  - name: recuperacion_castigo
+    status: active
+    source: design/gdd/combate-parry-absorcion.md
+    referenced_by:
+      - design/gdd/combate-parry-absorcion.md
+      - design/gdd/maquina-estados-jefe.md
+    value: "10-14"
+    unit: fotogramas (ticks de simulación fija a 60Hz)
+    notes: "Recuperación del jugador tras ejecutar un Golpe de Castigo, durante la cual
+      NO puede iniciar Parry (una de las dos únicas excepciones a la Regla 7 de
+      Combate). Ver Animation Feel Targets: 6-8 de inicio, 4-6 activos, 10-14 de
+      recuperación.
+      REGISTRADO 2026-08-03 (/consistency-check): su TECHO (14) sostiene toda la
+      justificación del colchón de la CORE RULE 4 del sistema 2 — el jefe pasa por
+      Repliegue (42 ticks) tras un Castigo conectado para que su siguiente ataque no
+      pueda resolverse mientras el jugador sigue comprometido. 42/14 = 3 EXACTO
+      ('triplica'). Es también la constante cuyo mal cálculo produjo el error
+      'cuadriplica' de la 1ª pasada de /design-review del sistema 2.
+      Los fotogramas de INICIO (6-8) y ACTIVOS (4-6) definen además la banda de contacto
+      del Castigo (una pulsación en el tick T impacta entre T+6 y T+14), que es lo que
+      hace posible el edge case E3 del sistema 2. Ver ventana_castigo.
+      CONSECUENCIA: subir este techo por encima de 14 invalida el margen del colchón sin
+      que nada lo detecte. Cualquier retune debe reverificar la Core Rule 4."
+    added: 2026-08-03
+    revised: ""
+
+# CANDIDATO NO REGISTRADO (2026-08-03): `margen_reaccion_min`, término de la Core Rule 9
+# del sistema 2. No se registra todavía porque no tiene ni valor ni GDD fuente — es
+# propiedad de IA de Combate de Jefes (sistema 20), que aún no existe. Registrar al
+# autorar ese GDD.
 
 # Example:
 #
@@ -166,3 +1174,164 @@ constants: []
 #     unit: slots
 #     added: 2026-03-26
 #     revised: ""
+
+
+# ─── EVENTS ──────────────────────────────────────────────────────────────────
+# Señales/eventos que cruzan la frontera entre sistemas. Registrar un evento
+# cuando lo emite un sistema y lo consume otro.
+#
+# POR QUÉ EXISTE ESTA SECCIÓN (añadida 2026-08-03 por /consistency-check):
+# el contrato entre los sistemas 1, 2, 4, 16 y 20 es mayoritariamente de eventos,
+# y hasta ahora ningún artefacto registraba QUIÉN EMITE QUÉ. Consecuencia directa:
+# el GDD de Combate atribuyó los eventos de ventana activa al sistema 20 durante
+# dos días y sobrevivió DOS pasadas de /design-review, porque no había nada contra
+# lo que contrastarlo. Las secciones entities/items/formulas/constants no podían
+# expresar este tipo de hecho.
+#
+# Campos: name, status, emitter, consumers[], payload, added, revised
+#   - emitter: el GDD del sistema que EMITE. Es el dueño del contrato.
+#   - consumers: todos los GDDs que lo consumen (incluidos los que aún no existen,
+#     marcados con `# (no existe aún)`).
+#   - canonical_name: nombre snake_case en tiempo pasado, per coding-standards.md.
+#     PROVISIONAL hasta que /create-architecture lo fije en un ADR — hoy los GDDs
+#     solo tienen nombres en prosa.
+
+events:
+  - name: "inicio de Golpe / fin de Golpe"
+    canonical_name: golpe_iniciado / golpe_terminado   # provisional, pendiente de ADR
+    status: active
+    emitter: design/gdd/maquina-estados-jefe.md
+    consumers:
+      - design/gdd/combate-parry-absorcion.md
+    payload: "ninguno declarado todavía"
+    notes: "Delimitan la ventana activa contra la que Combate resuelve un parry.
+      REPARTO DE TRES PARTES (fijado 2026-08-03): el sistema 20 posee las DURACIONES y
+      la composición de patrones; el sistema 2 es el EMISOR CANÓNICO (sus límites de
+      estado son lo que dispara el evento); Combate es el CONSUMIDOR.
+      Combate atribuía la emisión al sistema 20 en tres sitios y no mencionaba al
+      sistema 2 en ninguna parte — incumplía la regla de dependencias bidireccionales
+      de .claude/rules/design-docs.md. Corregido por enmienda el 2026-08-03."
+    added: 2026-08-03
+    revised: ""
+
+  - name: "inicio de Ventana Especial / fin de Ventana Especial"
+    canonical_name: ventana_especial_iniciada / ventana_especial_terminada
+    status: active
+    emitter: design/gdd/maquina-estados-jefe.md
+    consumers:
+      - design/gdd/combate-parry-absorcion.md
+    payload: "ninguno declarado todavía"
+    notes: "Par DELIBERADAMENTE DISTINTO del de Golpe. Lo declara un patrón con
+      interrumpible_por_parry = true (sistema 2, Core Rule 5); está PROHIBIDO bajo
+      interrumpible_por_parry = false.
+      RAZÓN DE SER UN EVENTO PROPIO: el AC C4 de Combate verifica que un parry exitoso
+      aplica sus CUATRO consecuencias como paquete atómico. Un parry contra una Ventana
+      Especial debe aplicar solo DOS (Gracia ✓, hitstop ✓, Postura ✗, Repliegue ✗), y
+      Combate no tiene ningún concepto de Acción Especial con el que distinguir los
+      casos. Con evento propio, los distingue por el evento mismo sin inspeccionar el
+      estado del jefe. Ver la excepción de Ventana Especial en la Regla 4 de Combate.
+      Una Ventana Especial NO parada no daña al jugador (excepción a la Regla 6).
+      FEEDBACK (añadido 2026-08-04, changeset 2 ítem 3): los tres instantes de PARRY son
+      del sistema 1 — eventos 14 (la ventana se abre), 15 (parada) y 16 (se cierra sin
+      parar). La COMPLETACIÓN y la INTERRUPCIÓN de la Acción Especial son del sistema 2,
+      que ya tiene fila para la interrupción.
+      DEUDA ABIERTA CONTRA EL SISTEMA 2 (congelado): (a) no existe fila de feedback para
+      la COMPLETACIÓN, y el AC V7 del sistema 1 exige que sea distinguible del cierre de
+      ventana y que ninguno de los dos se lea como alivio; (b) no existe evento declarado
+      para la completación en ningún GDD ni en este registry, pese a que el AC C22 del
+      sistema 1 cuelga de ese instante — mismo defecto DE TIPO que tuvo
+      recuperacion_recepcion: un contrato que nombra algo que no existe. Va a la 4ª
+      pasada del sistema 2."
+    added: 2026-08-03
+    revised: ""
+
+  - name: "parry exitoso / parry fallido (+ Postura resultante)"
+    canonical_name: parry_resuelto   # provisional; lleva resultado y Postura
+    status: active
+    emitter: design/gdd/combate-parry-absorcion.md
+    consumers:
+      - design/gdd/maquina-estados-jefe.md
+      - design/gdd/sistema-de-gracia.md          # (no existe aún) — sistema 5
+      - design/gdd/feedback-de-impacto.md        # (no existe aún) — sistema 4
+      - design/gdd/feedback-sonoro-parry.md      # (no existe aún) — sistema 16
+    payload: "resultado (éxito/fallo) + valor de Postura resultante"
+    notes: "Es el evento del que depende TODA la bifurcación de salida del sistema 2
+      (Repliegue / Aturdido / Enfriamiento) — su dependencia DURA hacia Combate.
+      SUJETO A LA REGLA 8 del sistema 2 (resolución síncrona): la transición que este
+      evento dispara debe resolverse dentro del mismo call stack, sin await, señales
+      diferidas, Tween, SceneTreeTimer ni callbacks de AnimationMixer. Ningún consumidor
+      puede invocar de vuelta al FSM durante el despacho (prohibición de reentrada)."
+    added: 2026-08-03
+    revised: ""
+
+  - name: "combo abortado"
+    canonical_name: combo_abortado
+    status: active
+    emitter: design/gdd/maquina-estados-jefe.md
+    consumers:
+      - design/gdd/feedback-de-impacto.md        # (no existe aún) — sistema 4, PREVISTO
+      - design/gdd/feedback-sonoro-parry.md      # (no existe aún) — sistema 16, PREVISTO
+    payload: "i (índice del golpe fallado, 1 <= i <= N) + N (longitud del combo)"
+    notes: "El payload es NORMATIVO, no opcional. Sin i y N, ningún sistema aguas abajo
+      puede distinguir 'el jugador falló el primer golpe' de 'paró 4 de 5 y falló el
+      último' — dos experiencias de peso emocional opuesto que producirían feedback
+      idéntico. Verificado por el AC C3b del sistema 2, que exige LEER el payload del
+      evento capturado, no inferirlo del estado resultante.
+      RIESGO ABIERTO: ningún GDD declara todavía que vaya a consumir estos campos. El
+      dato está expuesto pero podría no leerse nunca, con lo que el problema de
+      percepción original reaparecería intacto. Los consumidores listados son PREVISTOS,
+      no confirmados — cerrar al autorar los sistemas 4 y 16."
+    added: 2026-08-03
+    revised: ""
+
+  - name: "duelo ganado"
+    canonical_name: duelo_ganado
+    status: active
+    emitter: design/gdd/maquina-estados-jefe.md
+    consumers:
+      - design/gdd/gestion-de-run.md             # (no existe aún) — sistema 3
+    payload: "sin definir — Open Question del sistema 2"
+    notes: "Emitido exactamente UNA vez, al entrar en el estado terminal Muerto (AC C6
+      del sistema 2). La secuencia de post-duelo (pantalla, persistencia) es propiedad
+      de Gestión de Run, no del sistema 2.
+      NUNCA se emite si el duelo termina por derrota del jugador — en ese caso el FSM
+      del jefe se congela sin emitir ninguna señal de transición (espejo del AC E7 de
+      Combate).
+      OPEN QUESTION: ¿lleva payload (qué jefe, qué tríada, tiempo del duelo) o basta la
+      señal? Lo decide el GDD de Gestión de Run al autorarse.
+      PROPIEDAD DESAMBIGUADA 2026-08-04 (enmienda D del GDD de Combate): hasta esa fecha
+      AMBOS GDDs se adjudicaban este evento — el sistema 2 explícitamente (tres sitios),
+      y Combate por implicación, al listarlo en Dependencies y Cross-References como
+      evento que Gestión de Run le consume A COMBATE. Este registry ya tenía al sistema 2
+      como emitter desde el 2026-08-03 y no se modifica: la corrección cayó entera en
+      Combate, que es lo que permitió aplicarla con el sistema 2 congelado.
+      CRITERIO ADOPTADO: cada evento lo emite el GDD que posee el recurso cuyo
+      agotamiento lo causa. La Vida del jefe la agota la Fórmula 6 de Combate, pero el
+      ESTADO TERMINAL que lo reconoce es Muerto, del sistema 2 — y un evento de fin de
+      duelo es una transición de estado, no un cálculo de daño. Ver 'duelo perdido'."
+    added: 2026-08-03
+    revised: 2026-08-04
+
+  - name: "duelo perdido"
+    canonical_name: duelo_perdido
+    status: active
+    emitter: design/gdd/combate-parry-absorcion.md
+    consumers:
+      - design/gdd/gestion-de-run.md             # (no existe aún) — sistema 3
+    payload: "sin definir — misma Open Question que duelo_ganado"
+    notes: "Emitido por COMBATE cuando la Vida del jugador llega a 0 (Regla 6, Fórmula 5).
+      Es el hermano asimétrico de duelo_ganado: los dos son simétricos para Gestión de
+      Run pero NO tienen el mismo dueño, porque cada uno lo emite el GDD que posee el
+      recurso que se agota — la Vida del jugador es de Combate, la del jefe termina en un
+      estado del sistema 2.
+      REGISTRADO 2026-08-04 (enmienda D). Existía como prosa en Dependencies y
+      Cross-References de Combate desde el principio, siempre emparejado con duelo_ganado
+      y por tanto arrastrando su ambigüedad de propiedad.
+      PRIORIDAD ABSOLUTA: la derrota del jugador gana a cualquier estado del enemigo,
+      incluido Aturdido con la ventana de Castigo abierta (AC E7 de Combate). Su espejo
+      en el sistema 2 es la congelación del FSM del jefe SIN emitir ninguna señal de
+      transición — por eso duelo_ganado nunca se emite en este camino.
+      SECUENCIA DE POST-DERROTA (pantalla, persistencia entre runs): propiedad de Gestión
+      de Run, no de Combate. Open Question abierta en el GDD de Combate."
+    added: 2026-08-04
+    revised: ""

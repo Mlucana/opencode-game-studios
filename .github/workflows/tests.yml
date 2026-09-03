@@ -1,0 +1,42 @@
+name: Automated Tests
+
+# `coding-standards.md`: la suite corre en cada push a main y en cada PR, y un
+# fallo BLOQUEA el merge. Nunca desactivar ni saltar un test que falla — se
+# arregla la causa.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Run gdUnit4 Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Run gdUnit4 Tests
+        uses: MikeSchulze/gdUnit4-action@v1
+        with:
+          # Debe coincidir con docs/engine-reference/godot/VERSION.md.
+          # Si se cambia el motor, cambiar aquí también: un desajuste hace que
+          # el CI valide contra una versión que el proyecto no usa.
+          godot-version: '4.7'
+          # `tests/integration` se añadirá cuando tenga tests; apuntar a un
+          # directorio vacío hace fallar la acción.
+          paths: |
+            tests/unit
+          report-name: test-results
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: reports/

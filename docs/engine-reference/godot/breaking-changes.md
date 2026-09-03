@@ -1,8 +1,26 @@
 # Godot — Breaking Changes
 
-Last verified: 2026-02-12
+Last verified: 2026-07-31
 
 Changes between Godot versions, focused on post-LLM-cutoff changes (4.4+).
+
+## 4.6 → 4.7 (~Mid 2026 — POST-CUTOFF, HIGH RISK)
+
+| Subsystem | Change | Details |
+|-----------|--------|---------|
+| Input | Mouse/keyboard device IDs reworked | Changed from `0` to `InputEvent.DEVICE_ID_MOUSE` / `DEVICE_ID_KEYBOARD`. Breaks code hardcoding `device == 0` for keyboard/mouse. Joypad device indices unaffected. |
+| Audio | `AudioEffectSpectrumAnalyzer.tap_back_pos` removed | Audio visualizer code referencing this property must be updated. |
+| UI | `RichTextLabel.add_image()` / `update_image()` reworked | Width/height changed `int` → `float`; `width_in_percent`/`height_in_percent` renamed to `width_unit`/`height_unit` with new enum type. |
+| Physics (Jolt) | `WorldBoundaryShape3D` plane distance sign reversed | Existing scenes using this shape may need distance values inverted. |
+| Physics (Jolt) | `SoftBody3D` mass/stiffness behavior changed | Retune existing soft body setups after upgrading. |
+| Animation | `AnimationNodeBlendSpace1D/2D` internals | Projects that wrote against specific BlendSpace internals should retest blend behavior. `add_blend_point()` gains optional `name` parameter. |
+| Animation | `Animation.length` metadata type changed | `float` → `double`. |
+| Core | `Object.is_class()` parameter type changed | `String` → `StringName`. |
+| Shaders | Preprocessor restrictions tightened | Some macro patterns valid in 4.6 no longer compile. |
+| Platform | Android OBB support removed | Migrate to Play Asset Delivery or PCK split before upgrading if targeting Android. |
+| Editor | `EditorSceneFormatImporter` constants moved | Now live under the `ImportFlags` enum. |
+| New-project defaults | Window stretch mode/aspect changed | `disabled`/`keep` → `canvas_items`/`expand` (new projects only). |
+| New-project defaults | `LookAtModifier3D.relative` changed | `true` → `false`. |
 
 ## 4.5 → 4.6 (Jan 2026 — POST-CUTOFF, HIGH RISK)
 
