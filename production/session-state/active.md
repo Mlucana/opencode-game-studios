@@ -253,3 +253,10 @@ Hay GDDs (parry-absorcion, maquina-estados-jefe, concepto) pero sin ADRs ni
 - Registry: +6 constants +4 formulas audio (PROVISIONAL). Consumidores `feedback-sonoro-parry.md` en `parry_resuelto`/`combo_abortado` pasan a confirmados AL APROBAR, no hoy.
 - Riesgo nuevo: bus `Hitstop` con dos dueños (#4 provisional hasta #16, propiedad final aquí) — requiere ADR con technical-director.
 - MVP 6/7 diseñados (falta #13 HUD). 8 docs iniciados.
+
+## Session Extract — avance automático 2026-09-05 (Rev-1 IA + Sonoro, ADR-003)
+- IA #20: P1–P4 aplicados + Rev-1 lean → APPROVED (residuos menores + R1–R5 + OQ1–OQ6 + 4ª pasada #2 + harnesses).
+- Sonoro #16: P1–P7 aplicados (P2 adaptado a ratificación ADR-003) + Rev-1 lean → APPROVED (residuos: ciegas, medición Deck, evento #2, back-links).
+- ADR-003 bus Hitstop: Proposed → Accepted. Sin enmienda a #4 (solo back-link al aceptar).
+- Registry v15 (+ancha_vigilante, +derivacion_vida, escalera variables [i,N], F2 6-42). Index: 7 aprobados, MVP 6/7.
+- MVP pendiente solo #13 HUD (requiere /ux-design). Tests 62/35AC pendientes (sin godot).

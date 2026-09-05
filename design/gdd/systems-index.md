@@ -2,7 +2,7 @@
 
 > **Estado**: Aprobado
 > **Creado**: 2026-07-31
-> **Última actualización**: 2026-09-05 (2026-09-04: sistema 1 **Approved sin re-review por decisión de usuario** — 8ª pasada MAJOR con CS8 aplicado; precedente #4/#12/#15. **Máquina de Estados de Jefe (2) pendiente de re-review**. 2026-09-05: #5 Gracia **Approved** (lean Rev-1), #20 IA Draft, ADR-001/002 Accepted.)
+> **Última actualización**: 2026-09-05 (2026-09-04: sistema 1 **Approved sin re-review por decisión de usuario** — 8ª pasada MAJOR con CS8 aplicado; precedente #4/#12/#15. **Máquina de Estados de Jefe (2) pendiente de re-review**. 2026-09-05: #5 Gracia **Approved** (lean Rev-1), #20 IA Draft, ADR-001/002 Accepted; Rev-1 #20 IA + #16 Sonoro **Approved**, ADR-003 Accepted.)
 >
 > **Actualización anterior**: 2026-08-04 (**3ª pasada** de `/design-review` sobre el sistema 2 — veredicto **MAJOR REVISION NEEDED**. **El orden de diseño cambia: el sistema 1 va ahora por delante del 2.** Los 13 "descendientes" de la 2ª pasada se reagruparon en **5 raíces**, y **3 de ellas viven total o parcialmente en el sistema 1**, así que seguir iterando el 2 es iterar sobre el síntoma. El sistema 2 queda **CONGELADO**; el sistema 1 pierde su estado Aprobado hasta pasar su primera revisión adversarial. Ver `design/gdd/reviews/maquina-estados-jefe-review-log.md` para el plan de 5 fases, las adjudicaciones D1–D4 —incluida la **reversión del borde de Castigo de 113 a 114**, un arreglo de la 2ª pasada que estaba invertido— y el hallazgo de proceso)
 > **Concepto fuente**: design/gdd/game-concept.md
@@ -43,11 +43,11 @@ Alpha → Visión Completa).
 | 13 | HUD de Combate | UI | MVP | Not Started | — | Combate de Parry-Absorción, Sistema de Gracia — **📌 UX Flag: requiere `/ux-design` antes de escribir épicas** |
 | 14 | Pantalla de Elección de Reliquias (inferido) | UI | Vertical Slice | Not Started | — | Elección de Reliquias entre Duelos |
 | 15 | Menú Principal y Flujo de Pantallas (inferido) | UI | Vertical Slice | Approved (design-review full 2026-09-04: MAJOR → Rev2, aceptado sin re-review) | design/gdd/menu-principal-y-flujo-de-pantallas.md | Guardado de Progreso -dura-, Gestión de Run -dura-, HUD/Reliquias/Gracia -blandas- — **📌 UX Flag: specs por pantalla vía `/ux-design` en Pre-Producción** |
-| 16 | Feedback Sonoro del Parry | Audio | MVP | In Design | design/gdd/feedback-sonoro-parry.md | Combate (dura), Feedback de Impacto (blanda: triggers/prioridad/oráculos), Gracia + Menú (blandas: capas/intenciones) |
+| 16 | Feedback Sonoro del Parry | Audio | MVP | Approved (lean re-review Rev-1 2026-09-05; ciegas + medición Deck + evento #2) | design/gdd/feedback-sonoro-parry.md | Combate (dura), Feedback de Impacto (blanda: triggers/prioridad/oráculos), Gracia + Menú (blandas: capas/intenciones) |
 | 17 | Fragmentos de Memoria (esposa/hija) | Narrative | Vertical Slice | Not Started | — | Gestión de Run, Hub y Acumulación Visual |
 | 18 | Hub y Acumulación Visual | Narrative | Vertical Slice | Not Started | — | Gestión de Run, Sistema de Gracia |
 | 19 | Sistema de Efectos de Estado | Gameplay | Alpha | Not Started | — | Combate de Parry-Absorción, IA de Combate de Jefes |
-| 20 | IA de Combate de Jefes — Patrones de Ataque y Movimiento | Gameplay | MVP | In Design | design/gdd/ia-combate-jefes.md | Máquina de Estados de Jefe |
+| 20 | IA de Combate de Jefes — Patrones de Ataque y Movimiento | Gameplay | MVP | Approved (lean re-review Rev-1 2026-09-05; OQ1–OQ6 + 4ª pasada #2) | design/gdd/ia-combate-jefes.md | Máquina de Estados de Jefe |
 | 21 | Accesibilidad (inferido) | Meta | Alpha | Not Started | — | Combate de Parry-Absorción, HUD de Combate |
 
 ---
@@ -213,7 +213,7 @@ estructuralmente.
 | Sistemas totales identificados | 21 |
 | Docs de diseño iniciados | 8 |
 | Docs de diseño revisados | 4 (sistema 1: **3 pasadas** + verificación de alcance reducido + 4 enmiendas post-aprobación; la 3ª es su primera revisión adversarial propia y cerró su changeset 1 de 2 · sistema 2: **3 pasadas**, congelado tras la 3ª · sistema 15: **1 pasada full** 2026-09-04, 9 especialistas + síntesis CD · sistema 4: **2 pasadas full** 2026-09-04, 8 agentes + síntesis CD) |
-| Docs de diseño aprobados | **5** — Combate de Parry-Absorción (#1, 8ª pasada MAJOR con CS8; aceptado sin re-review 2026-09-04) · Menú Principal (#15, Rev2 aceptado sin re-review 2026-09-04) · Feedback de Impacto (#4, Rev2 aceptada sin 3ª pasada 2026-09-04) · Guardado de Progreso (#12, Rev2 aceptada sin re-review 2026-09-04). Sistema 2 pendiente de re-review · Gracia de Tres Capas (#5, lean Rev-1 2026-09-05) |
+| Docs de diseño aprobados | **7** — Combate de Parry-Absorción (#1, 8ª pasada MAJOR con CS8; aceptado sin re-review 2026-09-04) · Menú Principal (#15, Rev2 aceptado sin re-review 2026-09-04) · Feedback de Impacto (#4, Rev2 aceptada sin 3ª pasada 2026-09-04) · Guardado de Progreso (#12, Rev2 aceptada sin re-review 2026-09-04). Sistema 2 pendiente de re-review · Gracia de Tres Capas (#5, lean Rev-1 2026-09-05) · IA de Combate de Jefes (#20, lean Rev-1 2026-09-05) · Feedback Sonoro del Parry (#16, lean Rev-1 2026-09-05) |
 | Sistemas MVP diseñados | 6/7 |
 | Sistemas Vertical Slice diseñados | 0/9 |
 

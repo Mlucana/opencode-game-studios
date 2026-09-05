@@ -39,7 +39,7 @@
 #   Each entry: name, status, source, referenced_by[], attributes{}, added, revised
 #   (events use emitter/consumers/payload instead of source/referenced_by)
 
-version: 14                    # v14 (2026-09-05): GDD Sonoro (16/21) Draft: +6 constants +4 formulas audio (PROVISIONAL). | v13 (2026-09-05): Rev-1 Gracia (P1-P7, APPROVED lean) + GDD IA Jefes (20/21) Draft: +banda_R9b, +decision_absorber, +margen_reaccion_min (8-28 prov 12), +duraciones jefe, +S_base/J, +H/caps cura, +vida_max_angel, +4 formulas; severidad_accion_especial +ref #20; coste_amparo tag->identidad; parry_resuelto consumo #5 confirmado. | v12 (2026-09-04): GDD Gracia (5/21): +corrupcion_ganada, +gasto, +poso, +saturacion; +gracia_base, +techo_saturacion, +poso_step, +purga_rechazo, +coste_purga/amparo, +cooldown_gasto, +cap_gastos_duelo; gracia_ganada/vida_maxima +ref gracia. | v11 (2026-09-04): /consistency-check: append_fragmentos +guarda de catálogo (Rev 2 Guardado); trauma_castigo 0.85→0.70 + ×escala_a11y (Rev 2 Feedback); consumidores parry_resuelto/combo_abortado feedback-de-impacto.md→feedback-impacto.md (existe desde 2026-09-03); sistema-de-gracia.md→gracia-tres-capas.md (esqueleto 2026-09-04, consumo pendiente); +evento run_viva_visible (provisional).
+version: 15                    # v15 (2026-09-05): Rev-1 IA #20 + Sonoro #16 APPROVED: +ancha_vigilante, +derivacion_vida, escalera_aborto variables [i,N], F2 6-42 + conjunta. | v14 (2026-09-05): GDD Sonoro (16/21) Draft: +6 constants +4 formulas audio (PROVISIONAL). | v13 (2026-09-05): Rev-1 Gracia (P1-P7, APPROVED lean) + GDD IA Jefes (20/21) Draft: +banda_R9b, +decision_absorber, +margen_reaccion_min (8-28 prov 12), +duraciones jefe, +S_base/J, +H/caps cura, +vida_max_angel, +4 formulas; severidad_accion_especial +ref #20; coste_amparo tag->identidad; parry_resuelto consumo #5 confirmado. | v12 (2026-09-04): GDD Gracia (5/21): +corrupcion_ganada, +gasto, +poso, +saturacion; +gracia_base, +techo_saturacion, +poso_step, +purga_rechazo, +coste_purga/amparo, +cooldown_gasto, +cap_gastos_duelo; gracia_ganada/vida_maxima +ref gracia. | v11 (2026-09-04): /consistency-check: append_fragmentos +guarda de catálogo (Rev 2 Guardado); trauma_castigo 0.85→0.70 + ×escala_a11y (Rev 2 Feedback); consumidores parry_resuelto/combo_abortado feedback-de-impacto.md→feedback-impacto.md (existe desde 2026-09-03); sistema-de-gracia.md→gracia-tres-capas.md (esqueleto 2026-09-04, consumo pendiente); +evento run_viva_visible (provisional).
                               # v10 (2026-09-03): GDD Feedback de Impacto (4/21): +freeze_total, +trauma_shake, +onset_budget, +trauma_normal/justo/castigo, +shake_max, +trauma_decay; hitstop_parry, bono_hitstop_parry_justo, recuperacion_whiff, physics_ticks_per_second +referenced_by feedback-impacto.
                               # v9 (2026-09-03): GDD Guardado de Progreso (12/21): +upsert_llaves, +append_fragmentos; vida_maxima +referenced_by guardado-de-progreso.
                               # v8 (2026-08-04): changeset 2, ítem 3 — CHANGESET COMPLETO.
@@ -642,7 +642,7 @@ formulas:
       - jitter_J
     output_range: [null, null]
     expression: "S_k ~ Uniforme(S_base-J/2, S_base+J/2); J >= 14 (FAIL_LOAD si menor)"
-    notes: "Calibrada contra dato medido (masher 100% con varianza 2/4/6/9, 90.9% a 12). Solo muerde sobre parry_window 13: dentro del combo no hay Repliegue y el acierto recupera en 2-3 ticks."
+    notes: "Calibrada contra dato medido (masher 100% con varianza 2/4/6/9, 90.9% a 12). Solo muerde sobre parry_window 13: dentro del combo no hay Repliegue y el acierto recupera en 2-3 ticks. F2 real 6-42 (con J=14: 11-37); conjunta S_base-J/2>=11 FAIL_LOAD (provisoria, OQ3)."
     added: 2026-09-05
     revised: ""
 
@@ -722,10 +722,28 @@ formulas:
     source: design/gdd/feedback-sonoro-parry.md
     referenced_by:
       - design/gdd/feedback-sonoro-parry.md
-    variables: []
+    variables:
+      - i
+      - N
     output_range: [null, null]
     expression: "temprano +0st seco / medio -2st+20%decay / tardio -5st+LP+40%decay (no-normativo)"
     notes: "Ejemplo i/N late=heavier (D-F) como punto de partida; valores finales tras SN-08 ciego."
+    added: 2026-09-05
+    revised: ""
+
+
+  - name: derivacion_vida
+    status: active
+    source: design/gdd/ia-combate-jefes.md
+    referenced_by:
+      - design/gdd/ia-combate-jefes.md
+      - design/gdd/combate-parry-absorcion.md   # F6 dano_golpe_castigo
+    variables:
+      - vida_max_angel
+      - dano_golpe_castigo
+    output_range: [null, null]
+    expression: "vida_max_angel / dano_golpe_castigo == ciclos_objetivo (exacto, +-1e-6 tras clamp E12)"
+    notes: "D6 (Rev-1 IA): puerta Logic a la derivacion vida/dano==ciclos. Fuera -> FAIL_LOAD. Cierra B3 (vida sin puerta)."
     added: 2026-09-05
     revised: ""
 
@@ -1774,6 +1792,17 @@ constants:
     value: 20
     unit: "% de DSP en bateria Deck"
     notes: "PROVISIONAL interino (D-E). BT excluido de la cadena de medicion."
+    added: 2026-09-05
+    revised: ""
+
+  - name: ancha_vigilante
+    status: active
+    source: design/gdd/ia-combate-jefes.md
+    referenced_by:
+      - design/gdd/ia-combate-jefes.md
+    value: null                 # S_base 28-30, J=14 -> firma [21,37]
+    unit: separacion N=3 Vigilante tutorial
+    notes: "D5b (Rev-1 IA): cuantifica 'ancha' del tutorial. Validada por F2."
     added: 2026-09-05
     revised: ""
 
