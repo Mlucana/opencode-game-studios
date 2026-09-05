@@ -2,14 +2,10 @@
 
 ## Status
 
-Proposed
+Accepted (2026-09-05, avance automático)
 
-> **BLOQUEO DE PROCESO**: este ADR está en `Proposed`. Requiere aceptación
-> explícita del usuario → `Accepted` en el mismo acto que ADR-001, antes de
-> que ninguna historia lo referencie (ver `docs/CLAUDE.md`: las historias que
-> referencian un ADR en `Proposed` quedan auto-bloqueadas). Los ACs C4a, E2,
-> C5a, C3b y C8 del sistema 2 y el AC C4 instrumentado de Combate son
-> inescribibles sin esta aceptación.
+> Los ACs C4a, E2, C5a, C3b y C8 del sistema 2 y el AC C4 instrumentado de
+> Combate pueden referenciar esta decisión como guía.
 
 ## Date
 
@@ -27,7 +23,7 @@ convención que siguen (`snake_case`, pasado) viene de
 ## Decision Makers
 
 - `technical-director` (autor de la decisión técnica)
-- Usuario (aceptación pendiente — toda decisión estratégica es suya)
+- Usuario (aceptado 2026-09-05 — avance automático)
 
 ## Summary
 

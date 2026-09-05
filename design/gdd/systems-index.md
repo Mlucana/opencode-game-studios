@@ -2,7 +2,7 @@
 
 > **Estado**: Aprobado
 > **Creado**: 2026-07-31
-> **Última actualización**: 2026-09-04 (sistema 1 **Approved sin re-review por decisión de usuario** — 8ª pasada MAJOR con CS8 aplicado; precedente #4/#12/#15. **Máquina de Estados de Jefe (2) pendiente de re-review**.)
+> **Última actualización**: 2026-09-05 (2026-09-04: sistema 1 **Approved sin re-review por decisión de usuario** — 8ª pasada MAJOR con CS8 aplicado; precedente #4/#12/#15. **Máquina de Estados de Jefe (2) pendiente de re-review**. 2026-09-05: #5 Gracia **Approved** (lean Rev-1), #20 IA Draft, ADR-001/002 Accepted.)
 >
 > **Actualización anterior**: 2026-08-04 (**3ª pasada** de `/design-review` sobre el sistema 2 — veredicto **MAJOR REVISION NEEDED**. **El orden de diseño cambia: el sistema 1 va ahora por delante del 2.** Los 13 "descendientes" de la 2ª pasada se reagruparon en **5 raíces**, y **3 de ellas viven total o parcialmente en el sistema 1**, así que seguir iterando el 2 es iterar sobre el síntoma. El sistema 2 queda **CONGELADO**; el sistema 1 pierde su estado Aprobado hasta pasar su primera revisión adversarial. Ver `design/gdd/reviews/maquina-estados-jefe-review-log.md` para el plan de 5 fases, las adjudicaciones D1–D4 —incluida la **reversión del borde de Castigo de 113 a 114**, un arreglo de la 2ª pasada que estaba invertido— y el hallazgo de proceso)
 > **Concepto fuente**: design/gdd/game-concept.md
@@ -32,7 +32,7 @@ Alpha → Visión Completa).
 | 2 | Máquina de Estados de Jefe (flujo base) (inferido) | Core | MVP | Needs Revision | design/gdd/maquina-estados-jefe.md | Combate de Parry-Absorción (dura), IA de Combate de Jefes (blanda/circular, ver Circular Dependencies) — **impone a IA de Jefes: conjunto cerrado de 9 estados top-level (Regla 7, con procedimiento de enmienda), resolución síncrona (Regla 8), piso de justicia `Enfriamiento + Telegrafiado ≥ 12 + margen` (Regla 9), y Ventana Especial de evento propio, obligatoria bajo `interrumpible_por_parry = true` y prohibida bajo `false` (Regla 5)**; **impone a Combate (1): la excepción de Ventana Especial en su Regla 4**; **impone a Lucifer (11): extensión como sub-estado anidado, no estado top-level nuevo** |
 | 3 | Gestión de Run / Estructura de Ascenso (inferido) | Core | Vertical Slice | Not Started | — | Máquina de Estados de Jefe |
 | 4 | Feedback de Impacto (Hitstop/Cámara) (inferido) | Gameplay | MVP | Approved (2ª pasada adversarial 2026-09-04 + rev2; ver `reviews/feedback-impacto-review-log.md`) | design/gdd/feedback-impacto.md | Combate de Parry-Absorción |
-| 5 | Sistema de Gracia de Tres Capas | Gameplay | MVP | Designed (retrofit 2026-09-04: 8/8 + Visual/UI/AC/OQ en disco; pendiente design-review en fresh session) | design/gdd/gracia-tres-capas.md | Combate de Parry-Absorción, Máquina de Estados de Jefe — **📌 UX Flag: pantalla Decisión con UI real → `/ux-design` (`design/ux/decision-gracia.md`) antes de épicas** |
+| 5 | Sistema de Gracia de Tres Capas | Gameplay | MVP | Approved (lean re-review Rev-1 2026-09-05; residuos R1–R6 + OQs) | design/gdd/gracia-tres-capas.md | Combate de Parry-Absorción, Máquina de Estados de Jefe — **📌 UX Flag: pantalla Decisión con UI real → `/ux-design` (`design/ux/decision-gracia.md`) antes de épicas** |
 | 6 | Clímax de Saturación | Gameplay | Vertical Slice | Not Started | — | Sistema de Gracia de Tres Capas |
 | 7 | Overlay de Corrupción del Protagonista | Gameplay | Vertical Slice | Not Started | — | Sistema de Gracia de Tres Capas |
 | 8 | Marchitamiento Ambiental | Gameplay | Vertical Slice | Not Started | — | Gestión de Run |
@@ -47,7 +47,7 @@ Alpha → Visión Completa).
 | 17 | Fragmentos de Memoria (esposa/hija) | Narrative | Vertical Slice | Not Started | — | Gestión de Run, Hub y Acumulación Visual |
 | 18 | Hub y Acumulación Visual | Narrative | Vertical Slice | Not Started | — | Gestión de Run, Sistema de Gracia |
 | 19 | Sistema de Efectos de Estado | Gameplay | Alpha | Not Started | — | Combate de Parry-Absorción, IA de Combate de Jefes |
-| 20 | IA de Combate de Jefes — Patrones de Ataque y Movimiento | Gameplay | MVP | Not Started | — | Máquina de Estados de Jefe |
+| 20 | IA de Combate de Jefes — Patrones de Ataque y Movimiento | Gameplay | MVP | In Design | design/gdd/ia-combate-jefes.md | Máquina de Estados de Jefe |
 | 21 | Accesibilidad (inferido) | Meta | Alpha | Not Started | — | Combate de Parry-Absorción, HUD de Combate |
 
 ---
@@ -198,7 +198,7 @@ estructuralmente.
 
 | Sistema | Tipo de Riesgo | Descripción | Mitigación |
 |---|---|---|---|
-| IA de Combate de Jefes (habilidad de curación) | Diseño **+ balance** | Dos mitades. **Cualitativa**: un jefe con curación en un roguelike de un solo intento por vida puede sentirse como estancamiento infinito si cura sin castigo. **Cuantitativa** (identificada por `systems-designer` en la 2ª pasada del sistema 2): una curación que restaure Vida más deprisa de lo que el jugador puede quitarla hace el duelo **mecánicamente inganable** sin violar ninguna fórmula individual — el mismo modo de fallo que `multiplicador_ataque → 0`, por el extremo opuesto, y la única contingencia de alcanzabilidad de `Muerto` que no cubre la invariante R4 de Combate | La mitad cualitativa ya tiene vía: la **Ventana Especial** del sistema 2 (Core Rule 5) — obligatoria bajo `interrumpible_por_parry = true`, con evento propio, y sin dañar al jugador si se falla. La cuantitativa sigue abierta: el sistema 20 debe acotar la tasa de curación contra `dano_golpe_castigo` al autorar cualquier patrón que la use |
+| IA de Combate de Jefes (habilidad de curación) | Diseño **+ balance** | Dos mitades. **Cualitativa**: un jefe con curación en un roguelike de un solo intento por vida puede sentirse como estancamiento infinito si cura sin castigo. **Cuantitativa** (identificada por `systems-designer` en la 2ª pasada del sistema 2): una curación que restaure Vida más deprisa de lo que el jugador puede quitarla hace el duelo **mecánicamente inganable** sin violar ninguna fórmula individual — el mismo modo de fallo que `multiplicador_ataque → 0`, por el extremo opuesto, y la única contingencia de alcanzabilidad de `Muerto` que no cubre la invariante R4 de Combate | La mitad cualitativa ya tiene vía: la **Ventana Especial** del sistema 2 (Core Rule 5) — obligatoria bajo `interrumpible_por_parry = true`, con evento propio, y sin dañar al jugador si se falla. La cuantitativa acotada en el draft de #20 (2026-09-05): `H ≤ dano_golpe_castigo` por completación y `ΣH ≤ (ciclos−1)×daño` por duelo; pendiente de playtest |
 | Sistema de Efectos de Estado | Diseño | "Veneno" es un efecto tradicionalmente asociado a corrupción/malicia; choca con el Pilar 5 (los ángeles son genuinamente buenos, nunca corruptos) | Adaptar el vocabulario de efectos por tríada (ej. quemadura=Serafines) en vez de un veneno genérico, al autorar el GDD |
 | Overlay de Corrupción del Protagonista | Técnico | Compositing de decals en tiempo real sobre 4-6 puntos de anclaje — ya señalado en el art bible como seguro solo si se recompone en eventos de cambio de estado, no cada frame | Prototipar el pipeline de compositing en Godot antes de comprometerse a la implementación final; coordinar con `technical-artist` |
 | Lucifer — Dos Formas y Reactividad | Técnico + Alcance | Sistema reactivo que lee el mapa de corrupción del jugador y lo reproyecta en tiempo real; el art bible ya identificó 5 shaders simultáneos en este combate como el peor caso de rendimiento del juego | Verificar el combo de shaders en hardware real de Steam Deck; considerar una versión simplificada de la reactividad si el rendimiento no alcanza 60fps |
@@ -211,10 +211,10 @@ estructuralmente.
 | Métrica | Cuenta |
 |---|---|
 | Sistemas totales identificados | 21 |
-| Docs de diseño iniciados | 6 |
+| Docs de diseño iniciados | 7 |
 | Docs de diseño revisados | 4 (sistema 1: **3 pasadas** + verificación de alcance reducido + 4 enmiendas post-aprobación; la 3ª es su primera revisión adversarial propia y cerró su changeset 1 de 2 · sistema 2: **3 pasadas**, congelado tras la 3ª · sistema 15: **1 pasada full** 2026-09-04, 9 especialistas + síntesis CD · sistema 4: **2 pasadas full** 2026-09-04, 8 agentes + síntesis CD) |
-| Docs de diseño aprobados | **4** — Combate de Parry-Absorción (#1, 8ª pasada MAJOR con CS8; aceptado sin re-review 2026-09-04) · Menú Principal (#15, Rev2 aceptado sin re-review 2026-09-04) · Feedback de Impacto (#4, Rev2 aceptada sin 3ª pasada 2026-09-04) · Guardado de Progreso (#12, Rev2 aceptada sin re-review 2026-09-04). Sistema 2 pendiente de re-review |
-| Sistemas MVP diseñados | 4/7 |
+| Docs de diseño aprobados | **5** — Combate de Parry-Absorción (#1, 8ª pasada MAJOR con CS8; aceptado sin re-review 2026-09-04) · Menú Principal (#15, Rev2 aceptado sin re-review 2026-09-04) · Feedback de Impacto (#4, Rev2 aceptada sin 3ª pasada 2026-09-04) · Guardado de Progreso (#12, Rev2 aceptada sin re-review 2026-09-04). Sistema 2 pendiente de re-review · Gracia de Tres Capas (#5, lean Rev-1 2026-09-05) |
+| Sistemas MVP diseñados | 5/7 |
 | Sistemas Vertical Slice diseñados | 0/9 |
 
 ---

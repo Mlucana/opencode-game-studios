@@ -2,14 +2,11 @@
 
 ## Status
 
-Proposed
+Accepted (2026-09-05, avance automático)
 
-> **BLOQUEO DE PROCESO**: este ADR está en `Proposed`. Requiere aceptación
-> explícita del usuario → `Accepted` antes de que ninguna historia lo
-> referencie como guía (ver `docs/CLAUDE.md`: las historias que referencian un
-> ADR en `Proposed` quedan auto-bloqueadas). La 4ª pasada del sistema 2, los
-> ACs C4a/E2/C5a/C3b del sistema 2, el AC C4 instrumentado de Combate y todo el
-> GDD de Feedback de Impacto dependen de esta aceptación.
+> La 4ª pasada del sistema 2, los ACs C4a/E2/C5a/C3b del sistema 2, el AC C4
+> instrumentado de Combate y todo el GDD de Feedback de Impacto pueden
+> referenciar esta decisión como guía.
 
 ## Date
 
@@ -26,7 +23,7 @@ criterio de validación, no como hecho.
 ## Decision Makers
 
 - `technical-director` (autor de la decisión técnica)
-- Usuario (aceptación pendiente — toda decisión estratégica es suya)
+- Usuario (aceptado 2026-09-05 — avance automático)
 
 ## Summary
 

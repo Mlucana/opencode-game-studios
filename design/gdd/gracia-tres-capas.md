@@ -19,14 +19,14 @@ El jugador debe sentir que carga una luz que no era para él: no hacerse más fu
 
 1. **G1 — Ledger triple y vocabulario. Propiedad de #5.** El estado es exactamente tres floats `≥0` JSON-safe: `gracia_actual` (bolsa gastable), `corrupcion_actual` (progreso hacia el Clímax #6), `poso_irreversible` (suelo). Invariantes: `poso ≤ corrupcion ≤ techo`, `0 ≤ gracia ≤ techo`. No existe otro estado de gracia. Verba: `tomar / cargar / aliviar / poso / dejar ir`; jamás loot/almas/maná (Pilar 5).
 2. **G2 — ACUMULACIÓN: faucet único, event-driven.** Ante cada `parry_exitoso` de Combate (simples, intermedios de combo y VE-parada), ejecución atómica: `gracia_ganada = 1.0 × modificador_combo` (`1.0` simple/VE, `0.5` por parry en combo — consumido verbatim de Combate, R7); `gracia_actual += gracia_ganada; corrupcion_actual += gracia_ganada`. La misma barra es progresión y sufrimiento (Pilar 1). Combo N=3–5 rinde `1.5–2.5` por 1 instancia de Postura: rico en gracia, pobre en postura, por construcción.
-3. **G3 — VE-parada: el peor intercambio, nunca gratis (R9b).** Concede `1.0` a ambos ledgers con cero Postura y cero Repliegue (Regla 4 Combate): corrupción-por-progreso infinita. Mata la dominación invertida (parar dominaría a ignorar). Acotado por R9a (`Σ severidad ≤ 3` por duelo → ≤3 motas VE/duelo). Si #5 descontase jamás la gracia de VE, R9a debe re-derivarse (constraint-handoff declarado).
+3. **G3 — VE-parada: el peor intercambio, nunca gratis (R9b).** Concede `1.0` a ambos ledgers con cero Postura y cero Repliegue (Regla 4 Combate): corrupción-por-progreso infinita. Mata la dominación invertida (parar dominaría a ignorar). Acotado por R9a (Combate: Σ severidad ≤ 3 por duelo, D13; #5 no asume conteo: el cap efectivo es min(3 VE, Σ ≤ 3); si #5 descontase jamás la gracia de VE, R9a debe re-derivarse).
 4. **G4 — ELECCIÓN EXPLÍCITA: independiente, irrevocable, post-reliquia.** Tras cada ángel, pantalla Decisión (propiedad de #5, enrutada por #15): exactamente `TOMAR / DEJAR IR`. Independiente por ángel (`decision_absorber[i] ∈ {0,1}`, `angeles_absorbidos = suma`). Commit atómico e inmediato en memoria; Guardado solo escribe SUS en `post_decision`, jamás `pre_eleccion` (R5 Guardado). Sin re-elegir por recarga, sin absorción parcial, sin omitir.
 5. **G5 — TOMAR: los tres efectos disparan juntos, nunca selectivos.** (a) `angeles_absorbidos += 1` → Fórmula 5 Combate (`+18` Vida Máx v1.0, plano); (b) `poso_irreversible += 12.0` plano v1.0 (visión-9: decreciente por conteo, G9); (c) desbloquea el poder robado de ese coro (ficción por identidad, magnitudes idénticas — preserva independencia de orden). Sin lump inmediato de gracia (evita doble-contar el ingreso por parry). Reparación de invariante: TOMAR eleva `C`: `C' = max(C, poso')` — si el suelo adelantó a `C` (gasto hasta el suelo + TOMAR), el commit levanta `C` al nuevo suelo; nunca al revés.
 6. **G6 — DEJAR IR: la pureza tiene mecánica, no solo narrativa.** Sin Vida, sin poso, sin poder. En su lugar: `corrupcion_actual = max(poso, corrupcion_actual − 6.0)`. Sin purga, absorber dominaría estrictamente en supervivencia y el dilema colapsaría; con purga: TOMAR = +supervivencia/+inevitabilidad, DEJAR IR = −supervivencia/−inevitabilidad. La run pura (`absorbidos = 0`) es válida y la más dura. R10-safe: no toca Vida, ciclos, parries/ciclo ni cobertura.
-7. **G7 — GASTO: alivio y amparo, nunca daño. Con compuerta.** Acciones gastables consumen `gracia_actual` (exige `gracia ≥ coste`, sin deuda ni parciales) y alivian proporcional: `corrupcion := poso + (corrupcion − poso) / 2`. Plantilla MVP cerrada a dos poderes: **Purga** (coste 8, solo alivio, sin efecto de combate) y **Amparo** (coste 12, niega el daño del próximo Golpe fallado una vez, máx 1/duelo). Prohibidos: daño a Vida, daño a Postura, castigos extra, ventanas, robo de vida, conversión daño→gracia. Trigger: binding discreto dedicado (nunca el botón de parry); legal en `Telegrafiado / Enfriamiento / Repliegue / Hub / post-reliquia / post-decisión`; ilegal en `Parry activo / Aturdido / Recepción / lockout-whiff / VE activa / Decisión abierta` → descartado sin buffer (anti-mash, espejo de Regla 7 Combate). La decisión commitea contra ledger estable: primero decidir, gastar en el Hub. Cooldown 360 ticks (6 s) + cap 2 gastos/duelo + máx 1 amparo activo.
+7. **G7 — GASTO: alivio y amparo, nunca daño. Con compuerta.** Acciones gastables consumen `gracia_actual` (exige `gracia ≥ coste`, sin deuda ni parciales) y alivian proporcional: `corrupcion := poso + (corrupcion − poso) / 2`. Plantilla MVP cerrada a dos poderes: **Purga** (coste 8, solo alivio, sin efecto de combate) y **Amparo** (coste 12, niega el daño del próximo Golpe fallado una vez, máx 1/duelo). Prohibidos: daño a Vida, daño a Postura, castigos extra, ventanas, robo de vida, conversión daño→gracia. Trigger: binding discreto dedicado (nunca el botón de parry); legal en `Telegrafiado / Enfriamiento / Repliegue / Hub / post-reliquia / post-decisión`; ilegal en `Parry activo / Aturdido / Recepción / lockout-whiff / VE activa / Decisión abierta` → descartado sin buffer (anti-mash, espejo de Regla 7 Combate). La decisión commitea contra ledger estable: primero decidir, gastar en el Hub. Cooldown 360 ticks (6 s) + cap 2 gastos/duelo + máx 1 amparo activo. Reset-point: spends/amparos resetean al instanciar duelo (rename-SUS pre-duelo, R5 Guardado); gastos en Hub/post-reliquia/post-decisión cargan al duelo siguiente (el Hub pertenece al próximo duelo a efectos de cap); cooldown monótono no resetea (cruza duelos); SUS inicia SATISFECHO.
 8. **G8 — TECHO: la saturación es handoff, no muerte.** Si `corrupcion_actual ≥ 100.0`: clamp sin overflow, emite `saturacion_alcanzada` al Clímax #6 y deshabilita GASTO (no se gasta para esquivar la oferta). Seguir tras la paz cuesta desgarro permanente (propiedad de #6).
 9. **G9 — Extrapolación a 9 coros: decreciente POR CONTEO, no por identidad.** v1.0 congela HP lineal (`+18`) y poso plano (`+12`) para n≤3 (R5). Visión: funciones solo de `n` (conmutan → independencia de orden, Regla 8/AC E9); dirección preferida: HP legible + poso superlineal, con R5_9 re-derivada antes del 4º ángel — nunca extrapolación silenciosa.
-10. **G10 — Persistencia opaca + contrato de lectura.** #5 jamás toca disco; expone a Guardado el triple + `angeles_absorbidos + decision_log[]` verbatim cada `post_decision`. A HUD/Overlay/Clímax expone niveles y eventos de solo-lectura (`gracia_cambiada, corrupcion_cambiada, poso_cambiado, saturacion_alcanzada`), jamás setters. Epsilons: `1e-9` identidad (round-trip Guardado R9), `1e-6` para cero (patrón E13).
+10. **G10 — Persistencia opaca + contrato de lectura.** #5 jamás toca disco; expone a Guardado el triple + `angeles_absorbidos + decision_absorber[]` verbatim cada `post_decision`. A HUD/Overlay/Clímax expone niveles y eventos de solo-lectura (`gracia_cambiada, corrupcion_cambiada, poso_cambiado, saturacion_alcanzada`), jamás setters. Epsilons: `1e-9` identidad (round-trip Guardado R9), `1e-6` para cero (patrón E13).
 
 ### States and Transitions
 
@@ -43,15 +43,15 @@ Compuerta de gasto (G7): **legal** en `Telegrafiado / Enfriamiento / Repliegue /
 
 | Sistema | Dirección | Interfaz (qué fluye, quién posee qué) |
 |---|---|---|
-| #1 Combate | Bidireccional (contrato) | Consume `parry_exitoso {calidad_timing, tipo}` ya resuelto + `modificador_combo` verbatim; expone `angeles_absorbidos` (Fórmula 5); declara R9b (coste VE = 1.0 en ambos ledgers); poderes jamás tocan Vida/Postura (contrato R10). Simétrico a F7/R7/F5/R9b de Combate |
+| #1 Combate | Bidireccional (contrato) | Consume `parry_exitoso` ya resuelto como {evento_id ∈ {Golpe, VE}, modificador_combo ∈ {1.0, 0.5} verbatim de Combate R7} (calidad_timing NO consumida por #5; tipo = identidad de evento, no campo); expone `angeles_absorbidos` (Fórmula 5); declara R9b (coste VE = 1.0 en ambos ledgers, banda_R9b owned-#5); poderes jamás tocan Vida/Postura (contrato R10). Simétrico a F7/R7/F5/R9b de Combate |
 | #2 Máquina | Este consume (veredicto) | VE distinguida vía veredicto de Combate; VE no parada = `+0/+0` (corolario R6) |
 | #3 Run | Bidireccional (provisional) | Reset run-scoped al iniciar (triple a 0, n = 0, log vacío). Asunción abierta de Combate: regla de Vida por duelo (este GDD no la toca) |
-| #12 Guardado | Este expone a Guardado | Triple + `n` + `decision_log[]` verbatim cada `post_decision`; opaco (`≥ 0`, JSON-safe). Requiere fila AC en Guardado: rechazo por `poso` decreciente + rango `0–9` (back-link a anotar) |
-| #9 Reliquias | Este restringe (contrato) | Prohibido faucet de gracia en reliquias (sin tick pasivo, sin farm de hub, sin gracia de reliquia). Propuesto **R10e**: supervivencia conjunta (absorbs + reliquias + Amparo) ≤ +1 sobre absorbs; todo poder declara deltas R10 (extiende C26) |
+| #12 Guardado | Este expone a Guardado | Triple + `n` + `decision_absorber[]` verbatim cada `post_decision`; opaco (`≥ 0`, JSON-safe). Transporta opaco a Guardado (≥0 JSON-safe); el rechazo por poso-decreciente vive en #5 en carga (GX-04: poso_cargado<poso_memoria → descarte entero); Guardado AC-R9-02 cubre rango 0–9 + conjuntos (back-link anotado, OQ Guardado L348) |
+| #9 Reliquias | Este restringe (contrato) | Prohibido faucet de gracia en reliquias (sin tick pasivo, sin farm de hub, sin gracia de reliquia). **R10e propuesto (no-normativo hasta derivación)**: supervivencia conjunta (absorbs + reliquias + Amparo) ≤ +1 sobre absorbs; derivación pendiente (costes×caps×cooldown×earn/duelo); todo poder declara deltas R10 (C26-extendido en OQ hasta sistema 9) |
 | #13 HUD | Este expone (solo-lectura) | Niveles + 4 eventos; Decisión muestra solo Gracia en alta luminancia (spec HUD) |
 | #7 Overlay | Este expone a Overlay | Mapa permanente lee `C/P`; esquirlas temporales del evento 9 quedan en Combate (sin doble sangrado) |
 | #6 Clímax | Este emite a Clímax | `saturacion_alcanzada {triple snapshot, absorbidos}`; GASTO off en techo |
-| #15 Menú | Hermanos (presentación) | Enruta victoria → reliquias → decisión → hub. Decisión propiedad de #5 con **single-press + flanco fresco, SIN hold** (el hold protege destrucción de run/SUS; aquí la fricción castigaría P4). Requiere back-link en #15 + claves `MENU_*` |
+| #15 Menú | Hermanos (presentación) | Enruta victoria → reliquias → decisión → hub. Decisión propiedad de #5 con **commit irrevocable single-press + flanco fresco, SIN hold** — carve-out explícito: Firma Tipo-A (Menú R4, hold+listado) no aplica a Decisión (el hold protege destrucción de run/SUS; aquí la fricción castigaría continuidad, P4). Requiere back-link en #15 (tabla + alcance R4) + claves `MENU_*` |
 | #16 Sonoro | Este emite a Sonoro | Capas por gasto/decisión/saturación (propiedad de #16) |
 | #21 Accesibilidad | Este consume (fallo) | Assist que ensancha ventana acelera corrupción: debe escalar `gracia_base` proporcionalmente (fallo #21) |
 
@@ -67,7 +67,7 @@ The `gracia_ganada` formula is defined as:
 | gracia base | `gracia_base` | float | `= 1.0` locked | motas por parry simple, propiedad de #5 |
 | modificador combo | `modificador_combo` | float | `{1.0, 0.5}` locked | 1.0 simple/VE, 0.5 por parry en combo (Combate, R7) |
 
-**Output Range:** discreto bilateral `{0.5, 1.0}` por parry; conjunto cerrado, sin clamp.
+**Output Range:** discreto bilateral `{0.5, 1.0}` por parry; conjunto cerrado, sin clamp en la fórmula; clamp superior a techo en el ledger (no en la fórmula).
 **Example:** simple `1.0 × 1.0 = 1.0`; en combo `1.0 × 0.5 = 0.5`; combo N=3 → `3 × 0.5 = 1.5 > 1.0` ✓ R7.
 
 The `corrupcion_ganada` formula is defined as:
@@ -79,10 +79,10 @@ The `corrupcion_ganada` formula is defined as:
 |---|---|---|---|---|
 | gracia ganada | `gracia_ganada` | float | `{1.0, 0.5}` | entrada desde F-G1 |
 | corrupción ganada | `corrupcion_ganada` | float | `{1.0, 0.5}` | salida al ledger de corrupción |
-| banda VE | `banda` | float | `0 < x ≤ 1.5` bilateral | banda legal por ganancia (R9b) |
+| banda VE | `banda_R9b` | float | `(0, 1.5]` owned-#5 provisional | banda legal por ganancia (Combate R9b solo exige coste ≠ 0; este GDD fija 1.0-por-VE dentro de banda y la ofrece como constraint-handoff a #1) |
 
-**Output Range:** `{0.5, 1.0} ⊂ (0, 1.5]`; satisfecha por igualdad en ambos lados.
-**Example:** simple → ambos ledgers `+1.0`; en combo → ambos `+0.5`; VE-parada → ambos `+1.0` sin Postura ni daño; máx 3 VE/duelo → `3.0`.
+**Output Range:** `{0.5, 1.0} ⊂ (0, 1.5]` (banda_R9b); satisfecha por igualdad en ambos lados.
+**Example:** simple → ambos ledgers `+1.0`; en combo → ambos `+0.5`; VE-parada → ambos `+1.0` sin Postura ni daño; máx efectivo min(3 VE a 1.0, Σ severidad ≤ 3) → ≤3.0 (ver G3/GR-08).
 
 The `gasto` formula is defined as:
 
@@ -95,7 +95,7 @@ si no: gracia' = gracia − coste
 **Variables:**
 | Variable | Símbolo | Tipo | Rango | Descripción |
 |---|---|---|---|---|
-| gracia actual | `gracia` | float | `[0, +∞)` | saldo antes del gasto |
+| gracia actual | `gracia` | float | `[0, 100]` | saldo antes del gasto (cota única; exceso por earn destruido, no banqueado) |
 | corrupción actual | `corrupcion` | float | `[poso, 100]` | antes del gasto (≥ poso por invariante) |
 | suelo | `poso` | float | `{0, 12, 24, 36}` | floor desde F-P1 |
 | coste | `coste` | float | `{8, 12}` | 8 Purga / 12 Amparo |
@@ -103,7 +103,7 @@ si no: gracia' = gracia − coste
 | amparos/duelo | `amparos` | int | `[0, 1]` | máx 1 Amparo/duelo |
 | cooldown | `ticks_desde_gasto` | int | exige `≥ 360` | ticks entre gastos |
 
-**Output Range:** bilateral: `gracia' ≥ 0`; `poso ≤ corrupcion' ≤ corrupcion` (decreciente, parada en floor). Sin deuda, sin parciales; `max()` es el floor anti-flotante.
+**Output Range:** bilateral con clamp superior: `gracia' ∈ [0, 100]`; `poso ≤ corrupcion' ≤ min(corrupcion, 100)` (decreciente, parada en floor). Sin deuda, sin parciales; `max()` es el floor anti-flotante; exceso por earn destruido, no banqueado.
 **Example:** `(gracia 20, corrupcion 50, poso 24)` + Purga(8) → `(12, 37.0)`; segundo gasto → `30.5`; en floor `(24, poso 24)` → `24`, alivio 0.
 
 The `poso` formula is defined as:
@@ -132,7 +132,7 @@ The `saturacion` formula is defined as:
 | Variable | Símbolo | Tipo | Rango | Descripción |
 |---|---|---|---|---|
 | corrupción cruda | `cruda` | float | `[0, +∞)` | pre-clamp |
-| techo | `techo_saturacion` | float | `= 100.0` locked | techo de saturación |
+| techo | `techo_saturacion` | float | `= 100.0` provisional (protocolo OQ; se pinea a LOCKED tras calibración) | techo de saturación |
 | clampeada | `clamped` | float | `[0, 100]` bilateral | valor efectivo |
 | saturado | `saturado` | bool | `{false, true}` | predicado (banda `100 ± 1e-6` ≡ 100) |
 
@@ -161,10 +161,10 @@ Fronteras verificadas: 3-absorb spendless típico `67 + 36 = 103` → satura tar
 
 **Frontera float**
 - **Si `cruda` en `100 ± 1e-6`**: snap a `100.0` antes del predicado (valor limpio para round-trip Guardado).
-- **Aritmética exacta v1.0**: earns (`0.5/1.0`), costes (`8/12`) y `/2` son exactos en binario; el `1e-9` existe solo por round-trip JSON y se vuelve load-bearing con assist-scaling (K1). No "limpiarlo".
+- **Aritmética exacta v1.0**: earns (`0.5/1.0`), costes (`8/12`) y `/2` son exactos en binario; el `1e-9` existe solo por round-trip JSON y se vuelve load-bearing con assist-scaling (K1, ver Glosario). No "limpiarlo".
 
 **Round-trip Guardado**
-- **Si `poso` cargado < `poso` en memoria, NaN en cualquier campo, campo ausente o `len(log) ≠ n ≠ TOMARs`**: descarta la SUS entera (sin defaults que fabriquen monotonicidad; el log es source of truth, `n` su checksum).
+- **Si `poso` cargado < `poso` en memoria, NaN en cualquier campo, campo ausente o `len(decision_absorber) ≠ n ≠ TOMARs`**: descarta la SUS entera (sin defaults que fabriquen monotonicidad; el array es source of truth, `n` su checksum).
 - **Si SUS con `n > 3` en build v1.0**: rechazo forward-incompatible (sin clampar ni recomputar). Inversa (save viejo `n ≤ 3` en build futura): acepta solo si `poso == n × 12`.
 - **Tras cargar**: re-verifica `poso ≤ C ≤ 100`, `0 ≤ g ≤ 100`, `poso ∈ {0,12,24,36}`, `n ∈ [0,3]`; cualquier fallo → descarte. Higiene: snap a `0.5` más cercano si dentro de `1e-9` (único sitio donde el epsilon toca gameplay).
 
@@ -178,11 +178,11 @@ Fronteras verificadas: 3-absorb spendless típico `67 + 36 = 103` → satura tar
 **Amparo vivo al fin de duelo**
 - **Si victoria con Amparo sin consumir**: expira (duel-scoped, jamás serializado). Sin refund: el desperdicio es parte de su precio.
 - **Si derrota con Amparo**: se limpia con el reset de run (triple en derrota: propiedad de #3 — back-link).
-- **Amparo solo niega daño de `Golpe` fallado, por nombre**; daño de VE lo atraviesa sin consumirlo (requiere tag de fuente en Combate — back-link). Múltiples Golpes mismo tick: el 1º consume, el resto aplica.
+- **Amparo solo niega daño de `Golpe` fallado, por identidad-de-evento**; daño de VE lo atraviesa sin consumirlo (VE nunca daña por corolario Regla 6 de Combate → Amparo nunca consume en VE por construcción; test = stub VE-daño-0 + Golpe-daño-25; si sistema 20 añade daño-VE futuro, reabrir tag como ADR con #1). Múltiples Golpes mismo tick: el 1º consume, el resto aplica.
 
 **Saturación en Hub / Decisión**
 - **No hay vía Hub a saturación**: sin faucet en Hub (prohibición G), TOMAR sin lump, gastos solo bajan `C`. Trayectoria Hub monótona no-creciente.
-- **Gasto ilegal con Decisión abierta** (I2): decidir contra ledger estable; gastar en el Hub.
+- **Gasto ilegal con Decisión abierta** (I2, ver Glosario): decidir contra ledger estable; gastar en el Hub.
 
 **Quit / kill — ventana de volatilidad (diseñado, no data loss)**
 - **Si quit/kill con Decisión abierta (sin SUS nueva)**: al recargar, estado = última SUS `post_decision`; los deltas del duelo recién ganado se PIERDEN (fail-closed anti-scum).
@@ -192,30 +192,36 @@ Fronteras verificadas: 3-absorb spendless típico `67 + 36 = 103` → satura tar
 **Assist-mode**
 - **Si preset assist ensancha ventana**: `gracia_base_assist = 1.0 × (ventana_base / ventana_assist)` (proxy lineal, propiedad de #21). Solo vía earn (simple/combo/VE); jamás poso/purga/costes/caps. Base resultante fuera de `[0.5, 2.0]` exige re-derivar R7/R9b.
 
+### Glosario de labels
+- **J3** — floor-lift de TOMAR (`C' = max(C, poso')`, G5): si el suelo adelanta a `C` (gasto hasta el suelo + TOMAR), el commit levanta `C` al nuevo suelo, nunca al revés. Ledgers de Vida (Combate F5) y de gracia independientes; documentar orden con Combate al autorar #1.
+- **I2** — gasto ilegal con Decisión abierta (G7): la decisión commitea contra ledger estable; gastar solo en el Hub (post-decisión). Con Decisión abierta todo gasto se descarta sin buffer.
+- **K1** — assist-scaling por ratio-ventana (`gracia_base_assist = 1.0 × (ventana_base / ventana_assist)`, solo-earn; propiedad de #21). Base resultante fuera de `[0.5, 2.0]` exige re-derivar R7/R9b.
+- **D1–D7** — taxonomía de descarte SUS (cada una → descarte entero sin defaults): D1 poso_cargado < poso_memoria (GX-04); D2 NaN en cualquier campo; D3 campo ausente; D4 `len(decision_absorber) ≠ n ≠ TOMARs` (array source of truth, `n` checksum); D5 `n > 3` en build v1.0 forward-incompatible (GX-05); D6 rangos/conjuntos (`poso ≤ C ≤ 100`, `0 ≤ g ≤ 100`, `poso ∈ {0,12,24,36}`, `n ∈ [0,3]`); D7 versión/save-viejo solo iff `poso == n × 12`.
+
 ## Dependencies
 
 | Sistema | Dirección | Dura / Blanda | Interfaz |
 |---|---|---|---|
-| #1 Combate | Bidireccional | Dura | Consume `parry_exitoso` + modificador verbatim; expone `angeles_absorbidos` (F5); R9b igualdad 1.0; cero poderes de daño (R10). Back-links: tag Golpe-vs-VE (Amparo H3); timing F5 vs floor-lift J3 (ledgers independientes, documentar orden) |
+| #1 Combate | Bidireccional | Dura | Consume `parry_exitoso` ya resuelto como {evento_id ∈ {Golpe, VE}, modificador_combo ∈ {1.0, 0.5} verbatim R7} (calidad_timing NO consumida); expone `angeles_absorbidos` (F5); R9b igualdad 1.0 en banda_R9b owned-#5; cero poderes de daño (R10). Back-links: identidad-de-evento Golpe-vs-VE (Amparo H3, ver Glosario); timing F5 vs floor-lift J3 (ver Glosario J3; ledgers independientes, documentar orden) |
 | #2 Máquina | Consume | Blanda | VE distinguida vía veredicto; VE no parada = 0/0 |
 | #3 Run | Bidireccional | Dura | Reset run-scoped; triple en derrota con Amparo (back-link). Provisional (sin GDD) |
-| #12 Guardado | Expone | Dura | Triple + n + log cada `post_decision`; taxonomía de descarte D1–D7 (requiere fila AC: poso-decreciente + rango 0–9) |
-| #9 Reliquias | Restringe | Dura | Prohibido faucet de gracia; R10e propuesto (supervivencia conjunta ≤ +1; extiende C26) |
+| #12 Guardado | Expone | Dura | Triple + n + decision_absorber cada `post_decision`; taxonomía de descarte D1–D7 (ver Glosario de labels; poso-decreciente chequeado en #5 GX-04, rango en Guardado AC-R9-02) |
+| #9 Reliquias | Restringe | Dura | Prohibido faucet de gracia; R10e propuesto no-normativo (supervivencia conjunta ≤ +1; derivación pendiente; C26-extendido en OQ hasta sistema 9) |
 | #13 HUD | Expone lectura | Blanda | Niveles + 4 eventos; anotación Purga-en-suelo (UX, no regla) |
 | #7 Overlay | Expone | Blanda | Mapa permanente lee C/P |
 | #6 Clímax | Emite | Dura | `saturacion_alcanzada`; aritmética post-saturación (B3: 94-tras-100) |
-| #15 Menú | Hermanos | Dura (práctica) | Enruta; Decisión propiedad #5 (foco neutro + `MENU_DECISION_*`; back-link: actualizar tabla + inventario) |
+| #15 Menú | Hermanos | Dura (práctica) | Enruta; Decisión propiedad #5 (foco neutro + commit single-press sin hold, carve-out a Firma Tipo-A R4 + `MENU_DECISION_*`; back-link: actualizar tabla + alcance R4 + inventario) |
 | #16 Sonoro | Emite | Blanda | Capas por gasto/decisión/saturación (propiedad #16) |
-| #21 Accesibilidad | Consume fallo | Blanda | Medición ratio-ventana tras K1 |
+| #21 Accesibilidad | Consume fallo | Blanda | Medición ratio-ventana tras K1 (ver Glosario) |
 
-**Consistencia bidireccional pendiente:** al autorar #3, #6, #9 (y enmiendas de #1, #12, #15), cada uno declara su mitad (tag de daño, 94-tras-100, R10e, fila AC poso, foco neutro + claves). Verificará `/consistency-check`.
+**Consistencia bidireccional pendiente:** al autorar #3, #6, #9 (y enmiendas de #1, #12, #15), cada uno declara su mitad (identidad-de-evento Golpe-vs-VE cerrada lado-#5, 94-tras-100, R10e no-normativo, fila AC poso alineada a Guardado-opaco, foco neutro + claves). Verificará `/consistency-check`.
 
 ## Tuning Knobs
 
 | Knob | Lanzamiento | Rango seguro | Si muy alto | Si muy bajo | Interacciones |
 |---|---|---|---|---|---|
-| `gracia_base` (default locked, variable viva por #21) | 1.0 | 0.5–2.0 | Earn/duelo duplica → techo en duelo 1–2; >1.5 rompe banda R9b → re-derivar | Purga (8) inasequible → wallet muerta | R7, R9a, costes, techo (`techo ≈ earn_3 + 3×step + margen`) |
-| `techo_saturacion` | 100.0 LOCKED | 70–140 | Arco 3-duelos (ref 103) no satura → #6 inanido, Pilar 1 sin payoff | Saturación duelo-1 → tragedia no ganada | Conjunto con poso/purga/base; < 3×step rompe `poso ≤ techo` (HARD) |
+| `gracia_base` (default locked, variable viva por #21) | 1.0 | 0.5–2.0 | Earn/duelo duplica → techo en duelo 1–2; >1.5 rompe banda_R9b → re-derivar | Purga (8) inasequible → wallet muerta | R7, R9a, costes, techo (`techo ≈ earn_3 + 3×step + margen`) |
+| `techo_saturacion` | 100.0 provisional (protocolo OQ) | 70–140 (tunable solo vía protocolo; tras calibración se pinea y pasa a LOCKED) | Arco 3-duelos (ref 103) no satura → #6 inanido, Pilar 1 sin payoff | Saturación duelo-1 → tragedia no ganada | Conjunto con poso/purga/base; < 3×step rompe `poso ≤ techo` (HARD) |
 | `poso_step` | 12.0 LOCKED plano v1.0 | 6–24 | Floor-lift castiga TOMAR-tras-gasto → colapso a rechazar; 3×step > techo = HARD | Irreversible no se siente; Pilar 4 sin peso | Ratio 12:6 con purga (dial de asimetría); G9 superlineal en visión |
 | `purga_rechazo` (el más balance-sensible) | 6.0 | (0, 12) exclusivo | ≥ step: TOMAR gratis (+Vida+poder) → absorber domina | 0: rechazo narrativo-only → pura inviable → colapso inverso | Colapso de dos lados: ambos extremos matan la elección |
 | `coste_purga` | 8 | 4–16 | Gasto código muerto | Spam fija `C` al suelo; ≤ 0 vacía el Pilar 1 | Base, cap 2, cooldown (trío conjunto); orden `amparo > purga` invariante |
@@ -251,7 +257,7 @@ Pantalla Decisión (propiedad #5, enrutada por #15; modo UI distinto del HUD de 
 | Foco | **Neutro inicial (ninguno)** — excepción justificada a Menú R7: ambos commits son single-press irrevocables y el flanco fresco no para mash fresco; mover primero rompe la cadena. Orden: primer `ui_left/right` discreto agarra; trampa en díada; `ui_accept` (flanco fresco) commitea; `ui_cancel` = no-op + error sordo (sin atrás, sin omitir). Borde 2px `#C7CDD6` + cuneta, 0 glow, sin hover |
 | TOMAR | `+18 Vida máx`, `+12 poso`, `desbloquea: {poder}`, línea ledger `gracia/corrupción/poso`; nombra el coste (el gasto solo alivia hasta el suelo) |
 | DEJAR IR | `purga −6 hasta suelo`, explícito `sin Vida, sin poso, sin poder`; digno, jamás castigo (sin dimming, sin timbre menor) |
-| Confirm | Single-press + flanco fresco + dedupe por tick + consume/inhibe/swallow 200 ms; ambos botones se deshabilitan el mismo frame; commit atómico en memoria → animación → Hub. SIN hold (reservado a destrucción run/SUS) |
+| Confirm | Commit irrevocable single-press + flanco fresco + dedupe por tick + consume/inhibe/swallow 200 ms; ambos botones se deshabilitan el mismo frame; commit atómico en memoria → animación → Hub. SIN hold — carve-out explícito: Firma Tipo-A (Menú R4, hold+listado) no aplica a Decisión (reservada a destrucción run/SUS; aquí castigaría continuidad, P4) |
 | Quit/kill | Sin botón salir; línea `MENU_DECISION_QUIT_LINE` ("Si sales ahora, esta elección queda sin guardar"); kill ≡ cancelar (sin SUS mutada); sleep preserva pantalla+foco, jamás auto-commit |
 | Prohibido mostrar | Vida/Postura/timer/peek numérico/`estado_red`/Continuar/flash `#C75C4A`/hold prompt/lista destructiva R4 |
 | Claves | `MENU_DECISION_TITLE` ("El coro espera tu mano") · `..._TOMAR/DEJAR_LABEL/DESC` (placeholders `{poder} {vida} {poso} {purga}`) · `MENU_DECISION_LEDGER` · `MENU_DECISION_IRREVERSIBLE` · `MENU_DECISION_QUIT_LINE` (todas ≤120 caracteres post-interpolación; fija `/localize`) |
@@ -264,16 +270,16 @@ Pantalla Decisión (propiedad #5, enrutada por #15; modo UI distinto del HUD de 
 Gate levels: Logic/Integration = BLOCKING (`tests/unit/gracia/`, `tests/integration/gracia/`); Visual/Feel/UI = ADVISORY (`production/qa/evidence/` + sign-off); Config = ADVISORY smoke. Tags: `[A]` automatizable, `[M]` manual.
 
 **Reglas G1–G10**
-- [ ] **GR-01 [A]** — GIVEN run tras reset, WHEN snapshot + grep de escrituras, THEN claves exactamente `{gracia_actual, corrupcion_actual, poso_irreversible}` floats ≥0 JSON-safe (sin NaN/Inf/`-0.0`) + `{angeles_absorbidos, decision_log[]}`, cero escrituras fuera del módulo.
+- [ ] **GR-01 [A]** — GIVEN run tras reset, WHEN snapshot + grep de escrituras, THEN claves exactamente `{gracia_actual, corrupcion_actual, poso_irreversible}` floats ≥0 JSON-safe (sin NaN/Inf/`-0.0`) + `{angeles_absorbidos, decision_absorber[]}`, cero escrituras fuera del módulo.
 - [ ] **GR-02 [A]** — GIVEN P=12,C=20,G=10, WHEN secuencia earn+Purga+TOMAR+DEJAR, THEN tras cada paso `poso ≤ corrupcion ≤ 100` y `0 ≤ gracia ≤ 100` (clamp/reject, sin breach observable).
 - [ ] **GR-03 [A-parcial+M]** — GIVEN código + tablas + claves Decisión, WHEN grep `loot|alma|mana`, THEN cero hits (salvo notas históricas); verbos visibles solo tomar/cargar/aliviar/poso/dejar ir (tono: sign-off manual).
 - [ ] **GR-04 [A]** — GIVEN G=5,C=10,P=0, WHEN `parry_exitoso` simple, THEN G=6, C=11, P=0 en commit atómico (jamás G-solo o C-solo).
 - [ ] **GR-05 [A]** — GIVEN cero, WHEN 3 parries combo (mod 0.5), THEN G=C=1.5; con 5 → 2.5 (rico/pobre por construcción).
 - [ ] **GR-06 [A]** — GIVEN fuera de resolución de parry, WHEN whiff, daño recibido, hub idle 600 ticks o pickup reliquia, THEN ΔG=ΔC=0 en los cuatro (faucet único).
 - [ ] **GR-07 [A]** — GIVEN G=2,C=5,P=0, WHEN VE-parada, THEN G=3, C=6, postura_delta=0, repliegue=0 (el peor intercambio).
-- [ ] **GR-08 [A]** — GIVEN 3 VE-paradas consumidas, WHEN 4ª VE mismo duelo, THEN +0/+0 con log (R9a Σ≤3).
-- [ ] **GR-09 [A]** — GIVEN stub 3 duelos, WHEN TOMAR/DEJAR IR/pendiente, THEN log=[1,0], n=1=suma, pendiente ofrece exactamente {TOMAR, DEJAR IR}.
-- [ ] **GR-10 [A]** — GIVEN TOMAR committed + SUS `post_decision` + Hub, WHEN recargar e intentar re-decidir u omitir commit, THEN log=[1], 2º commit RECHAZADO por guardia, cero rutas victoria→Hub sin commit.
+- [ ] **GR-08 [A]** — GIVEN Σ severidad = 3 consumida (stub D13 severidad hasta sistema 20) OR 3 VE a 1.0, WHEN siguiente VE mismo duelo, THEN +0/+0 con log; GIVEN Σ < 3, THEN +1.0/+1.0 (cap efectivo min(3 VE, Σ ≤ 3); ver G3).
+- [ ] **GR-09 [A]** — GIVEN stub 3 duelos, WHEN TOMAR/DEJAR IR/pendiente, THEN decision_absorber=[1,0], n=1=suma, pendiente ofrece exactamente {TOMAR, DEJAR IR}.
+- [ ] **GR-10 [A]** — GIVEN TOMAR committed + SUS `post_decision` + Hub, WHEN recargar e intentar re-decidir u omitir commit, THEN decision_absorber=[1], 2º commit RECHAZADO por guardia, cero rutas victoria→Hub sin commit.
 - [ ] **GR-11 [A]** — GIVEN Decisión abierta sin SUS nueva, WHEN TOMAR, THEN memoria actualiza síncrona pre-animación; espía: 1 write `post_decision`, 0 `pre_eleccion`.
 - [ ] **GR-12 [A]** — GIVEN (G10,C20,P12,n1,vida118), WHEN TOMAR 2º ángel, THEN n=2, P=24, vida=136, poder on, G=10, C=max(20,24)=24 en un commit (nunca 1-de-3), sin lump.
 - [ ] **GR-13 [A]** — GIVEN Latente (0,0,0,n0) en Decisión, WHEN TOMAR, THEN P=12, n=1, C=max(0,12)=12; y GIVEN (G5,C12,P12,n1), WHEN TOMAR, THEN P=24, C=max(12,24)=24 (floor-lift).
@@ -283,23 +289,24 @@ Gate levels: Logic/Integration = BLOCKING (`tests/unit/gracia/`, `tests/integrat
 - [ ] **GR-17 [A]** — GIVEN (G8,C30,P12), WHEN Purga(8), THEN ACEPTA: G'=0.0, C'=21.0, spends=1, cooldown=0.
 - [ ] **GR-18 [A]** — GIVEN (G20,C50,P24), WHEN Purga, THEN (12, 37.0); y GIVEN en suelo (24,24,24), WHEN Purga legal, THEN ACEPTA con C'=24, alivio 0 (desperdicio uniforme, sin caso especial).
 - [ ] **GR-19 [A]** — GIVEN spends=2 (resto legal), WHEN 3º gasto, THEN RECHAZO; y GIVEN amparo_used=1, WHEN 2º Amparo o amparo activo, THEN RECHAZO.
+- [ ] **GR-19b [A]** — GIVEN 2 gastos en duelo N + 1 gasto en Hub, WHEN instanciar duelo N+1, THEN spends(N+1)=1 (el Hub carga al duelo siguiente; cooldown no resetea).
 - [ ] **GR-20 [A]** — GIVEN cooldown 359, WHEN gasto, THEN RECHAZO (entero); GIVEN 360, THEN ACEPTA y resetea (solo en aceptados; cruza duelos; SUS inicia SATISFECHO; 360 = 6×physics_hz).
 - [ ] **GR-21 [A-parcial+M]** — GIVEN legalidad, WHEN gasto en Telegrafiado/Enfriamiento/Repliegue/Hub/post, THEN ACEPTA; WHEN en Parry/Aturdido/Recepción/whiff/VE/Decisión-abierta, THEN RECHAZO sin cola (mash manual confirma); binding gasto ≠ botón parry.
 - [ ] **GR-22 [A]** — GIVEN cualquier gasto aceptado, WHEN deltas vía espía Combate, THEN Δvida=Δpostura=0, sin lifesteal, G baja exactamente el coste, cero timers extra.
 - [ ] **GR-23 [A]** — GIVEN Amparo activo, WHEN próximo Golpe fallado, THEN daño 0 una vez y amparo=0; el siguiente aplica; dos Golpes mismo tick: 1º consume, 2º aplica. Victoria con Amparo sin consumir → expira sin refund, ausente de SUS. Derrota → wipe con run (#3).
-- [ ] **GR-24 [A, blocked-on-backlink]** — GIVEN Amparo activo, WHEN daño VE con tag, THEN aplica pleno sin consumir (requiere tag Golpe-vs-VE en Combate; harness stub marca integración BLOCKED).
+- [ ] **GR-24 [A]** — GIVEN Amparo activo, WHEN daño VE (stub VE-daño-0 por corolario Regla 6), THEN aplica pleno sin consumir (identidad-de-evento, sin tag; harness stub marca integración).
 - [ ] **GR-25 [A]** — GIVEN (C99.5,G20), WHEN +1.0 earn, THEN C=100 clamped, saturado=true, `saturacion_alcanzada` una vez con snapshot; gasto posterior RECHAZADO; más earn mantiene 100 sin re-emitir.
 - [ ] **GR-26 [A]** — GIVEN Saturada (100,24,1), WHEN TOMAR, THEN n=2, P=min(36,100), C=100, saturado sigue; WHEN DEJAR IR, THEN C=94 pero handoff NO se retracta (#6 posee continuación); y sin earn, TOMAR/DEJAR jamás saturan (P+12≤36).
 - [ ] **GR-27 [A]** — GIVEN (C99.5,G20,spends0,cooldown ok) + earn/gasto mismo tick, WHEN resuelve en orden earn→clamp+emit→gasto, THEN gasto RECHAZADO (spends/cooldown intactos); dos gastos mismo tick → como máximo uno ACEPTA.
 - [ ] **GR-28 [A]** — GIVEN permutaciones de orden con n=2, WHEN run completa, THEN P=24, vida=136 (+reliquias aparte); magnitudes idénticas, solo identidades permutan.
 - [ ] **GR-29 [A]** — GIVEN build v1.0 con n=3 + 4º TOMAR o SUS n=4, WHEN commit/carga, THEN BLOQUEO/RECHAZO total (sin clampar; exige re-derivar G9).
-- [ ] **GR-30 [A]** — GIVEN commit Decisión + espía FS, WHEN earn/gasto/hub/`pre_eleccion` vs `post_decision`, THEN cero IO de #5; payload `post_decision` = {triple exacto, n, log verbatim}.
+- [ ] **GR-30 [A]** — GIVEN commit Decisión + espía FS, WHEN earn/gasto/hub/`pre_eleccion` vs `post_decision`, THEN cero IO de #5; payload `post_decision` = {triple exacto, n, decision_absorber verbatim}.
 - [ ] **GR-31 [A]** — GIVEN observadores HUD/Overlay/Clímax, WHEN eventos disparan, THEN niveles = ledgers ±1e-9; setter desde observador falla; ledgers intactos tras su tick.
 - [ ] **GR-32 [A]** — GIVEN `-0.0` tras aritmética, WHEN serializa, THEN `0.0` bit-exacto; múltiplos 0.5 ±5e-10 round-trip en 1e-9; `100±1e-6` satura, `99.9` no.
 
 **Fórmulas (≥1 por F)**
 - [ ] **GF-G1-01/02/03 [A]** — simple → 1.0 exacto; combo → 0.5/parry (N=3 → 1.5, conjunto cerrado); mod ∈ {0,−1,0.7,2,NaN} → descarta evento, ledgers intactos, log+contador, escala.
-- [ ] **GF-C1-01/02 [A]** — igualdad exacta en (0,1.5]; VE → 1.0/1.0; 3 VE/duelo = 3.0 (3% techo).
+- [ ] **GF-C1-01/02 [A]** — igualdad exacta en (0,1.5] (banda_R9b); VE → 1.0/1.0; 3 VE a 1.0/duelo = 3.0 (3% techo; cap efectivo min(3 VE, Σ ≤ 3)).
 - [ ] **GF-S1-01/02 [A]** — (20,50,P24)+Purga → (12,37.0); 2ª → (4,30.5); suelo → 24 alivio 0; coste>gracia RECHAZA; gracia==coste ACEPTA a 0.0.
 - [ ] **GF-P1-01/02 [A]** — 3 TOMAR → poso 0→12→24→36, n 0→3, sin lump; rechazar (50,P24) → 44; (26,P24) → 24.
 - [ ] **GF-T1-01/02 [A]** — 103 → 100+true con exceso destruido; 67 → 67+false; `100±1e-6` satura limpio; 99.9 no.
@@ -308,14 +315,14 @@ Gate levels: Logic/Integration = BLOCKING (`tests/unit/gracia/`, `tests/integrat
 - [ ] **GX-01 [A]** — Combate emite `parry_exitoso`: mod verbatim, timing preservado, VE distinguida; VE-no-parada +0/+0.
 - [ ] **GX-02 [A]** — n=1→2 (bonus 0→10): vida 118→136 (128→146 con bonus; passthrough, jamás calculado en #5).
 - [ ] **GX-03 [A]** — Round-trip {12.5,37.0,24,n2,[1,0]}: igualdad ±1e-9, snap 0.5, re-verifica rangos/conjuntos o descarta.
-- [ ] **GX-04 [A]** — Variantes (poso<memoria, NaN, ausente, log≠n): cada una descarta SUS entera sin defaults.
+- [ ] **GX-04 [A]** — Variantes (poso<memoria, NaN, ausente, decision_absorber≠n): cada una descarta SUS entera sin defaults.
 - [ ] **GX-05 [A]** — SUS n=4 en v1.0: RECHAZO forward-incompatible; save viejo n≤3 en futuro: acepta iff poso==n×12.
 - [ ] **GX-06 [A-parcial+M]** — victoria→reliquias→decisión→Hub exacto (FSM + walkthrough); trayectoria Hub monótona no-creciente.
 - [ ] **GX-07 [A-parcial+M]** — Decisión: foco neutro inicial, primer left/right agarra con trampa, accept flanco-fresco, cancel no-op+error, sin hold, disable mismo frame + swallow 200 ms, doble commit tumba el 2º.
 - [ ] **GX-08 [A-parcial+M]** — HUD niveles+4 eventos, Decisión solo-Gracia, setter falla, Purga-en-suelo ACEPTA, cero números flotantes (screenshot).
 - [ ] **GX-09 [A]** — `saturacion_alcanzada` = {snapshot, absorbidos}, una vez por entrada, gasto off, TOMAR/DEJAR posterior no retracta.
 - [ ] **GX-10 [A]** — Auditoría no-faucet: reliquia/hub-idle/passive sin `parry_exitoso` → Δ=0; call-sites == handler de parry.
-- [ ] **GX-11 [A, blocked]** — Amparo-vs-VE (duplicado cross de GR-24; BLOCKED hasta tag en #1).
+- [ ] **GX-11 [A]** — Amparo-vs-VE (duplicado cross de GR-24; unblocked-vía-identity, sin tag).
 - [ ] **GX-12 [A]** — Quit/kill en Decisión abierta → estado = última SUS (deltas perdidos, anti-scum); Hub volátil neto-cero; Abandonar = wipe total.
 - [ ] **GX-13a/b [M con protocolo]** — Gamesim 20 runs/mezcla (seeds archivadas): LOW 0.45 → win_rate(absorb) > win_rate(pura) con Δ≥1 duelo; HIGH 0.90 → saturation_rate(absorb) > saturation_rate(pura) con Δ≥1 duelo o ≥25pp. Evidencia en `production/qa/evidence/dilemma-{low,high}.md`. Prueba no-dominancia bilateral.
 - [ ] **GX-14 [A]** — Ordenamientos (no literal): 103 > techo > 67 > 30 > 3.0 > 0; floor-stop sin loop; al retunear techo se re-deriva, 100 jamás sagrado.
@@ -331,6 +338,6 @@ Gate levels: Logic/Integration = BLOCKING (`tests/unit/gracia/`, `tests/integrat
 | Función decreciente-9 + R5_9 + schedules poso conjuntos | Este GDD + #6 + #9 | Antes del 4º ángel | G9 congela lineal v1.0 |
 | ¿Lucifer lee `poso` en vivo? (coste 5-shaders Deck) | #11 + performance | Full Vision | Fuera de MVP |
 | Medición ratio-ventana tras K1 (assist) | #21 | Al autorar #21 | Base fuera de [0.5,2.0] → re-derivar R7/R9b |
-| R10e (supervivencia conjunta ≤ +1) ratificado por #9 | #9 + qa | Al autorar #9 | Propuesto aquí; C26 extendido |
+| R10e (supervivencia conjunta ≤ +1) ratificado por #9 | #9 + qa | Al autorar #9 | No-normativo hasta derivación (costes×caps×cooldown×earn); si no cierra, Amparo consume presupuesto R10a |
 | Back-links pendientes (lista en Dependencies) | Cada autoría | Al autorar cada GDD | Verificará `/consistency-check` |
 | Ventana commit-animación→Hub-flush (decisión perdida si kill intermedio) | Este GDD + Guardado | Playtest | Honesto hoy; sin SUS `post_decision` sin aprobación conjunta |

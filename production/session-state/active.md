@@ -239,3 +239,11 @@ Hay GDDs (parry-absorcion, maquina-estados-jefe, concepto) pero sin ADRs ni
 - GDD revision flags: maquina-estados-jefe.md (borde 113→114 en 4ª pasada)
 - Top ADR gaps: tiempo-autoritativo-y-hitstop; contrato-eventos-combate-jefe; estructura-fsm-jefe
 - Report: docs/architecture/architecture-review-2026-09-03.md
+
+## Session Extract — avance automático 2026-09-05 (A+C+D+aceptación)
+- ADR-001 + ADR-002: Proposed → Accepted (avance automático).
+- Gracia #5: P1–P7 aplicados lado-Gracia, Rev-1 lean → APPROVED (residuos R1–R6 + OQs). C8/C9/C10 cerrados lado-Gracia (grep-first). Registry v13.
+- IA Jefes #20: `design/gdd/ia-combate-jefes.md` Draft (suelo margen 8–28 prov 12, J≥14 FAIL_LOAD, cura H≤daño, R9a consumida). OQ1–OQ6 abiertas con ★.
+- UX: `design/ux/decision-gracia.md` Draft + gaps `hud.md` para HUD #13 (vía D).
+- Sonoro #16: outline + D-A–D-F con recomendadas ★ pendientes de adjudicación explícita — siguiente `/design-system #16`.
+- Tests 62/35AC: pendientes (sin binario godot en este entorno).

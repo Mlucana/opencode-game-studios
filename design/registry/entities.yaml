@@ -39,7 +39,7 @@
 #   Each entry: name, status, source, referenced_by[], attributes{}, added, revised
 #   (events use emitter/consumers/payload instead of source/referenced_by)
 
-version: 12                    # v12 (2026-09-04): GDD Gracia (5/21): +corrupcion_ganada, +gasto, +poso, +saturacion; +gracia_base, +techo_saturacion, +poso_step, +purga_rechazo, +coste_purga/amparo, +cooldown_gasto, +cap_gastos_duelo; gracia_ganada/vida_maxima +ref gracia. | v11 (2026-09-04): /consistency-check: append_fragmentos +guarda de catálogo (Rev 2 Guardado); trauma_castigo 0.85→0.70 + ×escala_a11y (Rev 2 Feedback); consumidores parry_resuelto/combo_abortado feedback-de-impacto.md→feedback-impacto.md (existe desde 2026-09-03); sistema-de-gracia.md→gracia-tres-capas.md (esqueleto 2026-09-04, consumo pendiente); +evento run_viva_visible (provisional).
+version: 13                    # v13 (2026-09-05): Rev-1 Gracia (P1-P7, APPROVED lean) + GDD IA Jefes (20/21) Draft: +banda_R9b, +decision_absorber, +margen_reaccion_min (8-28 prov 12), +duraciones jefe, +S_base/J, +H/caps cura, +vida_max_angel, +4 formulas; severidad_accion_especial +ref #20; coste_amparo tag->identidad; parry_resuelto consumo #5 confirmado. | v12 (2026-09-04): GDD Gracia (5/21): +corrupcion_ganada, +gasto, +poso, +saturacion; +gracia_base, +techo_saturacion, +poso_step, +purga_rechazo, +coste_purga/amparo, +cooldown_gasto, +cap_gastos_duelo; gracia_ganada/vida_maxima +ref gracia. | v11 (2026-09-04): /consistency-check: append_fragmentos +guarda de catálogo (Rev 2 Guardado); trauma_castigo 0.85→0.70 + ×escala_a11y (Rev 2 Feedback); consumidores parry_resuelto/combo_abortado feedback-de-impacto.md→feedback-impacto.md (existe desde 2026-09-03); sistema-de-gracia.md→gracia-tres-capas.md (esqueleto 2026-09-04, consumo pendiente); +evento run_viva_visible (provisional).
                               # v10 (2026-09-03): GDD Feedback de Impacto (4/21): +freeze_total, +trauma_shake, +onset_budget, +trauma_normal/justo/castigo, +shake_max, +trauma_decay; hitstop_parry, bono_hitstop_parry_justo, recuperacion_whiff, physics_ticks_per_second +referenced_by feedback-impacto.
                               # v9 (2026-09-03): GDD Guardado de Progreso (12/21): +upsert_llaves, +append_fragmentos; vida_maxima +referenced_by guardado-de-progreso.
                               # v8 (2026-08-04): changeset 2, ítem 3 — CHANGESET COMPLETO.
@@ -90,7 +90,7 @@ version: 12                    # v12 (2026-09-04): GDD Gracia (5/21): +corrupcio
                               # v3 (2026-08-04): convención de borde de ventana_castigo
                               # REVERTIDA a conteo inclusivo (114, no 113); `restantes`
                               # registrado como fórmula; evento "duelo perdido" añadido
-last_updated: 2026-09-04
+last_updated: 2026-09-05
 
 # ─── ENTITIES ────────────────────────────────────────────────────────────────
 # Named game-world objects: enemies, NPCs, characters, factions, bosses.
@@ -616,6 +616,65 @@ formulas:
 #     revised: ""
 
 
+  - name: piso_regla9
+    status: active
+    source: design/gdd/ia-combate-jefes.md
+    referenced_by:
+      - design/gdd/ia-combate-jefes.md
+      - design/gdd/maquina-estados-jefe.md   # Core Rule 9: forma del #2, numero del #20
+    variables:
+      - duracion_enfriamiento
+      - duracion_telegrafiado
+      - margen_reaccion_min
+    output_range: [null, 40]
+    expression: "duracion_enfriamiento + duracion_telegrafiado >= 12 + margen_reaccion_min"
+    notes: "Piso de justicia siempre en techo 12. Piso maximo 40 < 42 (colchon post-Castigo): el camino simple nunca pide mas aire."
+    added: 2026-09-05
+    revised: ""
+
+  - name: separacion_antimash
+    status: active
+    source: design/gdd/ia-combate-jefes.md
+    referenced_by:
+      - design/gdd/ia-combate-jefes.md
+    variables:
+      - separacion_base_S
+      - jitter_J
+    output_range: [null, null]
+    expression: "S_k ~ Uniforme(S_base-J/2, S_base+J/2); J >= 14 (FAIL_LOAD si menor)"
+    notes: "Calibrada contra dato medido (masher 100% con varianza 2/4/6/9, 90.9% a 12). Solo muerde sobre parry_window 13: dentro del combo no hay Repliegue y el acierto recupera en 2-3 ticks."
+    added: 2026-09-05
+    revised: ""
+
+  - name: tasa_curacion
+    status: active
+    source: design/gdd/ia-combate-jefes.md
+    referenced_by:
+      - design/gdd/ia-combate-jefes.md
+    variables:
+      - curacion_por_accion_H
+      - dano_golpe_castigo
+    output_range: [null, null]
+    expression: "H <= dano_golpe_castigo por completacion AND suma(H) <= (ciclos-1) x dano_golpe_castigo por duelo"
+    notes: "Mitad cuantitativa del riesgo curacion (duelo inganable sin violar formulas). Curar mas deprisa de lo que el jugador dana = FAIL_LOAD."
+    added: 2026-09-05
+    revised: ""
+
+  - name: severidad_equivalente
+    status: active
+    source: design/gdd/ia-combate-jefes.md
+    referenced_by:
+      - design/gdd/ia-combate-jefes.md
+      - design/gdd/combate-parry-absorcion.md   # R9a: referencia, no duplica
+    variables:
+      - severidad_extra
+    output_range: [1.0, 2.0]
+    expression: "s = severidad_extra x (1 - 0.72)"
+    notes: "Consume R9a sin redefinirla (banda 1.0-2.0 + SUMA <= 3). Ejemplo canonico Cosmos 40->1.12 OK / 80->2.24 FAIL; techo robusto H<=66."
+    added: 2026-09-05
+    revised: ""
+
+
 # ─── CONSTANTS ───────────────────────────────────────────────────────────────
 # Named numerical values referenced across multiple systems.
 # Register a constant when it is defined in one GDD but another GDD must
@@ -803,6 +862,7 @@ constants:
     source: design/gdd/combate-parry-absorcion.md
     referenced_by:
       - design/gdd/combate-parry-absorcion.md
+      - design/gdd/ia-combate-jefes.md   # añadido 2026-09-05: declara s por habilidad
     value: null                 # la declara el sistema 20 por habilidad; este GDD solo
                                 # acota la banda legal (constraint-handoff)
     unit: múltiplos de dano_golpe_enemigo
@@ -1427,9 +1487,9 @@ constants:
       - design/gdd/gracia-tres-capas.md
     value: 12
     unit: puntos de gracia
-    notes: "Niega el dano del proximo Golpe fallado una vez, max 1/duelo + 1 activo. Rango 9-20. Duel-scoped (expira sin refund). Solo vs Golpe (requiere tag en #1)."
+    notes: "Niega el dano del proximo Golpe fallado una vez, max 1/duelo + 1 activo. Rango 9-20. Duel-scoped (expira sin refund). Solo vs Golpe por identidad-de-evento (VE nunca dana por corolario Regla 6; sin tag — Rev-1 Gracia 2026-09-05)."
     added: 2026-09-04
-    revised: ""
+    revised: "2026-09-05"
 
   - name: cooldown_gasto
     status: active
@@ -1453,10 +1513,148 @@ constants:
     added: 2026-09-04
     revised: ""
 
-# CANDIDATO NO REGISTRADO (2026-08-03): `margen_reaccion_min`, término de la Core Rule 9
-# del sistema 2. No se registra todavía porque no tiene ni valor ni GDD fuente — es
-# propiedad de IA de Combate de Jefes (sistema 20), que aún no existe. Registrar al
-# autorar ese GDD.
+    notes: "LOCKED. spends 0 = kill-switch playtest (jamas ship). amparos >= 2 rompe R10e. Costes x caps x cooldown = alivio efectivo por duelo (trio conjunto). Reset-point (Rev-1 2026-09-05): spends/amparos resetean al instanciar duelo; Hub carga al duelo siguiente; cooldown no resetea."
+    added: 2026-09-04
+    revised: "2026-09-05"
+
+  - name: banda_R9b
+    status: active
+    source: design/gdd/gracia-tres-capas.md
+    referenced_by:
+      - design/gdd/gracia-tres-capas.md
+      - design/gdd/combate-parry-absorcion.md   # constraint-handoff: R9b solo exige coste != 0
+    value: 1.0
+    unit: corrupcion por VE-parada (banda owned-#5 (0,1.5] provisional)
+    notes: "Coste VE en ambos ledgers. Combate R9b solo exige no-nulo; la banda la posee #5 (Rev-1 P4). Si #1 la rechaza, re-derivar GR-08/GX-15."
+    added: 2026-09-05
+    revised: ""
+
+  - name: decision_absorber
+    status: active
+    source: design/gdd/gracia-tres-capas.md
+    referenced_by:
+      - design/gdd/gracia-tres-capas.md
+      - design/gdd/guardado-de-progreso.md   # persiste/valida verbatim cada post_decision
+    value: null                 # array 0/1 por angel; n = suma (checksum, no fuente)
+    unit: decisiones TOMAR (1) / DEJAR IR (0) por run
+    notes: "Source of truth de elecciones (Rev-1 P1/C8: decision_log[] eliminado). Guardado lo transporta opaco; D4: len != n -> descarte entero."
+    added: 2026-09-05
+    revised: ""
+
+  - name: margen_reaccion_min
+    status: active
+    source: design/gdd/ia-combate-jefes.md
+    referenced_by:
+      - design/gdd/ia-combate-jefes.md
+      - design/gdd/maquina-estados-jefe.md   # Core Rule 9: piso enfriamiento+telegrafiado
+    value: 12
+    unit: ticks de simulacion fija a 60Hz
+    notes: "Suelo fijado por #20 (faltaba; cota sup 28 heredada: 42-14 colchon post-Castigo). Rango bilateral 8-28, PROVISIONAL 12 (OQ2: playtest Deck). Piso maximo 40 < 42."
+    added: 2026-09-05
+    revised: ""
+
+  - name: duracion_telegrafiado
+    status: active
+    source: design/gdd/ia-combate-jefes.md
+    referenced_by:
+      - design/gdd/ia-combate-jefes.md
+      - design/gdd/maquina-estados-jefe.md
+    value: null                 # por arquetipo; alimenta el piso Regla 9
+    unit: ticks de simulacion fija a 60Hz
+    notes: "Rango 30-60. Tutorial: valores altos + N<=3 + cero especiales."
+    added: 2026-09-05
+    revised: ""
+
+  - name: duracion_golpe
+    status: active
+    source: design/gdd/ia-combate-jefes.md
+    referenced_by:
+      - design/gdd/ia-combate-jefes.md
+      - design/gdd/maquina-estados-jefe.md
+    value: null
+    unit: ticks de simulacion fija a 60Hz
+    notes: "Rango 10-20 por arquetipo."
+    added: 2026-09-05
+    revised: ""
+
+  - name: duracion_enfriamiento
+    status: active
+    source: design/gdd/ia-combate-jefes.md
+    referenced_by:
+      - design/gdd/ia-combate-jefes.md
+      - design/gdd/maquina-estados-jefe.md
+    value: null
+    unit: ticks de simulacion fija a 60Hz
+    notes: "Rango 20-50 por arquetipo. Con telegrafiado alimenta piso_regla9."
+    added: 2026-09-05
+    revised: ""
+
+  - name: separacion_base_S
+    status: active
+    source: design/gdd/ia-combate-jefes.md
+    referenced_by:
+      - design/gdd/ia-combate-jefes.md
+    value: 24
+    unit: ticks entre golpes intra-combo
+    notes: "PROVISIONAL 24 (rango 18-30, OQ3). Tutorial: separacion >= 13+9+margen."
+    added: 2026-09-05
+    revised: ""
+
+  - name: jitter_J
+    status: active
+    source: design/gdd/ia-combate-jefes.md
+    referenced_by:
+      - design/gdd/ia-combate-jefes.md
+    value: null                 # S_k ~ Uniforme(S_base-J/2, S_base+J/2)
+    unit: ticks de varianza intra-combo
+    notes: "Anti-mash: J >= 14 FAIL_LOAD (masher 100% bajo varianza <12; solo muerde sobre parry_window 13). Techo J <= 24 por legibilidad. Invariante de dos lados."
+    added: 2026-09-05
+    revised: ""
+
+  - name: curacion_por_accion_H
+    status: active
+    source: design/gdd/ia-combate-jefes.md
+    referenced_by:
+      - design/gdd/ia-combate-jefes.md
+    value: null
+    unit: puntos de Vida de jefe por especial de curacion
+    notes: "Mitad cuantitativa del riesgo curacion: H <= dano_golpe_castigo por completacion Y sumaH <= (ciclos-1) x dano por duelo. Curacion con interrumpible=false = FAIL_LOAD."
+    added: 2026-09-05
+    revised: ""
+
+  - name: intervalo_min_entre_especiales
+    status: active
+    source: design/gdd/ia-combate-jefes.md
+    referenced_by:
+      - design/gdd/ia-combate-jefes.md
+    value: null
+    unit: duelos/ciclos entre especiales
+    notes: "Rango 1-4 con max_especiales_por_duelo 1-3 (OQ4: recomendado max 2)."
+    added: 2026-09-05
+    revised: ""
+
+  - name: max_especiales_por_duelo
+    status: active
+    source: design/gdd/ia-combate-jefes.md
+    referenced_by:
+      - design/gdd/ia-combate-jefes.md
+    value: 2
+    unit: especiales por duelo
+    notes: "PROVISIONAL 2 (rango 1-3, OQ4). Con 1 la Ventana deviene anecdota; alta presiona R9a-SUMA."
+    added: 2026-09-05
+    revised: ""
+
+  - name: vida_max_angel
+    status: active
+    source: design/gdd/ia-combate-jefes.md
+    referenced_by:
+      - design/gdd/ia-combate-jefes.md
+      - design/gdd/combate-parry-absorcion.md   # F6 dano_golpe_castigo la cita sin dueno
+    value: null
+    unit: puntos de Vida de jefe
+    notes: "Registrada 2026-09-05: hasta hoy solo citada en notas de dano_golpe_castigo. La fija #20 por arquetipo."
+    added: 2026-09-05
+    revised: ""
 
 # Example:
 #
@@ -1560,7 +1758,7 @@ events:
     emitter: design/gdd/combate-parry-absorcion.md
     consumers:
       - design/gdd/combate-parry-absorcion.md
-      - design/gdd/gracia-tres-capas.md            # existe como esqueleto desde 2026-09-04 (era sistema-de-gracia.md) — sistema 5, consumo pendiente al autorar secciones
+      - design/gdd/gracia-tres-capas.md            # consume desde G2 (earn) — Rev-1 2026-09-05
       - design/gdd/feedback-impacto.md           # existe desde 2026-09-03 (Rev 2 aceptada 2026-09-04); era feedback-de-impacto.md, nombre corregido 2026-09-04
       - design/gdd/feedback-sonoro-parry.md      # (no existe aún) — sistema 16
     payload: "resultado (éxito/fallo) + valor de Postura resultante"
