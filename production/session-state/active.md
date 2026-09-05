@@ -247,3 +247,9 @@ Hay GDDs (parry-absorcion, maquina-estados-jefe, concepto) pero sin ADRs ni
 - UX: `design/ux/decision-gracia.md` Draft + gaps `hud.md` para HUD #13 (vía D).
 - Sonoro #16: outline + D-A–D-F con recomendadas ★ pendientes de adjudicación explícita — siguiente `/design-system #16`.
 - Tests 62/35AC: pendientes (sin binario godot en este entorno).
+
+## Session Extract — avance automático 2026-09-05 (Sonoro #16 Draft)
+- `design/gdd/feedback-sonoro-parry.md` Draft (198L, 8 secciones): D-A–D-F adoptadas provisionales; pineado #1/#4 como RESTRICCIÓN HEREDADA.
+- Registry: +6 constants +4 formulas audio (PROVISIONAL). Consumidores `feedback-sonoro-parry.md` en `parry_resuelto`/`combo_abortado` pasan a confirmados AL APROBAR, no hoy.
+- Riesgo nuevo: bus `Hitstop` con dos dueños (#4 provisional hasta #16, propiedad final aquí) — requiere ADR con technical-director.
+- MVP 6/7 diseñados (falta #13 HUD). 8 docs iniciados.

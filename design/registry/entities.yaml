@@ -39,7 +39,7 @@
 #   Each entry: name, status, source, referenced_by[], attributes{}, added, revised
 #   (events use emitter/consumers/payload instead of source/referenced_by)
 
-version: 13                    # v13 (2026-09-05): Rev-1 Gracia (P1-P7, APPROVED lean) + GDD IA Jefes (20/21) Draft: +banda_R9b, +decision_absorber, +margen_reaccion_min (8-28 prov 12), +duraciones jefe, +S_base/J, +H/caps cura, +vida_max_angel, +4 formulas; severidad_accion_especial +ref #20; coste_amparo tag->identidad; parry_resuelto consumo #5 confirmado. | v12 (2026-09-04): GDD Gracia (5/21): +corrupcion_ganada, +gasto, +poso, +saturacion; +gracia_base, +techo_saturacion, +poso_step, +purga_rechazo, +coste_purga/amparo, +cooldown_gasto, +cap_gastos_duelo; gracia_ganada/vida_maxima +ref gracia. | v11 (2026-09-04): /consistency-check: append_fragmentos +guarda de catálogo (Rev 2 Guardado); trauma_castigo 0.85→0.70 + ×escala_a11y (Rev 2 Feedback); consumidores parry_resuelto/combo_abortado feedback-de-impacto.md→feedback-impacto.md (existe desde 2026-09-03); sistema-de-gracia.md→gracia-tres-capas.md (esqueleto 2026-09-04, consumo pendiente); +evento run_viva_visible (provisional).
+version: 14                    # v14 (2026-09-05): GDD Sonoro (16/21) Draft: +6 constants +4 formulas audio (PROVISIONAL). | v13 (2026-09-05): Rev-1 Gracia (P1-P7, APPROVED lean) + GDD IA Jefes (20/21) Draft: +banda_R9b, +decision_absorber, +margen_reaccion_min (8-28 prov 12), +duraciones jefe, +S_base/J, +H/caps cura, +vida_max_angel, +4 formulas; severidad_accion_especial +ref #20; coste_amparo tag->identidad; parry_resuelto consumo #5 confirmado. | v12 (2026-09-04): GDD Gracia (5/21): +corrupcion_ganada, +gasto, +poso, +saturacion; +gracia_base, +techo_saturacion, +poso_step, +purga_rechazo, +coste_purga/amparo, +cooldown_gasto, +cap_gastos_duelo; gracia_ganada/vida_maxima +ref gracia. | v11 (2026-09-04): /consistency-check: append_fragmentos +guarda de catálogo (Rev 2 Guardado); trauma_castigo 0.85→0.70 + ×escala_a11y (Rev 2 Feedback); consumidores parry_resuelto/combo_abortado feedback-de-impacto.md→feedback-impacto.md (existe desde 2026-09-03); sistema-de-gracia.md→gracia-tres-capas.md (esqueleto 2026-09-04, consumo pendiente); +evento run_viva_visible (provisional).
                               # v10 (2026-09-03): GDD Feedback de Impacto (4/21): +freeze_total, +trauma_shake, +onset_budget, +trauma_normal/justo/castigo, +shake_max, +trauma_decay; hitstop_parry, bono_hitstop_parry_justo, recuperacion_whiff, physics_ticks_per_second +referenced_by feedback-impacto.
                               # v9 (2026-09-03): GDD Guardado de Progreso (12/21): +upsert_llaves, +append_fragmentos; vida_maxima +referenced_by guardado-de-progreso.
                               # v8 (2026-08-04): changeset 2, ítem 3 — CHANGESET COMPLETO.
@@ -671,6 +671,61 @@ formulas:
     output_range: [1.0, 2.0]
     expression: "s = severidad_extra x (1 - 0.72)"
     notes: "Consume R9a sin redefinirla (banda 1.0-2.0 + SUMA <= 3). Ejemplo canonico Cosmos 40->1.12 OK / 80->2.24 FAIL; techo robusto H<=66."
+    added: 2026-09-05
+    revised: ""
+
+
+  - name: duck_sustain
+    status: active
+    source: design/gdd/feedback-sonoro-parry.md
+    referenced_by:
+      - design/gdd/feedback-sonoro-parry.md
+    variables:
+      - duck_profundidad_P
+      - duck_release_R
+    output_range: [null, null]
+    expression: "duck sustains -6dB bajo transients rank-1, ataque <= 1 tick; release 6 ticks"
+    notes: "PROVISIONAL (D-A). Valores finales tras escucha ciega."
+    added: 2026-09-05
+    revised: ""
+
+  - name: techo_mezcla
+    status: active
+    source: design/gdd/feedback-sonoro-parry.md
+    referenced_by:
+      - design/gdd/feedback-sonoro-parry.md
+    variables:
+      - techo_mezcla_T
+    output_range: [null, -3.0]
+    expression: "suma de colas <= -3.0 dBFS"
+    notes: "PROVISIONAL."
+    added: 2026-09-05
+    revised: ""
+
+  - name: presupuesto_audio
+    status: active
+    source: design/gdd/feedback-sonoro-parry.md
+    referenced_by:
+      - design/gdd/feedback-sonoro-parry.md
+    variables:
+      - voces_max
+      - tails_max
+      - DSP_bat_max
+    output_range: [null, null]
+    expression: "voces <= 12 AND tails <= 4 AND DSP_bat <= 20%"
+    notes: "Interinos D-E: solo se estrechan, nunca se ensanchan sin medicion. Deadline pre-Vertical Slice."
+    added: 2026-09-05
+    revised: ""
+
+  - name: escalera_aborto
+    status: active
+    source: design/gdd/feedback-sonoro-parry.md
+    referenced_by:
+      - design/gdd/feedback-sonoro-parry.md
+    variables: []
+    output_range: [null, null]
+    expression: "temprano +0st seco / medio -2st+20%decay / tardio -5st+LP+40%decay (no-normativo)"
+    notes: "Ejemplo i/N late=heavier (D-F) como punto de partida; valores finales tras SN-08 ciego."
     added: 2026-09-05
     revised: ""
 
@@ -1653,6 +1708,72 @@ constants:
     value: null
     unit: puntos de Vida de jefe
     notes: "Registrada 2026-09-05: hasta hoy solo citada en notas de dano_golpe_castigo. La fija #20 por arquetipo."
+    added: 2026-09-05
+    revised: ""
+
+  - name: duck_profundidad_P
+    status: active
+    source: design/gdd/feedback-sonoro-parry.md
+    referenced_by:
+      - design/gdd/feedback-sonoro-parry.md
+    value: 6.0
+    unit: dB de ducking sobre sustains
+    notes: "PROVISIONAL (D-A): duck de sustains bajo transients rank-1, ataque <= 1 tick. Solo se estrecha tras medicion Deck."
+    added: 2026-09-05
+    revised: ""
+
+  - name: duck_release_R
+    status: active
+    source: design/gdd/feedback-sonoro-parry.md
+    referenced_by:
+      - design/gdd/feedback-sonoro-parry.md
+    value: 6
+    unit: ticks de release del duck
+    notes: "PROVISIONAL (D-A). Solo se estrecha tras escucha ciega."
+    added: 2026-09-05
+    revised: ""
+
+  - name: techo_mezcla_T
+    status: active
+    source: design/gdd/feedback-sonoro-parry.md
+    referenced_by:
+      - design/gdd/feedback-sonoro-parry.md
+    value: -3.0
+    unit: dBFS de suma maxima
+    notes: "PROVISIONAL: la suma de colas no supera -3.0 dBFS."
+    added: 2026-09-05
+    revised: ""
+
+  - name: voces_max
+    status: active
+    source: design/gdd/feedback-sonoro-parry.md
+    referenced_by:
+      - design/gdd/feedback-sonoro-parry.md
+    value: 12
+    unit: voces simultaneas
+    notes: "PROVISIONAL interino (D-E). Medir Deck bateria peor caso pre-Vertical Slice (cierra P5-DEF)."
+    added: 2026-09-05
+    revised: ""
+
+  - name: tails_max
+    status: active
+    source: design/gdd/feedback-sonoro-parry.md
+    referenced_by:
+      - design/gdd/feedback-sonoro-parry.md
+    value: 4
+    unit: colas simultaneas
+    notes: "PROVISIONAL interino (D-E). Solo se estrecha."
+    added: 2026-09-05
+    revised: ""
+
+  - name: DSP_bat_max
+    status: active
+    source: design/gdd/feedback-sonoro-parry.md
+    referenced_by:
+      - design/gdd/feedback-sonoro-parry.md
+    value: 20
+    unit: "% de DSP en bateria Deck"
+    notes: "PROVISIONAL interino (D-E). BT excluido de la cadena de medicion."
     added: 2026-09-05
     revised: ""
 
