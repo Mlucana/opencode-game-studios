@@ -24,10 +24,164 @@
 #
 # STATUS VALUES: active | deprecated | superseded-by: TR-[system]-NNN
 
-version: 1
-last_updated: ""
+version: 2
+last_updated: "2026-09-03"
 
-requirements: []
+requirements:
+- id: TR-parry-001
+  system: parry
+  gdd: design/gdd/combate-parry-absorcion.md
+  requirement: "All durations authorised as integer ticks of fixed 60Hz simulation; tick counter immune to hitstop"
+  created: 2026-09-03
+  revised: ""
+  status: active
+- id: TR-parry-002
+  system: parry
+  gdd: design/gdd/combate-parry-absorcion.md
+  requirement: "Diegetic time-scale mechanism without Engine.time_scale (gameplay scaled, HUD full-speed)"
+  created: 2026-09-03
+  revised: ""
+  status: active
+- id: TR-parry-003
+  system: parry
+  gdd: design/gdd/combate-parry-absorcion.md
+  requirement: "Digital-only parry input with load-time binding validation, edge-triggered, read in _physics_process, no buffering"
+  created: 2026-09-03
+  revised: ""
+  status: active
+- id: TR-parry-004
+  system: parry
+  gdd: design/gdd/combate-parry-absorcion.md
+  requirement: "Player state machine with bidirectional anticipation forgiveness, whiff/castigo lockouts, interrupt table, inclusive clamps"
+  created: 2026-09-03
+  revised: ""
+  status: active
+- id: TR-parry-005
+  system: parry
+  gdd: design/gdd/combate-parry-absorcion.md
+  requirement: "Formulas F1-F8 and invariants R1-R10 as data-driven config with load-time validation gates"
+  created: 2026-09-03
+  revised: ""
+  status: active
+- id: TR-parry-006
+  system: parry
+  gdd: design/gdd/combate-parry-absorcion.md
+  requirement: "Synchronous combat event bus (emits result/posture/duelo-perdido; consumes boss windows)"
+  created: 2026-09-03
+  revised: ""
+  status: active
+- id: TR-parry-007
+  system: parry
+  gdd: design/gdd/combate-parry-absorcion.md
+  requirement: "Hitstop + camera + rumble contract (5-tick base, Justo bonus capped by R8, physics-mode Tweens)"
+  created: 2026-09-03
+  revised: ""
+  status: active
+- id: TR-parry-008
+  system: parry
+  gdd: design/gdd/combate-parry-absorcion.md
+  requirement: "Particle emitter pool recycled by finished signal within ~20 draw-call combat budget"
+  created: 2026-09-03
+  revised: ""
+  status: active
+- id: TR-parry-009
+  system: parry
+  gdd: design/gdd/combate-parry-absorcion.md
+  requirement: "Diegetic vs UI/music audio layers, harmonic precedence rule, bus/ducking architecture with Deck voice budget"
+  created: 2026-09-03
+  revised: ""
+  status: active
+- id: TR-parry-010
+  system: parry
+  gdd: design/gdd/combate-parry-absorcion.md
+  requirement: "Hitstop-immune HUD data contract (player HP, enemy posture/HP, punish timer, grace meter)"
+  created: 2026-09-03
+  revised: ""
+  status: active
+- id: TR-parry-011
+  system: parry
+  gdd: design/gdd/combate-parry-absorcion.md
+  requirement: "Cross-system data contracts (angeles_absorbidos, bono_reliquias in; parry event + grace modulator out; duelo-perdido; assist knob pair)"
+  created: 2026-09-03
+  revised: ""
+  status: active
+- id: TR-parry-012
+  system: parry
+  gdd: design/gdd/combate-parry-absorcion.md
+  requirement: "Real-Deck performance budgets (33/50ms input, P0-P5 gates, 20-minute thermal soak)"
+  created: 2026-09-03
+  revised: ""
+  status: active
+- id: TR-jefe-001
+  system: jefe
+  gdd: design/gdd/maquina-estados-jefe.md
+  requirement: "Hierarchical boss FSM with 9 closed top-level states, counted En Combo container, amendment procedure, Lucifer nesting path"
+  created: 2026-09-03
+  revised: ""
+  status: active
+- id: TR-jefe-002
+  system: jefe
+  gdd: design/gdd/maquina-estados-jefe.md
+  requirement: "Synchronous transition dispatch within originating call stack, no subscriber reentrancy, canonical signal names"
+  created: 2026-09-03
+  revised: ""
+  status: active
+- id: TR-jefe-003
+  system: jefe
+  gdd: design/gdd/maquina-estados-jefe.md
+  requirement: "Combat-result-driven bifurcation with Aturdido replacing Repliegue only at resolution instant"
+  created: 2026-09-03
+  revised: ""
+  status: active
+- id: TR-jefe-004
+  system: jefe
+  gdd: design/gdd/maquina-estados-jefe.md
+  requirement: "Combo abort on any hit i to Repliegue with deferred payback, remainder never executes, abort event carries i and N"
+  created: 2026-09-03
+  revised: ""
+  status: active
+- id: TR-jefe-005
+  system: jefe
+  gdd: design/gdd/maquina-estados-jefe.md
+  requirement: "Aturdido exits (cushion after connected punish, direct after expiry, terminal Muerto after lethal) with duelo-ganado emitted once"
+  created: 2026-09-03
+  revised: ""
+  status: active
+- id: TR-jefe-006
+  system: jefe
+  gdd: design/gdd/maquina-estados-jefe.md
+  requirement: "Accion Especial contract (interruptible flag with mandatory/forbidden special window, own event pair, 2-of-4 consequences, illegal configs fail at load)"
+  created: 2026-09-03
+  revised: ""
+  status: active
+- id: TR-jefe-007
+  system: jefe
+  gdd: design/gdd/maquina-estados-jefe.md
+  requirement: "Fairness floor Enfriamiento+Telegrafiado >= 12+margen validated at load over system-20 pattern data"
+  created: 2026-09-03
+  revised: ""
+  status: active
+- id: TR-jefe-008
+  system: jefe
+  gdd: design/gdd/maquina-estados-jefe.md
+  requirement: "Owned boss feedback rows (special start/interrupt/complete, distinct post-punish Repliegue, Muerto) with VE-close vs completion distinguishability"
+  created: 2026-09-03
+  revised: ""
+  status: active
+- id: TR-jefe-009
+  system: jefe
+  gdd: design/gdd/maquina-estados-jefe.md
+  requirement: "Immediate boss FSM freeze on player defeat mid-state with no further transitions or signals"
+  created: 2026-09-03
+  revised: ""
+  status: active
+- id: TR-jefe-010
+  system: jefe
+  gdd: design/gdd/maquina-estados-jefe.md
+  requirement: "Dual test gates (mocked-event unit Logic plus two-case wiring integration) with placeholder durations and debug triggers"
+  created: 2026-09-03
+  revised: ""
+  status: active
 
 # --- EXAMPLE ENTRIES (remove when first real entries are added) ---
 #

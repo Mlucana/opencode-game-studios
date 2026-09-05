@@ -1,9 +1,14 @@
 # Godot — Deprecated APIs
 
-Last verified: 2026-02-12
+Last verified: 2026-09-03
 
 If an agent suggests any API in the "Deprecated" column, it MUST be replaced
 with the "Use Instead" column.
+
+> Nota de refresh 2026-09-03: los parches 4.7.1 y 4.7.2 no introducen nuevas
+> deprecaciones de cara a GDScript (ambos declaran sin incompatibilidades
+> conocidas). La única deprecación interna en la rama 4.7 es
+> `ScriptLanguage::instance_has` (GH-118217), solo relevante para GDExtension.
 
 ## Nodes & Classes
 

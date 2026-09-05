@@ -1,8 +1,17 @@
 # Godot Input — Quick Reference
 
-Last verified: 2026-02-12 | Engine: Godot 4.6
+Last verified: 2026-09-03 | Engine: Godot 4.7
 
 ## What Changed Since ~4.3 (LLM Cutoff)
+
+### 4.7 Changes
+- **Device IDs reworked**: mouse/keyboard device IDs changed from `0` to
+  `InputEvent.DEVICE_ID_MOUSE` / `DEVICE_ID_KEYBOARD`
+  - Code hardcoding `device == 0` to mean keyboard/mouse BREAKS — use the constants
+  - Joypad device indices are unaffected
+- **4.7.2 high-polling-rate mouse fix** (GH-109639): performance issues when
+  moving the mouse with high polling rate on Windows are fixed — but parry
+  timing must still be verified with real hardware (Steam Deck + high-Hz mice)
 
 ### 4.6 Changes
 - **Dual-focus system**: Mouse/touch focus is now separate from keyboard/gamepad focus
@@ -27,6 +36,17 @@ func _physics_process(delta: float) -> void:
     )
     if Input.is_action_just_pressed(&"jump"):
         jump()
+```
+
+### Device Detection (4.7 — CHANGED)
+```gdscript
+# NEVER hardcode `device == 0` for keyboard/mouse — breaks in 4.7+
+func _input(event: InputEvent) -> void:
+    if event.device == InputEvent.DEVICE_ID_KEYBOARD:
+        handle_keyboard(event)
+    elif event.device == InputEvent.DEVICE_ID_MOUSE:
+        handle_mouse(event)
+    # Joypad indices (0, 1, ...) are unaffected by the rework
 ```
 
 ### Input Events (unchanged)
@@ -67,6 +87,7 @@ func _input(event: InputEvent) -> void:
 ```
 
 ## Common Mistakes
+- Hardcoding `device == 0` for keyboard/mouse detection (breaks in 4.7 — use `DEVICE_ID_*`)
 - Not testing both mouse and keyboard focus paths (dual-focus in 4.6)
 - Assuming `grab_focus()` affects mouse focus (it only affects keyboard/gamepad in 4.6)
 - Using string literals instead of `StringName` (`&"action"`) for action names in hot paths

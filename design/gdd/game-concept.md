@@ -439,7 +439,7 @@ con seriedad. Ninguno de estos grupos debe influir en una sola decisión de dise
 
 | Consideración | Evaluación |
 | ---- | ---- |
-| **Motor recomendado** | Godot 4.6 — confirmado. Excelente para 2D, ligero, adecuado para desarrollo en solitario y primer proyecto. Exporta limpiamente a PC y Steam Deck (Linux) |
+| **Motor recomendado** | Godot 4.7 — confirmado. Excelente para 2D, ligero, adecuado para desarrollo en solitario y primer proyecto. Exporta limpiamente a PC y Steam Deck (Linux) |
 | **Retos técnicos clave** | El *feel* del parry: frame data limpia, buffer de input, cancelación de animación y confirmación audiovisual por debajo de 100 ms. Máquinas de estado de jefes con patrones legibles y deterministas. Sistema de Gracia de tres capas sin ambigüedad de estado |
 | **Estilo de arte** | 2D — grabado monocromo (protagonista y mundo) contrastado con vitral saturado (ángeles y gracia) |
 | **Complejidad del pipeline de arte** | Media — 2D custom, pero deliberadamente elegido por su bajo coste: el grabado se produce rápido y el vitral son formas planas con luz, sin texturas complejas |
@@ -450,8 +450,9 @@ con seriedad. Ninguno de estos grupos debe influir en una sola decisión de dise
 | **Sistemas procedurales** | Mínimos. La selección del representante de cada coro y la oferta de reliquias se aleatorizan; no hay generación procedural de niveles |
 
 > **Aviso de versión de motor**: el conocimiento del modelo cubre Godot hasta ~4.3.
-> Las versiones 4.4, 4.5 y 4.6 introdujeron cambios relevantes. Ejecutar
-> `/setup-engine` para poblar la documentación de referencia antes de escribir código.
+> Las versiones 4.4–4.7 introdujeron cambios relevantes. La documentación de
+> referencia está poblada en `docs/engine-reference/godot/` (ver `VERSION.md`,
+> última verificación 2026-09-03). Consultarla siempre antes de usar APIs de Godot.
 
 ---
 
@@ -543,7 +544,7 @@ la tensión entre acumular gracia y gastarla produce decisiones interesantes.*
 
 ## Next Steps
 
-- [ ] Ejecutar `/setup-engine` para poblar la documentación de referencia de Godot 4.6
+- [x] Ejecutar `/setup-engine` para poblar la documentación de referencia de Godot 4.7 (completado 2026-09-03: `docs/engine-reference/godot/` verificado contra 4.7.2)
 - [ ] Ejecutar `/prototype parry-absorcion` — validar la hipótesis central antes de
       escribir ningún GDD (el paso de mitigación de riesgo más importante del proyecto)
 - [ ] Si el prototipo da PROCEED: ejecutar `/art-bible` partiendo del Ancla de

@@ -1,8 +1,14 @@
 # Godot — Breaking Changes
 
-Last verified: 2026-07-31
+Last verified: 2026-09-03
 
 Changes between Godot versions, focused on post-LLM-cutoff changes (4.4+).
+
+## 4.7 → 4.7.1 / 4.7.2 (mantenimiento — SIN RUPTURAS)
+
+Ambos parches declaran oficialmente **sin incompatibilidades conocidas** con la
+4.7 previa (ver `VERSION.md`, sección Refresh 2026-09-03). Solo correcciones de
+bugs. No hay cambios de ruptura que registrar.
 
 ## 4.6 → 4.7 (~Mid 2026 — POST-CUTOFF, HIGH RISK)
 

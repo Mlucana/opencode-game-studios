@@ -2,8 +2,18 @@
 Epic: Diseño de sistemas MVP
 Feature: GDD — Combate de Parry-Absorción (sistema 1/21)
 Task: 62 tests. C12b NO cerrable: no define sus dos modelos de jugador. Siguiente: correr
+<!-- CONSISTENCY-CHECK: 2026-09-04 | GDDs checked: 6 | Conflicts found: 0 (2 OQs stale) | Registry v12 -->
+Task: Designing gracia-tres-capas GDD (sistema 5/21)
+- Current section: A+B+C+D+E+F+G+Visual+UI+AC+OQ COMPLETE en disco (2026-09-04, sesión paralela; 0 placeholders); retrofit de esta sesión: E y H redactados pero SUPERSEDED (paralela ganó) — sin writes desde aquí salvo este estado
+- File: design/gdd/gracia-tres-capas.md
+Task: Designing feedback-impacto GDD
+- Current section: COMPLETE (2026-09-03; 11 secciones + OQ, CD-GDD-ALIGN APPROVED, ACs realineados a C/D/E en disco)
+- File: design/gdd/feedback-impacto.md
+GDD Guardado de Progreso (sistema 12/21) COMPLETO 2026-09-03 (A–H + Visual/Audio-none + UI + Open Questions; CD-GDD-ALIGN APPROVED; registry v9; systems-index: Designed). Fichero: design/gdd/guardado-de-progreso.md. Siguiente: GDD Menu Principal y Flujo de Pantallas (sistema 15/21): review MAJOR 2026-09-04 (6 especialistas + CD, 10 bloques) + Rev 1 APLICADA (5 decisiones usuario, ACs M1–M15+MA+MH). Systems-index: In Review. Review-log creado. Siguiente: /clear + re-review en sesión limpia. Fichero: design/gdd/menu-principal-y-flujo-de-pantallas.md. (Mi sesion 2026-09-04: retrofit no-brillo/R5/typo + sleep!=kill corregido + CD-GDD-ALIGN APPROVED sellado + index fila 15 Designed verificado; registry sin cambios.)
 <!-- /STATUS -->
 <!-- CONSISTENCY-CHECK: 2026-08-04 | Registry en v8 | GDDs checked: 2 | Conflictos abiertos: 1 (el 113 del sistema 2, no cerrable por congelación) -->
+<!-- CONSISTENCY-CHECK: 2026-09-04 | Registry v10→v11 (append_fragmentos guard, trauma_castigo 0.70, consumer paths, +evento run_viva_visible) | GDDs checked: 6 | Conflicts found: 7 (C1 Reset hold-vs-x2, C2 S4-restore sin superficie, C3 resumen sin proveedor, C4 ultimo_motivo sin consumo, C5 angeles 0-8 vs 0-3/0-9, C6 pausa-segura fantasma, C7 .consuming renombrado) | Report: docs/consistency-failures.md -->
+<!-- CONSISTENCY-CHECK-FOCO-GRACIA: 2026-09-04 | GDD gracia-tres-capas (paralela) vs combate/guardado-Rev2/menu-Rev2/registry-v12 | Conflicts: C8 decision_log naming, C9 dangling J3/I2/K1/D1-D7, C10 Menu firma-irrevocable (log) | Registry: +angeles_absorbidos, nota OQ en gracia_base, dedup duplicado, resto a sesión propietaria | Verdict: CONFLICTS FOUND (3 menores, owning session) -->
 
 # Estado de Sesión — NOVENA
 
@@ -221,3 +231,11 @@ para auditar fase, huecos y conformidad de formato de los GDDs en espanol.
 Hay GDDs (parry-absorcion, maquina-estados-jefe, concepto) pero sin ADRs ni
 `architecture.md`. `src/` solo tiene combate; hay prototipo jugable en
 `prototypes/parry-absorcion-concept/` y tests GdUnit4 en `tests/`.
+
+## Session Extract — /architecture-review 2026-09-03
+- Verdict: FAIL (esperado — 0 ADRs; capas Fundación/Core sin cubrir)
+- Requirements: 22 total — 0 covered, 0 partial, 22 gaps
+- New TR-IDs registered: 22 (TR-parry-001..012, TR-jefe-001..010; registry v2)
+- GDD revision flags: maquina-estados-jefe.md (borde 113→114 en 4ª pasada)
+- Top ADR gaps: tiempo-autoritativo-y-hitstop; contrato-eventos-combate-jefe; estructura-fsm-jefe
+- Report: docs/architecture/architecture-review-2026-09-03.md

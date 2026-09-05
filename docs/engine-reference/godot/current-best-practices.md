@@ -1,9 +1,19 @@
 # Godot — Current Best Practices
 
-Last verified: 2026-02-12 | Engine: Godot 4.6
+Last verified: 2026-09-03 | Engine: Godot 4.7
 
 Practices that are **new or changed** since the model's training data (~4.3).
 This supplements (not replaces) the agent's built-in knowledge.
+
+## Input (4.7)
+
+- **Device IDs reworked**: mouse/keyboard device IDs changed from `0` to
+  `InputEvent.DEVICE_ID_MOUSE` / `DEVICE_ID_KEYBOARD` — never hardcode
+  `device == 0` for keyboard/mouse detection. Joypad indices unaffected.
+  See `modules/input.md` for patterns.
+- **4.7.2 high-polling-rate mouse fix** (GH-109639): parry timing must still be
+  verified with real hardware (mando + ratón de alto Hz + Steam Deck), not only
+  desktop PC — see `Technical Preferences → Input & Platform`.
 
 ## GDScript (4.5+)
 

@@ -7,8 +7,8 @@
 
 - **Engine**: Godot 4.7
 - **Language**: GDScript
-- **Rendering**: [TO BE CONFIGURED]
-- **Physics**: [TO BE CONFIGURED]
+- **Rendering**: Compatibility — 2D tinta/vitral, máxima compatibilidad Deck/Proton @60fps (decidido 2026-09-03)
+- **Physics**: GodotPhysics 2D integrada — Jolt solo afecta al 3D, irrelevante para este 2D (decidido 2026-09-03)
 
 ## Input & Platform
 

@@ -39,7 +39,10 @@
 #   Each entry: name, status, source, referenced_by[], attributes{}, added, revised
 #   (events use emitter/consumers/payload instead of source/referenced_by)
 
-version: 8                    # v8 (2026-08-04): changeset 2, ítem 3 — CHANGESET COMPLETO.
+version: 12                    # v12 (2026-09-04): GDD Gracia (5/21): +corrupcion_ganada, +gasto, +poso, +saturacion; +gracia_base, +techo_saturacion, +poso_step, +purga_rechazo, +coste_purga/amparo, +cooldown_gasto, +cap_gastos_duelo; gracia_ganada/vida_maxima +ref gracia. | v11 (2026-09-04): /consistency-check: append_fragmentos +guarda de catálogo (Rev 2 Guardado); trauma_castigo 0.85→0.70 + ×escala_a11y (Rev 2 Feedback); consumidores parry_resuelto/combo_abortado feedback-de-impacto.md→feedback-impacto.md (existe desde 2026-09-03); sistema-de-gracia.md→gracia-tres-capas.md (esqueleto 2026-09-04, consumo pendiente); +evento run_viva_visible (provisional).
+                              # v10 (2026-09-03): GDD Feedback de Impacto (4/21): +freeze_total, +trauma_shake, +onset_budget, +trauma_normal/justo/castigo, +shake_max, +trauma_decay; hitstop_parry, bono_hitstop_parry_justo, recuperacion_whiff, physics_ticks_per_second +referenced_by feedback-impacto.
+                              # v9 (2026-09-03): GDD Guardado de Progreso (12/21): +upsert_llaves, +append_fragmentos; vida_maxima +referenced_by guardado-de-progreso.
+                              # v8 (2026-08-04): changeset 2, ítem 3 — CHANGESET COMPLETO.
                               # severidad_accion_especial pasa de PAGO EN VIDA a
                               # EQUIVALENCIA: el ítem 0 contradecía al sistema 2, que
                               # declara dos veces que la Acción Especial nunca reduce la
@@ -87,7 +90,7 @@ version: 8                    # v8 (2026-08-04): changeset 2, ítem 3 — CHANGE
                               # v3 (2026-08-04): convención de borde de ventana_castigo
                               # REVERTIDA a conteo inclusivo (114, no 113); `restantes`
                               # registrado como fórmula; evento "duelo perdido" añadido
-last_updated: 2026-08-04
+last_updated: 2026-09-04
 
 # ─── ENTITIES ────────────────────────────────────────────────────────────────
 # Named game-world objects: enemies, NPCs, characters, factions, bosses.
@@ -239,6 +242,8 @@ formulas:
     source: design/gdd/combate-parry-absorcion.md
     referenced_by:
       - design/gdd/combate-parry-absorcion.md
+      - design/gdd/guardado-de-progreso.md
+      - design/gdd/gracia-tres-capas.md      # añadido 2026-09-04 (expone angeles_absorbidos = n)
     variables:
       - vida_base
       - angeles_absorbidos
@@ -384,6 +389,7 @@ formulas:
     referenced_by:
       - design/gdd/combate-parry-absorcion.md
       - design/gdd/maquina-estados-jefe.md   # añadido 2026-08-03 (Ventana Especial)
+      - design/gdd/gracia-tres-capas.md      # añadido 2026-09-04 (consume mod verbatim; fija base)
     variables:
       - gracia_base
       - modificador_combo
@@ -409,8 +415,9 @@ formulas:
       eventos propio de una Acción Especial interrumpible— concede gracia COMPLETA
       (modificador_combo = 1.0), pese a no aplicar daño de Postura ni Repliegue.
       Razón: arrebatarle a un ángel su habilidad divina es la fantasía de robo del
-      Pilar 2, y por el Pilar 1 el triunfo también corrompe. Ver la excepción de
-      Ventana Especial en la Regla 4 de Combate."
+      Pilar 2, y por el Pilar 1 el triunfo también corrompe.       Ver la excepción de
+      Ventana Especial en la Regla 4 de Combate.
+      BASE FIJADA 2026-09-04 (GDD Gracia, F-G1): gracia_base = 1.0 locked; VE = 1.0 en ambos ledgers (igualdad R9b, cierra R9b)."
     added: 2026-07-31
     revised: 2026-08-03   # was: revised 2026-08-01
 
@@ -450,6 +457,140 @@ formulas:
       Combate, luego el término derivado de ella también lo es. El sistema 2 lo CONSUME.
       Verificado por el AC C11 de Combate (bordes 114/115 fijados por cifra)."
     added: 2026-08-04
+    revised: ""
+
+  - name: upsert_llaves
+    status: active
+    source: design/gdd/guardado-de-progreso.md
+    referenced_by:
+      - design/gdd/guardado-de-progreso.md
+    variables:
+      - llaves_viejo
+      - id
+    output_range: [0, null]
+    expression: "llaves_viejo si (id no en catalogo o id en llaves_viejo), si no llaves_viejo + [id]"
+    notes: "Set idempotente de llaves en PER. El catalogo lo posee el sistema 10 (Meta-progresion de Llaves, provisional sin GDD); este GDD posee cuando y como se fijan. Doble evento = no-op; ID desconocido = ignorar sin escribir."
+    added: 2026-09-03
+    revised: ""
+
+  - name: append_fragmentos
+    status: active
+    source: design/gdd/guardado-de-progreso.md
+    referenced_by:
+      - design/gdd/guardado-de-progreso.md
+    variables:
+      - fragmentos_viejo
+      - id
+    output_range: [0, null]
+    expression: "fragmentos_viejo si (id no en catalogo o id en fragmentos_viejo), si no fragmentos_viejo + [id]"
+    notes: "Log solo-append con orden de obtencion en PER. El contenido lo posee el sistema 17 (Fragmentos, provisional sin GDD). Unico borrado posible: Reset R12. Doble evento = no-op; ID desconocido o catalogo vacio = ignorar sin escribir ni dirty. GUARDA DE CATALOGO ANADIDA 2026-09-04 (Rev 2 Guardado): la expresion anterior omitia el chequeo de catalogo que upsert_llaves si tenia, con lo que cualquier evento con catalogo vacio se appendeaba — violaba su propia regla de no-op y el rango 0-N_catalogo."
+    added: 2026-09-03
+    revised: 2026-09-04   # was: sin guarda de catalogo
+
+  - name: freeze_total
+    status: active
+    source: design/gdd/feedback-impacto.md
+    referenced_by:
+      - design/gdd/feedback-impacto.md
+    variables:
+      - H_ref
+      - B_ref
+      - evt
+    output_range: [0, 8]
+    expression: "0 si evt == whiff, si no H_ref + B_ref(evt); fusion mismo tick: max(f1, f2)"
+    notes: "Duracion del freeze en ticks de reloj real. H_ref = hitstop_parry y B_ref =
+      bono_hitstop_parry_justo, ambos propiedad de Combate y consumidos por referencia
+      (este GDD no los retunea). Invariante R8 de Combate: total <= 8. Whiff = 0."
+    added: 2026-09-03
+    revised: ""
+
+  - name: trauma_shake
+    status: active
+    source: design/gdd/feedback-impacto.md
+    referenced_by:
+      - design/gdd/feedback-impacto.md
+    variables:
+      - trauma_previo
+      - T_evt
+      - S_max
+      - D_dec
+    output_range: [0, 17.3]
+    expression: "trauma(evt) = min(1.0, previo + T[evt]); shake_px = trauma^2 * S_max; decay 1/D_dec por tick real, en pausa durante Freeze"
+    notes: "T por evento: normal +0.30, justo/VE/cierre +0.55, castigo +0.85, whiff +0.0.
+      S_max = 24 px, D_dec = 12 ticks. Sin escalado por progresion por decision de diseno."
+    added: 2026-09-03
+    revised: ""
+
+  - name: onset_budget
+    status: active
+    source: design/gdd/feedback-impacto.md
+    referenced_by:
+      - design/gdd/feedback-impacto.md
+    variables:
+      - d_detect
+      - d_dispatch
+      - d_present
+    output_range: [0, 2]
+    expression: "onset = d_detect + d_dispatch + d_present <= 2 (cada termino 0-1 tick)"
+    notes: "Evento resuelto -> entrada en freeze + reaccion HUD + primer sample SFX.
+      El freeze queda excluido del computo (Regla 1 del GDD). > 2 ticks = FAIL."
+    added: 2026-09-03
+    revised: ""
+
+  - name: corrupcion_ganada
+    status: active
+    source: design/gdd/gracia-tres-capas.md
+    referenced_by:
+      - design/gdd/gracia-tres-capas.md
+    variables:
+      - gracia_ganada
+    output_range: [0.5, 1.0]
+    expression: "corrupcion_ganada = gracia_ganada; VE: 1.0 en ambos ledgers"
+    notes: "Igualdad R9b (cierra R9b): cada parry corrompe lo mismo que otorga. Banda bilateral 0 < x <= 1.5 por ganancia, satisfecha por igualdad. VE acotada por R9a (<=3/duelo)."
+    added: 2026-09-04
+    revised: ""
+
+  - name: gasto
+    status: active
+    source: design/gdd/gracia-tres-capas.md
+    referenced_by:
+      - design/gdd/gracia-tres-capas.md
+    variables:
+      - gracia_actual
+      - corrupcion_actual
+      - poso_irreversible
+      - coste
+    output_range: [0, 100]
+    expression: "si coste>gracia RECHAZAR; si no: gracia-=coste; corrupcion=max(poso,poso+(corrupcion-poso)/2)"
+    notes: "Alivio proporcional (nunca deuda ni parciales). Purga=8 (solo alivio), Amparo=12 (niega 1 Golpe, max 1/duelo). Caps 2 gastos/duelo + cooldown 360 ticks. En suelo el alivio es 0 con earn>0: loop imposible por construccion."
+    added: 2026-09-04
+    revised: ""
+
+  - name: poso
+    status: active
+    source: design/gdd/gracia-tres-capas.md
+    referenced_by:
+      - design/gdd/gracia-tres-capas.md
+    variables:
+      - decision
+      - angeles_absorbidos
+    output_range: [0, 36]
+    expression: "absorber: poso+=12, n+=1; rechazar: corrupcion=max(poso,corrupcion-6)"
+    notes: "Suelo irreversible v1.0 (0/12/24/36). Delta bilateral {0,12}. Sin lump al absorber; floor-lift C'=max(C,poso') en TOMAR. Monotono: solo sube, jamas baja (ni gastar, ni muerte, ni reload, ni round-trip)."
+    added: 2026-09-04
+    revised: ""
+
+  - name: saturacion
+    status: active
+    source: design/gdd/gracia-tres-capas.md
+    referenced_by:
+      - design/gdd/gracia-tres-capas.md
+    variables:
+      - corrupcion_actual
+    output_range: [0, 100]
+    expression: "clamped=min(max(cruda,0),100); saturado=(cruda>=100)"
+    notes: "Clamp bilateral + predicado (simetria E5/E12/E13). Emit-once saturacion_alcanzada -> #6; gasto off en techo; TOMAR/DEJAR posterior no retracta. Techo provisional (calibracion por protocolo); ACs aseveran ordenamientos, no literal."
+    added: 2026-09-04
     revised: ""
 
 # Example:
@@ -612,6 +753,7 @@ constants:
     source: design/gdd/combate-parry-absorcion.md
     referenced_by:
       - design/gdd/combate-parry-absorcion.md
+      - design/gdd/feedback-impacto.md
     value: 2                    # en calidad_timing = 1.0; +1 en 0.9; +0 por debajo
     unit: ticks de simulación fija
     notes: "Micro-extensión del hitstop que diferencia el Parry Justo. Reparto por
@@ -871,6 +1013,7 @@ constants:
     source: design/gdd/combate-parry-absorcion.md
     referenced_by:
       - design/gdd/combate-parry-absorcion.md
+      - design/gdd/feedback-impacto.md
     value: 9
     unit: fotogramas (ticks de simulación fija a 60Hz)
     notes: "Recuperación tras un parry que vence sin encontrar ningún Golpe (whiff),
@@ -983,6 +1126,7 @@ constants:
     source: design/gdd/combate-parry-absorcion.md
     referenced_by:
       - design/gdd/combate-parry-absorcion.md
+      - design/gdd/feedback-impacto.md
     value: 5
     unit: ticks de simulación fija a 60Hz (0.0833s de reloj real)
     notes: "Duración del hitstop de un parry exitoso. Rango seguro 3-6 ticks.
@@ -1023,6 +1167,7 @@ constants:
     referenced_by:
       - design/gdd/combate-parry-absorcion.md
       - design/gdd/maquina-estados-jefe.md
+      - design/gdd/feedback-impacto.md
     value: 60
     unit: ticks por segundo
     notes: "INVARIANTE DE PROYECTO, NO UN AJUSTE. Toda la canonicalización en ticks del
@@ -1144,6 +1289,170 @@ constants:
     added: 2026-08-03
     revised: ""
 
+  - name: trauma_normal
+    status: active
+    source: design/gdd/feedback-impacto.md
+    referenced_by:
+      - design/gdd/feedback-impacto.md
+    value: 0.30
+    unit: trauma (adimensional 0.0-1.0)
+    notes: "Pico de trauma de un parry normal (T0). Con S_max = 24 px da ~2.2 px."
+    added: 2026-09-03
+    revised: ""
+
+  - name: trauma_justo
+    status: active
+    source: design/gdd/feedback-impacto.md
+    referenced_by:
+      - design/gdd/feedback-impacto.md
+    value: 0.55
+    unit: trauma (adimensional 0.0-1.0)
+    notes: "Pico de trauma de Parry Justo / VE parada / cierre (T1). Con S_max = 24 px da ~7.3 px."
+    added: 2026-09-03
+    revised: ""
+
+  - name: trauma_castigo
+    status: active
+    source: design/gdd/feedback-impacto.md
+    referenced_by:
+      - design/gdd/feedback-impacto.md
+    value: 0.70
+    unit: trauma (adimensional 0.0-1.0)
+    notes: "Pico de trauma del Golpe de Castigo (T2). Knob mas delicado junto a S_max:
+      con 24 px da ~11.76 px (0.70^2 x 24); vigilar mareo en Deck de 7 pulgadas en playtest.
+      RETUNE 2026-09-04 (Rev 2 Feedback, decision de usuario): era 0.85 (~17.3 px).
+      shake_px = trauma^2 x S_max x escala_a11y (factor a11y anadido en Rev 2)."
+    added: 2026-09-03
+    revised: 2026-09-04   # was: 0.85, sin factor escala_a11y
+
+  - name: shake_max
+    status: active
+    source: design/gdd/feedback-impacto.md
+    referenced_by:
+      - design/gdd/feedback-impacto.md
+    value: 24.0
+    unit: pixeles
+    notes: "Techo de shake (S_max). offset_pico = trauma^2 * S_max. Solo capa diegetica, nunca HUD."
+    added: 2026-09-03
+    revised: ""
+
+  - name: trauma_decay
+    status: active
+    source: design/gdd/feedback-impacto.md
+    referenced_by:
+      - design/gdd/feedback-impacto.md
+    value: 12
+    unit: ticks de simulación fija a 60Hz
+    notes: "Decaimiento del trauma (D_dec). Rango seguro 8-18 ticks. En pausa durante el freeze."
+    added: 2026-09-03
+    revised: ""
+
+  - name: angeles_absorbidos
+    status: active
+    source: design/gdd/gracia-tres-capas.md
+    referenced_by:
+      - design/gdd/gracia-tres-capas.md
+      - design/gdd/combate-parry-absorcion.md
+      - design/gdd/guardado-de-progreso.md
+    value: null                 # varia 0-9 (v1.0 efectivo 0-3); es conteo, no knob
+    unit: decisiones TOMAR por run
+    notes: "Conteo de elecciones 'absorber', expuesto por Gracia (n = suma de
+      decision_absorber). Lo consume Combate (F5 vida_maxima) y lo valida/persiste
+      Guardado (techo 0-9 + efectivo-v1.0 0-3, espejo de coro_siguiente_idx).
+      REGISTRADO 2026-09-04 (/consistency-check foco Gracia). Gracia confirma
+      semantica (¿cuenta Lucifer?) al cerrar su diseno."
+    added: 2026-09-04
+    revised: ""
+
+  - name: gracia_base
+    status: active
+    source: design/gdd/gracia-tres-capas.md
+    referenced_by:
+      - design/gdd/gracia-tres-capas.md
+      - design/gdd/combate-parry-absorcion.md   # consume por referencia (F7)
+    value: 1.0
+    unit: motas por parry simple
+    notes: "Fijada por #5 (Combate la consumia sin dueno). Default locked; variable viva solo por assist-scaling #21 (base_assist = 1.0 x ratio-ventana). Rango 0.5-2.0; fuera exige re-derivar R7/R9b. Cierra la Open Question de Combate sobre su valor (verificado /consistency-check 2026-09-04)."
+    added: 2026-09-04
+    revised: ""
+
+  - name: techo_saturacion
+    status: active
+    source: design/gdd/gracia-tres-capas.md
+    referenced_by:
+      - design/gdd/gracia-tres-capas.md
+    value: 100.0
+    unit: puntos de corrupcion
+    notes: "Provisional (calibracion por protocolo: 0.95 x media non-spender). Rango 70-140; < 3 x poso_step rompe poso<=techo (HARD). Ordenamientos: 103 > techo > 67 > 30 > 3.0."
+    added: 2026-09-04
+    revised: ""
+
+  - name: poso_step
+    status: active
+    source: design/gdd/gracia-tres-capas.md
+    referenced_by:
+      - design/gdd/gracia-tres-capas.md
+    value: 12.0
+    unit: puntos de corrupcion por absorber
+    notes: "Plano v1.0 (n<=3, R5). Rango 6-24. Vision-9: decreciente por conteo con R5_9 antes del 4 angel; jamas extrapolacion silenciosa."
+    added: 2026-09-04
+    revised: ""
+
+  - name: purga_rechazo
+    status: active
+    source: design/gdd/gracia-tres-capas.md
+    referenced_by:
+      - design/gdd/gracia-tres-capas.md
+    value: 6.0
+    unit: puntos de corrupcion
+    notes: "Knob mas balance-sensible: >= step colapsa a absorber; 0 colapsa a rechazar (pura inviable). Rango exclusivo (0,12). Ratio 12:6 con poso_step = dial de asimetria."
+    added: 2026-09-04
+    revised: ""
+
+  - name: coste_purga
+    status: active
+    source: design/gdd/gracia-tres-capas.md
+    referenced_by:
+      - design/gdd/gracia-tres-capas.md
+    value: 8
+    unit: puntos de gracia
+    notes: "Solo alivio, sin efecto de combate. Rango 4-16. Orden estricto coste_amparo > coste_purga (invariante)."
+    added: 2026-09-04
+    revised: ""
+
+  - name: coste_amparo
+    status: active
+    source: design/gdd/gracia-tres-capas.md
+    referenced_by:
+      - design/gdd/gracia-tres-capas.md
+    value: 12
+    unit: puntos de gracia
+    notes: "Niega el dano del proximo Golpe fallado una vez, max 1/duelo + 1 activo. Rango 9-20. Duel-scoped (expira sin refund). Solo vs Golpe (requiere tag en #1)."
+    added: 2026-09-04
+    revised: ""
+
+  - name: cooldown_gasto
+    status: active
+    source: design/gdd/gracia-tres-capas.md
+    referenced_by:
+      - design/gdd/gracia-tres-capas.md
+    value: 360
+    unit: ticks de simulacion fija a 60Hz (~6 s)
+    notes: "Comparacion entera >= 360; resetea solo en aceptados; monotono (cruza duelos); SUS inicia SATISFECHO. Rango 120-900. Escala con Hz."
+    added: 2026-09-04
+    revised: ""
+
+  - name: cap_gastos_duelo
+    status: active
+    source: design/gdd/gracia-tres-capas.md
+    referenced_by:
+      - design/gdd/gracia-tres-capas.md
+    value: 2
+    unit: gastos por duelo (amparos max 1, activo max 1)
+    notes: "LOCKED. spends 0 = kill-switch playtest (jamas ship). amparos >= 2 rompe R10e. Costes x caps x cooldown = alivio efectivo por duelo (trio conjunto)."
+    added: 2026-09-04
+    revised: ""
+
 # CANDIDATO NO REGISTRADO (2026-08-03): `margen_reaccion_min`, término de la Core Rule 9
 # del sistema 2. No se registra todavía porque no tiene ni valor ni GDD fuente — es
 # propiedad de IA de Combate de Jefes (sistema 20), que aún no existe. Registrar al
@@ -1250,9 +1559,9 @@ events:
     status: active
     emitter: design/gdd/combate-parry-absorcion.md
     consumers:
-      - design/gdd/maquina-estados-jefe.md
-      - design/gdd/sistema-de-gracia.md          # (no existe aún) — sistema 5
-      - design/gdd/feedback-de-impacto.md        # (no existe aún) — sistema 4
+      - design/gdd/combate-parry-absorcion.md
+      - design/gdd/gracia-tres-capas.md            # existe como esqueleto desde 2026-09-04 (era sistema-de-gracia.md) — sistema 5, consumo pendiente al autorar secciones
+      - design/gdd/feedback-impacto.md           # existe desde 2026-09-03 (Rev 2 aceptada 2026-09-04); era feedback-de-impacto.md, nombre corregido 2026-09-04
       - design/gdd/feedback-sonoro-parry.md      # (no existe aún) — sistema 16
     payload: "resultado (éxito/fallo) + valor de Postura resultante"
     notes: "Es el evento del que depende TODA la bifurcación de salida del sistema 2
@@ -1269,7 +1578,7 @@ events:
     status: active
     emitter: design/gdd/maquina-estados-jefe.md
     consumers:
-      - design/gdd/feedback-de-impacto.md        # (no existe aún) — sistema 4, PREVISTO
+      - design/gdd/feedback-impacto.md           # existe desde 2026-09-03 (era feedback-de-impacto.md, nombre corregido 2026-09-04) — sistema 4, PREVISTO
       - design/gdd/feedback-sonoro-parry.md      # (no existe aún) — sistema 16, PREVISTO
     payload: "i (índice del golpe fallado, 1 <= i <= N) + N (longitud del combo)"
     notes: "El payload es NORMATIVO, no opcional. Sin i y N, ningún sistema aguas abajo
@@ -1334,4 +1643,18 @@ events:
       SECUENCIA DE POST-DERROTA (pantalla, persistencia entre runs): propiedad de Gestión
       de Run, no de Combate. Open Question abierta en el GDD de Combate."
     added: 2026-08-04
+    revised: ""
+
+  - name: "run viva visible"
+    canonical_name: run_viva_visible   # provisional, pendiente de ADR
+    status: active
+    emitter: design/gdd/gestion-de-run.md             # (no existe aún) — sistema 3, emisor provisional
+    consumers:
+      - design/gdd/guardado-de-progreso.md           # commit-point de R9: borra save+validating al confirmar
+      - design/gdd/menu-principal-y-flujo-de-pantallas.md   # confirma con timeout y ruta de rechazo (intenciones continuar_run)
+    payload: "run_uuid + coro_idx (Menu L59); Guardado solo exige la ocurrencia"
+    notes: "Commit-point nombrado del consumo de SUS (R9 Guardado Rev 2): la confirma Run,
+      no Guardado. REGISTRADO 2026-09-04 (/consistency-check): aparece en 2 GDDs sin entrada
+      en registry. Revisar payload/timeout/rechazo al autorar el sistema 3."
+    added: 2026-09-04
     revised: ""

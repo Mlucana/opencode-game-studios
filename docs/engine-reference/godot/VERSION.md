@@ -2,10 +2,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Engine Version** | Godot 4.7 |
-| **Release Date** | ~Mid 2026 |
+| **Engine Version** | Godot 4.7 (último parche verificado: 4.7.2-stable, 2026-08-18) |
+| **Release Date** | 2026-06-18 (4.7-stable) |
 | **Project Pinned** | 2026-07-31 |
-| **Last Docs Verified** | 2026-07-31 |
+| **Last Docs Verified** | 2026-09-03 |
 | **LLM Knowledge Cutoff** | May 2025 |
 
 ## Knowledge Gap Warning
@@ -46,6 +46,28 @@ version realignment, not a code migration.
 **Recommended migration order**: N/A — no existing code to migrate. Any new
 input-remapping or device-detection code should use the new `DEVICE_ID_*`
 constants from the start rather than hardcoding `0`.
+
+## Refresh — 2026-09-03 (parches 4.7.1 / 4.7.2)
+
+**Fuentes**: https://godotengine.org/article/maintenance-release-godot-4-7-1/
+(2026-07-14, 78 fixes) · https://godotengine.org/article/maintenance-release-godot-4-7-2/
+(2026-08-18, 57 fixes) · ambos declaran **sin incompatibilidades conocidas**
+con la 4.7 previa. Son parches de mantenimiento compatibles — adopción recomendada,
+ningún cambio de ruptura, ninguna API nueva deprecada de cara a GDScript.
+
+**Relevante para NOVENA** (parry de precisión, input por mando + teclado/ratón):
+- 4.7.2 corrige problemas de rendimiento al mover el ratón con polling rate alto
+  en Windows (GH-109639) y la liberación simultánea de shift (GH-120327) —
+  verificar el timing del parry también con ratones de alto Hz, no solo con mando.
+- 4.7.2 prohíbe pesos negativos en `RandomPCG::rand_weighted` (GH-120004) —
+  relevante para la oferta aleatoria de reliquias / selección de representante:
+  nunca pasar pesos negativos.
+- 4.7.2 actualiza AccessKit a 0.22.3 (GH-121393) — lector de pantalla / accesibilidad.
+- 4.7.1 corrige flickering de iluminación en mallas con escala no uniforme
+  (GH-119784) y regresiones táctiles de drag-n-drop en el árbol de escena.
+
+**Estado de ramas**: 4.7 y 4.6 con soporte activo; 4.8 en desarrollo (master,
+estimado Q4 2026, inestable — no usar). El pin del proyecto sigue en la línea 4.7.
 
 ## Verified Sources
 

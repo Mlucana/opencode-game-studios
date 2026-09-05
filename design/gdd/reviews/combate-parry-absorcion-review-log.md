@@ -5,6 +5,63 @@ capa Fundación, prioridad MVP). Una entrada por pasada de `/design-review`.
 
 ---
 
+## Review — 2026-09-04 — Verdict: APPROVED (aceptado sin re-review, decisión de usuario)
+Scope signal: L/XL
+Specialists: game-designer, systems-designer, qa-lead, ux-designer, audio-director, performance-analyst, godot-specialist, economy-designer + creative-director (8ª pasada)
+Blocking items: ~16 (8ª pasada) | Recommended: ver plan A→D 8ª pasada
+Summary: 8ª pasada dio MAJOR (CS8 aplicado; P1+tick+R9a/D15 retornaron). Usuario acepta revisiones y marca Approved sin re-review, precedente #4/#12/#15. Deuda viva pasa a harness, re-review Feedback y 4ª sistema-2.
+Prior verdict resolved: No — aprobado por decisión sin re-review (el veredicto MAJOR queda como registro de proceso)
+
+## Review — 2026-09-04 (8ª pasada, re-review tras CS7) — Verdict: MAJOR REVISION NEEDED
+
+Scope signal: L (documento) / XL (end-to-end con harness + Deck + ABX + playtest)
+Specialists: game-designer, systems-designer, qa-lead (entregó), ux-designer, audio-director, performance-analyst, godot-specialist, economy-designer + síntesis senior de creative-director
+Blocking items: ~16 únicos (P1×6, tick-math, contrato-AV, letalidad/schema, techos falsos, puertas-oráculo)
+CS8 aplicado en sesión (~20): WO-TIME-08 (R2.2→0%, 4×4%-stale, OQ-pausa, R2.1-caveat, R2.3-remath), tick-math (P1 sin 40Hz, C13a sin rama-40Hz), R9a-66 verificado + D15-suficiencia + techo-base+1 + shake-triggers, C4 partición, C25 salvo-8, OQ-2305 RESUELTA, R5 19→104, E9 derive, R10a dual-épsilon, D8b no-entero, F8 float-norm, fixture 3er nivel, C7a-coste (no Δ==0), C8a/b, E8 ±1 tick, D13c fidelidad, RUNTIME_DROP+contadores, P0 CPU/GPU-pointer; Feedback: C5b-DEF matriz-3vías+ABX.
+Escalado por regla 7ª (P1+tick+R9a/D15 sin resolver). Diferido: proveniencia-fusión payload, rampa-stepped, pool-holder, trauma-owner, pause-pim, T2-traza, P4-refresh, V-protocol, namespace-FB, R9b-dientes, R9a-expectation-AC, E3b-113.
+Prior verdict resolved: **Parcial** — CS7 verificado ~90%; coherencia en regresión.
+Summary: norma falsa + puertas inejecutables + split-brain en corrección; núcleo P1/tick/R9a-D15. Plan: harness → re-review Feedback → 4ª sistema-2.
+
+## Review — 2026-09-04 (7ª pasada, re-review tras CS6) — Verdict: NEEDS REVISION
+
+Scope signal: L (documento) / XL (end-to-end con harness + playtest + ABX)
+Specialists: game-designer, systems-designer, qa-lead (entregó), ux-designer, audio-director, performance-analyst, godot-specialist, economy-designer + síntesis senior de creative-director
+Blocking items: ~16 únicos (P1×6 reportes, tick-math, contrato-AV, letalidad/schema, techos falsos, puertas-oráculo)
+CS7 aplicado en sesión (~20): R9a-66 + zona re-medida, D15-suficiencia, techo-8 condicionado, D9b =1 (R1/R2), Regla 2.2 a 0%-pausa, P1 3-métricas per-modo, C4 partición, C25 salvo-8, OQ-2305 RESUELTA-espejo, R5 19→104, E9 derive, R10a dual-épsilon, D8b no-entero, F8 float-norm, fixture 3er nivel, C7a/b, C8a/b, E8 ±1 tick + instrumentado, D13c fidelidad, RUNTIME_DROP; Feedback: C5b-DEF matriz-3vías+ABX.
+Adjudicaciones 6ª cerradas: deaf-16 parametrizada ACEPTADA; thud-línea + matriz-ABX aplicadas.
+Prior verdict resolved: **Parcial** — CS6 verificado; coherencia en regresión (edits rompían al cerrar).
+Summary: norma falsa + puertas inejecutables en corrección; P1 + tick-math + R9a/D15 como núcleo. Plan: harness → re-review Feedback → 4ª sistema-2. Si P1+tick+R9a/D15 vuelven sin resolver, escalar a MAJOR.
+
+## Review — 2026-09-04 (6ª pasada, re-review tras CS5a) — Verdict: NEEDS REVISION
+
+Scope signal: L (documento) / XL (end-to-end con harness + playtest + ABX)
+Specialists: game-designer, systems-designer, qa-lead (entregó), ux-designer, audio-director, performance-analyst, godot-specialist, economy-designer + síntesis senior de creative-director
+Blocking items: ~30 (5 systems aritmética exacta B1–B5 + 9 qa + 3 ux + 5 audio + 3 perf + 6 godot + 1 economy N1, + residuos CS5a)
+CS6+CS6b aplicado en sesión (Combate, ~19): R5 veraz 15–18/19–20+vb≥110, R6 entera ×35/×65, épsilon ceil en R10a, R9a esperanza/peor-caso + 0.72 ±0.02, D15 portable + dano_efectivo, D8b validación-g, R1 equivalencia (floor ≥3 rechazado por doctrina, adjudicado), E9 scoping, fixture dual + D13 fuera de suscriptores, C13a/b checkboxes, V7 2ª mitad bloqueada, C26 back-ref, C22-completación, C23 1.0-severidad + instrumentado, D13c keys, P1 métrica-(c), C4 same-tick + signal_order_spy, E8 comparador, V5 binomial, evento-4 rescope.
+Feedback: track concurrente ajeno corrió MAJOR REVISION propia (2026-09-04, 218 líneas: transient-entrada, fusión definida, deaf-16 parametrizada con sunset, i/N, letalidad, rampa, ACs con oráculos, deferred appendix). Mis ~15 edits NO aplicados para no colisionar — adjudicado 2026-09-04: (1) deaf-16 parametrizada-con-sunset ACEPTADA, cierra el ítem; (2) thud-del-5: línea "el 9 nunca lleva el thud del 5" añadida a Regla 6 de Feedback por decisión expresa.
+Prior verdict resolved: **Parcial** — CS5a verificado; A–F recurren en forma menor; arquitectura intacta 6ª pasada.
+Summary: norma falsa + inconstruible + promesa rota en corrección; velocidad < descubrimiento. Plan: CS7-feel residual → harness → re-review Feedback → 4ª sistema-2.
+
+## Review — 2026-09-03 (5ª pasada, re-review tras CS1) — Verdict: NEEDS REVISION
+
+Scope signal: L (documento) / XL (end-to-end con harness + playtest)
+Specialists: game-designer, systems-designer, qa-lead (entregó), ux-designer, audio-director, performance-analyst, godot-specialist, economy-designer + síntesis senior de creative-director
+Blocking items: ~38 (~25 cruzados contra feedback v1-fantasma + ~13 propios: C25 regresión, FAIL_LOAD parcial, D14 hueco, C13 Justo/40Hz, D1/D14 unión, F5 "200", R1 5/8, +25⟺vb≥100, R9b/C23, E9)
+CS5a aplicado en sesión (Combate, 10 fixes): C25 instrumentado, FAIL_LOAD→C26/C24/F8-g, D14 pares, F5 100–179, D1/D14→Golpe + D1b-VE, C13a/b, ejemplo F1→Golpe, fixture con suscriptores, guard g→3–6. Feedback: 4 edits NO aplicados (anchors de v1 inexistentes en v2).
+Cross-review v2-congelada (4 focused: game/qa/godot/audio): reglas/estados/interacciones sin deriva; hallazgos sobreviven (recompensa tardía, fusión sin proveniencia, C4/C20/P1/V1/C13 re-anclar, flam 83–133ms, 5+9 reubicado, 4 relojes, deaf-16 vs V7, P5 sin recontar).
+Deriva: feedback-impacto.md 74→87→168→186 líneas en concurrente (untracked). Sus ACs nuevos (C1–C8/D1–D3/X1–X3/P0/P1/P4/P5/V1) quedan SIN revisión adversarial → siguiente paso.
+Prior verdict resolved: **Parcial** — CS1 verificado ~90%; criterio "sin recurrencias A–E" fallido (A–E + nueva F split-brain).
+Summary: arquitectura intacta 5ª pasada; velocidad < descubrimiento. Plan: CS2-normativo (M) → CS3-feel (L) → CS4-harness (L) → CS5-ownership (M).
+
+## Review — 2026-09-03 (4ª pasada, re-review tras changesets 1+2) — Verdict: NEEDS REVISION
+
+Scope signal: L (documento) / XL (end-to-end con harness + playtest)
+Specialists: game-designer, systems-designer, qa-lead (entregó), ux-designer, audio-director, performance-analyst, godot-specialist, economy-designer + síntesis senior de creative-director
+Blocking items: ~70 agrupados en 11 (ver 4ª pasada full) | CS1 aplicado en sesión: 11 fixes mecánicos | Pendientes: CS2/CS3/CS4
+Prior verdict resolved: **Parcial** — changesets 1+2 verificados aplicados; criterio de éxito ("4ª sin recurrencias A/B/C") fallido — A, B, C y D recurren + capa nueva E (verificación-sin-harness, 20 de qa-lead)
+Summary: arquitectura intacta por 4ª pasada; fallo de procedimiento de reparación por 4ª vez. Decisiones de usuario: R9a se mantiene + playtest; R1/R10 endurecer; R9b gate + viabilidad; alcance CS1 mecánico. Re-review full tras `/clear`.
+
+
 ## Review — 2026-08-04 (3ª pasada, primera propia) — Verdict: NEEDS REVISION
 
 Scope signal: L (reparación del documento, en dos changesets) / XL (implementación)
