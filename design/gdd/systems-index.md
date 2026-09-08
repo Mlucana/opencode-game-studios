@@ -40,7 +40,7 @@ Alpha → Visión Completa).
 | 10 | Meta-progresión de Llaves y Desbloqueo | Progression | Alpha | Not Started | — | Máquina de Estados de Jefe, Guardado de Progreso |
 | 11 | Lucifer — Dos Formas y Reactividad | Gameplay | Full Vision | Not Started | — | Máquina de Estados de Jefe, Overlay de Corrupción, IA de Combate de Jefes |
 | 12 | Guardado de Progreso (inferido) | Persistence | Alpha | Needs Revision | design/gdd/guardado-de-progreso.md | — **📌 UX Flag: requiere `/ux-design` antes de escribir épicas (fachada publicada en §Fachada; contraparte pendiente en #15 Rev 2)** |
-| 13 | HUD de Combate | UI | MVP | Not Started | — | Combate de Parry-Absorción, Sistema de Gracia — **📌 UX Flag: requiere `/ux-design` antes de escribir épicas** |
+| 13 | HUD de Combate | UI | MVP | Designed | design/ux/hud.md (Rev-2, `/ux-review` APPROVED 2026-09-08 — el spec UX ES el diseño, sin GDD) | Combate de Parry-Absorción, Sistema de Gracia |
 | 14 | Pantalla de Elección de Reliquias (inferido) | UI | Vertical Slice | Not Started | — | Elección de Reliquias entre Duelos |
 | 15 | Menú Principal y Flujo de Pantallas (inferido) | UI | Vertical Slice | Needs Revision | design/gdd/menu-principal-y-flujo-de-pantallas.md | Guardado de Progreso -dura-, Gestión de Run -dura-, HUD/Reliquias/Gracia -blandas- — **📌 UX Flag: specs por pantalla vía `/ux-design` en Pre-Producción** |
 | 16 | Feedback Sonoro del Parry | Audio | MVP | Needs Revision | design/gdd/feedback-sonoro-parry.md | Combate (dura), Feedback de Impacto (blanda: triggers/prioridad/oráculos), Gracia + Menú (blandas: capas/intenciones) |
