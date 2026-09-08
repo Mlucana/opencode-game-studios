@@ -407,3 +407,57 @@ garantiza la Regla 8 (resolución síncrona) debe resolverse con un ADR en
 `/create-architecture`. El modo de fallo es un tick de retraso silencioso, no un
 crash — precisamente el test negativo que la Player Fantasy declara como
 criterio de fracaso del sistema.
+
+---
+
+## 4ª pasada — 2026-09-05 — Cambios aplicados (pendiente de re-review en sesión separada)
+
+**Modo**: lean single-session (sin especialistas: las decisiones ya estaban adjudicadas — D1–D4 del log 2026-08-04 + ADR-001/ADR-002 Accepted 2026-09-05). Aprobación del changeset por el usuario antes de editar.
+**Scope signal**: M (un solo GDD, 0 fórmulas nuevas, 2 ADRs consumidos, ~6 dependencias tocadas por referencia)
+**Raíces tratadas**: R1 → R3 → R4 → R5, en ese orden. R2 vivía en Combate y ya cerró (enmiendas A–G + CS8, 8ª pasada 2026-09-04).
+
+| Edit | Raíz | Cambio |
+|---|---|---|
+| E1 | R5 | Borde exterior Castigo 113 → **114** + conteo **inclusivo** (`restantes(T) = ventana + 1 − T`, poseído por Combate): fila E3, fila E3b, ejemplo del AC E3, AC E3b (deriva de knobs, nunca literal) |
+| E2 | R5/D1 | Retirada la acusación falsa de "causa raíz señalada a Combate" (confirmado ausente en ambos lados) |
+| E3 | — | Header: status 4ª pasada + fecha; bloqueante externo actualizado (enmiendas A–G aplicadas, pendiente re-review + V1) |
+| E4 | R4/D3 | Core Rule 9 como **propiedad general** (toda transición a estado con ventana de Golpe; tabla de compromisos 12/14/9/3/0; cota sup de margen 28); el piso simple queda como instancia + colchón Core Rule 4 como instancia |
+| E5 | R4/Tier B | `margen_reaccion_min` bilateral (provisional 8–28 por referencia #20; sin-margen/fuera-de-rango = FAIL_LOAD) + OQ actualizada (valor abierto, bilateralidad cerrada) |
+| E6 | R4/Tier B | C9 por **pares** de patrones (A→B) en techo 12 + camino de expiración de `Aturdido` |
+| E7 | R3 | Regla 8 consume ADR-001/002 (llamada + `B-*` síncronas, orden cierre→resultado→transición); OQ mecanismo **RESUELTA**, V1 en motor como validación pendiente |
+| E8 | R1 | Contrato de emisión intra-`En Combo` (par estándar por repetición, FSM permanece; solo la resolución emite a nivel combo) |
+| E9 | Tier B/proceso | C3c por **orden y conteo de señales** (doctrina B7) |
+| E10 | R6/Tier B | Fila reversa Feedback (4/16) + `accion_especial_completada` / `castigo_conectado` reservados (ADR-002 §2) + `fin de Golpe` al truncar (orden ADR-002; Tier B verificado, no escala) + predecesor de `Acción Especial` + supresión del aborto ante derrota (prioridad E7) |
+
+**Regla de proceso respetada**: ningún hallazgo de esta pasada se declara cerrado aquí — el cierre lo da el re-review en sesión separada (fase 5 del plan). Criterio de éxito a verificar entonces: <4 bloqueantes y ninguno descendiente de estos arreglos; `qa-lead` primero con el encargo del cuantificador.
+
+---
+
+## Re-review — 2026-09-05 — Verdict: MAJOR REVISION NEEDED (criterio no cumplido)
+
+Scope signal: XL
+Specialists: qa-lead (primero) + game-designer + systems-designer + ai-programmer + godot-specialist + creative-director (sintesis)
+Blocking: ~25 grupos (7 de sintesis) | Recommended: D-A a D-F + V0/V1/V-batch
+Summary: la 4a pasada cerro raices pero hay descendientes (F1/F4/F7, C4d, A5, F2, E7) + duros nuevos (wire, teardown, spy, piso 37 vs Tele 30, C4b/C6). Fantasia: FAIL. R3 se reabre (no R6).
+Prior verdict resolved: No.
+Next: F2.1 central primero, luego 5a pasada; V0/V1/V-batch en orden.
+
+---
+
+## 5ª pasada — 2026-09-06 — Cambios aplicados (pendiente de re-review en sesión separada)
+
+**Modo**: lean single-session (sin especialistas: decisiones ya adjudicadas — re-review 2026-09-05 + ADR-001/002 Accepted). Aprobación del changeset por el usuario antes de editar ("toma tus criterios como los míos").
+**Scope signal**: M (un solo GDD + infra de test, 0 fórmulas nuevas, 2 ADRs consumidos por referencia).
+**Escalados tratados**: PRODUCER (F2.1 spy roto cross-doc → F2.2/F2.3; evento completación único contrato+stub; `retreat_base`/HUD ownership) + TD (V0/V1/V-batch en orden antes de cablear; F3.1 expiración con vía conforme; F4 pause-accounting derrota-durante-freeze).
+
+| Edit | Escalado | Cambio |
+|---|---|---|
+| T1 | F2.2 | `tests/helpers/signal_order_spy.gd`: cada registro anota `emisor_id` + `emisor_nombre` capturados en `observar()`; nuevos `emisores()`, `nombres_emisores()`, `indices_de(emisor)`. Misma señal desde dos emisores ya distinguible (cierra "spy roto cross-doc") |
+| T2 | F2.3 | Mismo fichero: `fijar_tick(tick_gate, nombre_gate)` + `tick_actual()` + `origen_tick_actual()` + `origenes_tick()` por emisión; `avanzar_tick()` queda para tests puros. Integración debe fijar tick desde el gate (WallTick/DiegeticTick); `mismo_tick()` fuera de rango → `false` + `push_error`, no crash |
+| T3 | V0/V1/V-batch | Nuevo `tests/unit/jefe/fsm_contrato_spy_test.gd` (6 tests): V0 orden cross-doc + atribución + tick de gate; V1 orden de conexión mismo stack (ADR-002 V1); V-batch triple cierre → resultado → transición mismo tick (lo que C4a asevera). Sin binario godot en este entorno — pendiente de ejecución headless con `--ignoreHeadlessMode` |
+| E1 | Evento único | `maquina-estados-jefe.md` Dependencies: `accion_especial_completada(habilidad_id: StringName, tick: int)` pasa de reservada a DECLARADA ÚNICA (orden + desempate E2 + fila Visual/Audio distinguible del cierre-16); `castigo_conectado` queda como evento DISTINTO de contacto (ADR-002 §5). Sorda provisional retirada a nivel de diseño. Desbloquea C22 + C5b-DEF |
+| E2 | F3.1 | AC **C4c**: la expiración de `Aturdido` la resuelve el resolver por conteo `DiegeticTick` (vía conforme Regla 8/ADR-001); `SceneTreeTimer`/`Tween`/`await`/polling independiente prohibidos en este camino |
+| E3 | F4 | Edge derrota: `window_id`/`i` descartados sin reutilización; si la derrota cae en freeze, el restore lo gobierna Feedback R11/R12 (esta FSM no restaura el reloj) |
+| E4 | Ownership | Tuning Knobs: `retreat_base` (42) propiedad de Combate, consumo por referencia; HUD-13 no consume nada de este esqueleto |
+
+**Regla de proceso respetada**: ningún hallazgo del re-review se declara cerrado aquí — el cierre lo da el re-review en sesión separada. Criterio de éxito entonces: <4 bloqueantes y ninguno descendiente de estos arreglos; `qa-lead` primero con el encargo del cuantificador.

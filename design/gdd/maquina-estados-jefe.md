@@ -1,10 +1,10 @@
 # Máquina de Estados de Jefe
 
-> **Status**: In Review — revisado y corregido, pendiente de re-review
+> **Status**: In Review — 5ª pasada aplicada 2026-09-06 (contrato+stub V0/V1/V-batch en `tests/unit/jefe/fsm_contrato_spy_test.gd`, evento de completación único, F3.1 expiración conforme, F3.2/F4 pause-accounting en derrota, propiedad `retreat_base`/HUD), pendiente de re-review en sesión separada
 > **Author**: usuario + agentes especialistas (`systems-designer`, `qa-lead`)
-> **Last Updated**: 2026-08-03
+> **Last Updated**: 2026-09-06
 > **Last Reviewed**: 2026-08-03 — **2ª pasada** de `/design-review` completo (mismos 5 especialistas + síntesis de `creative-director`). Veredicto: NEEDS REVISION con 9 bloqueantes, **los 9 resueltos en esta pasada**, más los 5 recomendados. Los 14 arreglos de la 1ª pasada se sostienen; lo que la 1ª pasada no buscó fueron **contradicciones cruzadas con el GDD de Combate ya Aprobado** (verificó constantes, no reglas). Cambios: aborto de combo corregido a `Repliegue` y cota ampliada a `1 ≤ i ≤ N` (B1) · **Core Rule 9** nueva, piso de justicia de `Enfriamiento`+`Telegrafiado` (B2) · `Acción Especial` con **Ventana Especial** de evento propio, rama de parry fallido y configuraciones ilegales (B3) · Regla 8 reformulada como prohibición **por propiedad**, con `await`/`Tween`/`SceneTreeTimer`/`AnimationMixer` y reentrada (B4) · relación de tres partes en la propiedad de eventos (B5) · aritmética del borde de Castigo corregida a **113** y banda de contacto 116–124 (B6) · payload `i`/`N` aseverado en C3b, E2 reescrito, E5 con capas separadas (B7) · convención "resolución = límite de estado" y reconciliación con el AC C5 de Combate (B8) · derrota del jugador a mitad de estado (B9). ACs nuevos: **C3c, C4d, C5c, C5d, C9**.
-> **Bloqueante externo abierto**: dos enmiendas pendientes en `combate-parry-absorcion.md` (ver Interactions) — una no semántica (dependencia bidireccional) y una semántica (excepción a su Regla 4 para la Ventana Especial).
+> **Bloqueante externo abierto**: las dos enmiendas pendientes en `combate-parry-absorcion.md` fueron **aplicadas** (enmiendas A–G + CS8, 8ª pasada 2026-09-04). Bloqueante actual: re-review en sesión separada + verificación V1 de ADR-001/002 en motor (validación, bloquea historias de cableado, no este GDD).
 > **Implements Pillar**: Pilar 2 (La maestría está en las manos, no en la ficha) — también sostiene el Pilar 3 (Cada enemigo es alguien)
 
 ## Summary
@@ -151,7 +151,20 @@ invisible y confiable, nunca protagonista.
    > producirían feedback idéntico. **El feedback en sí no es propiedad de este
    > GDD** (los eventos de combo son de Combate; el impacto es del sistema 4);
    > la obligación de este esqueleto es puramente **exponer el dato** para que
-   > puedan diferenciarlo. Es contrato de eventos, no diseño audiovisual.
+    > puedan diferenciarlo. Es contrato de eventos, no diseño audiovisual.
+
+    > **Contrato de emisión dentro de `En Combo` (R1, 4ª pasada).** Cada
+    > repetición interna `Telegrafiado → Golpe` emite el par estándar
+    > `inicio/fin de Golpe` — son ventanas parables reales que Combate consume
+    > (su Regla 9/D4/Fórmula 4 las tratan como unidad de resolución única:
+    > una sola Postura con la calidad del último parry, gracia por parry, sin
+    > `Repliegue` entre golpes). La FSM **permanece en `En Combo`** durante las
+    > N repeticiones: no emite `state_entered(Repliegue)` ni evalúa bifurcación
+    > entre golpes (C3c). Solo la **resolución** emite a nivel de combo: éxito
+    > total → una sola bifurcación Regla 2; fallo en `i` → un solo
+    > `combo_abortado(i, N)` + `Repliegue` (C3b, payload leído del evento, no
+    > inferido). Sin este párrafo, una implementación plana no emitiría ventana
+    > para los golpes 2..N y todo se resolvería como whiff (A1).
 4. **Ruptura de Postura → `Aturdido` reemplaza a `Repliegue`, nunca interrumpe
    otro estado** (aclara una ambigüedad que Combate deja abierta desde el lado
    del jefe — su Regla 5 solo especifica "sin importar el estado del
@@ -194,9 +207,17 @@ invisible y confiable, nunca protagonista.
    - Si `true`: el patrón **debe** declarar además una **Ventana Especial**
      interna (ver abajo). Un evento "parry exitoso" resuelto contra esa ventana
      corta la `Acción Especial` de inmediato y el jefe pasa a `Enfriamiento`.
-   - Si `false`: `Acción Especial` ignora cualquier evento de Combate hasta
-     completar su propia duración (propiedad de sistema 20), y **tiene prohibido
-     declarar una Ventana Especial** (ver "Configuraciones ilegales").
+    - Si `false`: `Acción Especial` ignora cualquier evento de Combate hasta
+      completar su propia duración (propiedad de sistema 20), y **tiene prohibido
+      declarar una Ventana Especial** (ver "Configuraciones ilegales").
+
+    **Predecesor de entrada** (4ª pasada): la entrada a `Acción Especial` solo
+    ocurre en un **límite de estado** (típicamente post-`Enfriamiento` o
+    post-`Repliegue`, declarado por el patrón), nunca preemptando un `Golpe` /
+    `En Combo` en curso — convención "resolución = límite de estado". (Su
+    duración sí es propiedad del sistema 20, por patrón; donde el patrón pueda
+    seguir a un `Golpe` conectado, aplica el piso de la Core Rule 9
+    generalizada.)
 
    > **Precondición: el booleano por sí solo no crea nada que parar.**
    > `interrumpible_por_parry = true` **no genera automáticamente una ventana de
@@ -368,10 +389,12 @@ invisible y confiable, nunca protagonista.
      Especial` son ambos visualmente animados;
    - un bus de eventos con cola, aunque se vacíe "casi inmediatamente".
 
-   **Sí es conforme**: una señal de Godot **no diferida** (conexión por defecto,
-   sin flags), porque invoca todos los `Callable` conectados de forma síncrona,
-   en orden de conexión, dentro del mismo call stack. También lo es la llamada
-   directa a método. La elección entre ambas es de `/create-architecture`.
+    **Sí es conforme**: la llamada directa a método **más** las señales
+    `B-*` síncronas de observabilidad (nunca una sin la otra — **ADR-002**,
+    Accepted 2026-09-05: la llamada porta la transición, las señales `B-*`
+    `snake_case` en pasado portan la observabilidad que C4a/E2/C5a/C3b exigen;
+    orden fijo cierre → resultado → transición). La elección del mecanismo
+    quedó cerrada por ADR-001 (dirección Combate → FSM) + ADR-002 (contrato).
 
    **Prohibición de reentrada**: ningún suscriptor de una señal de transición
    (`state_entered`, `state_exited` o equivalente) puede disparar sincrónicamente
@@ -396,11 +419,15 @@ invisible y confiable, nunca protagonista.
    `Aturdido`. Es decir, el modo de fallo es precisamente el test negativo que
    la Player Fantasy declara como criterio de fracaso del sistema.
 
-   Este GDD especifica **el efecto, no el mecanismo** — mismo patrón que Combate
-   aplica en su Regla 2 al hitstop. El *cómo* concreto (nodo autoritativo,
-   `process_priority`, orden de despacho) es decisión de `/create-architecture`
-   — ver Open Questions. Cubierto por los ACs **C4a** y **E2** — la Regla 8
-   nombra **dos** casos, y ambos necesitan verificación por contrato de señales.
+    Este GDD especifica **el efecto, no el mecanismo** — mismo patrón que Combate
+    aplica en su Regla 2 al hitstop. El *cómo* concreto quedó decidido por
+    **ADR-001** (pausa 0% Pattern-A, doble contador WallTick/DiegeticTick,
+    dirección Combate → FSM) + **ADR-002** (contrato de eventos, nombres
+    canónicos, guarda anti-reentrada, costura de test), ambos Accepted
+    2026-09-05 — ver Open Questions (verificación V1 en motor, pendiente como
+    validación, no como contenido de este GDD). Cubierto por los ACs **C4a**
+    y **E2** — la Regla 8 nombra **dos** casos, y ambos necesitan verificación
+    por contrato de señales.
 9. **Piso de justicia tras un golpe que conecta** (hallazgo de `game-designer`,
    adjudicado como bloqueante por `creative-director` en la 2ª pasada de
    `/design-review`). La Core Rule 4 introdujo un colchón de 42 ticks para que
@@ -420,9 +447,37 @@ invisible y confiable, nunca protagonista.
    > Para **todo** patrón que pueda seguir a un `Golpe` que conectó:
    > `duración(Enfriamiento) + duración(Telegrafiado) ≥ recuperacion_recepcion_max + margen_reaccion_min`
    >
-   > donde `recuperacion_recepcion_max` = **12 ticks** (techo del rango 8–12 de
-   > Recepción de golpe, propiedad de Combate) y `margen_reaccion_min` es un
-   > valor **propiedad del sistema 20**, a fijar por playtesting.
+    > donde `recuperacion_recepcion_max` = **12 ticks** (techo del rango 8–12 de
+    > Recepción de golpe, propiedad de Combate) y `margen_reaccion_min` es un
+    > valor **propiedad del sistema 20**, a fijar por playtesting — con
+    > **exigencia bilateral cerrada en este GDD** (4ª pasada): rango provisional
+    > **8–28** consumido del sistema 20 por referencia (suelo 8 + cota sup 28
+    > derivada del colchón 42); un patrón con margen fuera de rango, o sin
+    > margen declarado, **falla la validación de datos** (un margen sin suelo
+    > vuelve la invariante auto-satisfacible: C9 pasaría en verde con 0).
+
+    **Propiedad general (D3, 4ª pasada — la invariante anterior es su instancia
+    para el camino simple).** Para **toda** transición hacia un estado que
+    pueda producir una ventana de `Golpe` activa:
+
+    > `ticks_hasta_ventana_activa ≥ compromiso_restante_del_jugador + margen_reaccion_min`
+
+    | Compromiso del jugador al tomar la transición | Ticks restantes |
+    |---|---|
+    | Recepción de golpe (techo) | 12 |
+    | Recuperación de Castigo (techo) | 14 |
+    | Recuperación de whiff | 9 |
+    | Recuperación de parry exitoso | 3 |
+    | Libre (sin recuperación en curso) | 0 |
+
+    Efectos: cubre sin enumerarlos los caminos de expiración de `Aturdido` y de
+    `Enfriamiento` tras interrupción; da a `margen_reaccion_min` una **cota
+    superior de 28** derivada de una constante existente (`retreat_base` 42 ≥
+    14 + margen — un `margen > 28` invertiría la jerarquía: el camino simple
+    pediría más aire que el colchón post-Castigo); junto al suelo cierra la
+    variable libre por ambos lados; `retreat_base` recupera un solo
+    significado. El colchón de la Core Rule 4 es una *instancia* que satisface
+    esta propiedad, no un segundo mecanismo.
 
    **Este GDD declara la forma de la restricción, no el número.** Elegir
    `margen_reaccion_min` es diseño de cadencia y pertenece al sistema 20 — igual
@@ -455,7 +510,7 @@ invisible y confiable, nunca protagonista.
 |---|---|---|---|
 | Reposo | Inicio del duelo | Comienza el primer Telegrafiado | Sin ataque activo; único punto de entrada al ciclo (ver Open Questions sobre transiciones de fase) |
 | Telegrafiado | Fin de Enfriamiento/Repliegue/Reposo, o siguiente repetición dentro de En Combo | Comienza la ventana activa de Golpe | Duración y telegrafía visual por patrón — propiedad de sistema 20 |
-| Golpe | Fin de Telegrafiado | El jugador para el golpe o el golpe conecta — evento consumido de Combate (sistema 1) | Ventana activa consumida por Combate como "inicio de Golpe"/"fin de Golpe". Duración propiedad de sistema 20 |
+| Golpe | Fin de Telegrafiado | El jugador para el golpe o el golpe conecta — evento consumido de Combate (sistema 1) | Ventana activa consumida por Combate como "inicio de Golpe"/"fin de Golpe". Duración propiedad de sistema 20. Si el perdón de anticipación trunca el `Golpe`, el `fin de Golpe` se emite **en el mismo paso de resolución, después del resultado** (orden ADR-002: cierre → resultado → transición): ningún consumidor puede leerlo como ventana no-parada ni infligir daño desde él — la vía de daño de Combate exige whiff/expiración, no truncamiento (verificado en la 4ª pasada como Tier B: no se confirma el modo de fallo, no escala a Tier A) |
 | En Combo | El patrón activo es un combo (composición de sistema 20); se entra en el primer Telegrafiado del combo | Los N golpes se paran (éxito total), **o** cualquier golpe `i` (`1 ≤ i ≤ N`, incluido el final) conecta (fallo, aborta los restantes) | Envuelve 3–5 repeticiones internas de Telegrafiado→Golpe sin Repliegue/Enfriamiento entre ellas; la Postura solo se evalúa una vez, al resolverse el combo completo. **Ambas salidas van a `Repliegue`** (o a `Aturdido` en el caso de éxito con Postura resultante 0) — ver Core Rule 3 |
 | Repliegue | Golpe simple se resuelve con parry exitoso y la Postura resultante es > 0; **o** un `En Combo` se resuelve (éxito total con Postura > 0, **o** aborto por fallo — el Repliegue diferido se paga aquí, Core Rule 3); **o** el Golpe de Castigo conectó en Aturdido (colchón obligatorio, ver Core Rule 4) | Vencen `retreat_base` ticks (42, propiedad de Combate) | Ventana de bajo riesgo antes del siguiente Telegrafiado; duración fija, no varía por patrón ni por cuál de las tres entradas se usó |
 | Enfriamiento | Un `Golpe` **simple** conecta sin ser parado (Combate, AC E8), **o** una `Acción Especial` es interrumpida (Core Rule 5) | Vence la duración de Enfriamiento (propiedad de sistema 20, por patrón; con el piso de la Core Rule 9) | Cadencia normal de recuperación; no acelera ni ralentiza por el resultado (Combate, Edge Cases). **No se entra aquí por aborto de combo** — ver Core Rule 3 |
@@ -615,12 +670,12 @@ aquí si cambian — actualizar la referencia, no duplicar el valor):
 | El jugador intenta un parry durante `Acción Especial`, y esa instancia no declaró ninguna Ventana Especial | Se resuelve como **whiff** (Combate, Regla 7) — `Acción Especial` por sí sola no es una ventana de parry activa. `interrumpible_por_parry = true` **no crea automáticamente** una Ventana Especial: el patrón de sistema 20 debe declararla explícitamente para que exista algo que parar | Evita una contradicción latente entre esta Core Rule y la Regla 3 de Combate. Si `interrumpible_por_parry = true` pero el patrón no declara ninguna ventana, la interrupción nunca puede dispararse — es una configuración incoherente que sistema 20 debe evitar, no algo que este GDD resuelva en runtime |
 | El jugador **falla** el parry contra una Ventana Especial declarada (la ventana se cierra sin parry exitoso) | La ventana se cierra **sin dañar al jugador**; la `Acción Especial` continúa hasta su duración natural y se completa (el jefe consigue su habilidad) → `Telegrafiado`. **El estado `Acción Especial` nunca reduce la Vida del jugador, en ninguna rama** | Decisión de usuario en la 2ª pasada de `/design-review`. La Ventana Especial es una ventana de *oportunidad*, no un ataque: el castigo por fallarla es que la habilidad se completa. Que una curación fuese además un ataque sería doble castigo por un solo error y agravaría el riesgo de "jefe con curación sin castigo" de `systems-index.md`. Es también la razón por la que la Ventana Especial no puede reutilizar el contrato de `Golpe`: la Regla 6 de Combate hace que todo `Golpe` no parado reduzca la Vida del jugador |
 | Sistema 20 configura `interrumpible_por_parry = false` **y además** declara una Ventana Especial | **Configuración ilegal**: falla ruidosamente al cargar/entrar (AC **C5d**). Una ventana que nada puede interrumpir es semánticamente vacía | Hacer ilegal la configuración cierra por construcción la colisión entre esta Core Rule ("con `false` ignora cualquier evento de Combate") y el **AC C5 de Combate** ("entra en Aturdido sin importar el estado"). Sin Ventana Especial bajo `false`, la Postura no puede cambiar durante ese estado (Core Rule 4) y la colisión es inalcanzable — no hay precedencia que adjudicar entre los dos documentos |
-| El duelo termina por **derrota del jugador** (su Vida llega a 0) mientras el jefe está a mitad de `En Combo` o de `Acción Especial` | La FSM del jefe **se congela de inmediato**: no ejecuta ninguna transición más, libera sus temporizadores, descarta el índice `i` del combo en curso, y **no emite ninguna señal de transición** (en particular, nunca "duelo ganado"). El estado del jefe no impide, retrasa ni revierte la derrota | Espejo del **AC E7 de Combate**, que ya declara la prioridad absoluta de la derrota desde su lado pero no dice qué debe hacer esta FSM. `En Combo` es el único estado contenedor con bucle contado y temporizadores propios — es exactamente donde una terminación abrupta filtraría estado a la siguiente run si nadie declara el comportamiento |
+| El duelo termina por **derrota del jugador** (su Vida llega a 0) mientras el jefe está a mitad de `En Combo` o de `Acción Especial` | La FSM del jefe **se congela de inmediato**: no ejecuta ninguna transición más, libera sus temporizadores, descarta el índice `i` y el `window_id` en curso (nunca se reutilizan en el siguiente duelo), y **no emite ninguna señal de transición** (en particular, nunca "duelo ganado"). Si la derrota coincide con un aborto de combo pendiente, la congelación **suprime la emisión de `combo_abortado`** (se registra la supresión en log): la derrota tiene prioridad absoluta y C3b no es exigible sobre un duelo ya terminado. El estado del jefe no impide, retrasa ni revierte la derrota. **Contabilidad de pausa/freeze (F4, 5ª pasada)**: si la derrota cae durante un freeze, el restore del reloj lo gobierna Feedback R11/R12 (`paused=false` primero, `trauma:=0`, cues de Cola suprimidas, latch descartado — nada post-mortem); esta FSM no restaura el reloj por su cuenta | Espejo del **AC E7 de Combate**, que ya declara la prioridad absoluta de la derrota desde su lado pero no dice qué debe hacer esta FSM. `En Combo` es el único estado contenedor con bucle contado y temporizadores propios — es exactamente donde una terminación abrupta filtraría estado a la siguiente run si nadie declara el comportamiento |
 | La interrupción de `Acción Especial` (parry exitoso) y su finalización natural por duración vencen en el mismo tick | Se prioriza la **interrupción** — se registra como interrumpida, nunca como completada | Un evento "parry exitoso" nunca debe ignorarse silenciosamente por un empate de temporización; es más seguro y consistente que la lectura "el jugador rompió esto" gane siempre el empate |
 | El jefe llega a `Muerto` (Vida = 0) durante la resolución de un Golpe de Castigo | Transición directa e inmediata a `Muerto` — la Postura **no** se restaura en ese caso (a diferencia de la salida normal de Aturdido, que sí la restaura) | `Muerto` es terminal y tiene prioridad absoluta: restaurar la Postura de un jefe que ya no existe no tiene efecto útil y complicaría la implementación sin ninguna ganancia de diseño |
 | El jefe solo puede entrar en `Muerto` desde `Aturdido` | Ninguna otra transición hacia `Muerto` existe en este esqueleto — `Telegrafiado`, `Golpe`, `En Combo`, `Repliegue`, `Enfriamiento` y `Acción Especial` nunca exponen la Vida del jefe a daño | El Golpe de Castigo es la única fuente de daño del jugador (Combate, Fórmula 6), y solo puede ejecutarse mientras el jefe está en `Aturdido` |
-| El Golpe de Castigo **conecta** (instante de contacto) exactamente en el último tick de `ventana_castigo` | Se prioriza la **conexión** sobre la expiración — cuenta como Golpe de Castigo exitoso, no como ventana expirada. **Este esqueleto gobierna el instante de _contacto_, no el de _pulsación_** | Límite inclusivo, coherente con el precedente ya fijado por Combate para `parry_window`: nunca excluir un evento válido por un solo tick de borde. **Convención de conteo (normativa para este GDD)**: `restantes(T) = ventana_castigo − T`; en el tick 110 restan 10. El escenario es real pese a la regla de input de Combate: los Animation Feel Targets de Combate dan al Golpe de Castigo **6–8 ticks de inicio + 4–6 fotogramas activos**, así que un Castigo pulsado en el tick 110 (legal: restan 10 > 6) tiene su banda de contacto en los ticks **116–124** — el tick 120 cae dentro. *(La justificación anterior apelaba solo a "6–8 ticks de anticipación", con lo que el máximo era 110+8 = **118 ≠ 120** y el ejemplo no cerraba. Corregido en la 2ª pasada de `/design-review`: los ticks que faltaban salen de los fotogramas activos, que el texto no mencionaba.)* |
-| El jugador **pulsa** el botón en el último tick de `ventana_castigo` (tick 120) | **No es un Golpe de Castigo** — la pulsación se reinterpreta como Parry, según la regla de desambiguación de input de Combate. Este esqueleto nunca ve un evento de Castigo en ese tick, así que no hay transición que resolver | Propiedad de Combate, no de este GDD: su regla exige `restantes > gracia_salida_castigo` (6) para clasificar la pulsación como Castigo, y en el tick 120 restan 0. **El último tick en que una pulsación puede clasificarse como Castigo es el 113**: con la convención `restantes(T) = 120 − T` de la fila anterior, en 113 restan **7 > 6** ✓, y en 114 restan **6**, y `6 > 6` es **falso** ✗. Se documenta aquí porque la fila anterior habla de "conectar" y sin esta aclaración las dos se leen como contradictorias. *(La versión anterior decía **114** resolviendo `120 − 6` como una igualdad en vez de la desigualdad **estricta** que la regla de Combate exige — habría desplazado el borde Castigo/Parry un tick, haciendo que `gracia_salida_castigo` se comportara como 7 en vez de 6. Corregido en la 2ª pasada. **Causa raíz señalada a Combate**: su prosa "los últimos 6 fotogramas" (= ticks 115–120) discrepa en un tick de su propia regla normativa de desambiguación, que es la que manda.)* |
+| El Golpe de Castigo **conecta** (instante de contacto) exactamente en el último tick de `ventana_castigo` | Se prioriza la **conexión** sobre la expiración — cuenta como Golpe de Castigo exitoso, no como ventana expirada. **Este esqueleto gobierna el instante de _contacto_, no el de _pulsación_** | Límite inclusivo, coherente con el precedente ya fijado por Combate para `parry_window`: nunca excluir un evento válido por un solo tick de borde. **Convención de conteo (consumida de Combate por referencia — el símbolo `restantes(T)` lo posee Combate, enmienda E; nunca literal aquí)**: `restantes(T) = ventana_castigo + 1 − T` (conteo **inclusivo**); en el tick 110 restan 11. El escenario es real pese a la regla de input de Combate: los Animation Feel Targets de Combate dan al Golpe de Castigo **6–8 ticks de inicio + 4–6 fotogramas activos**, así que un Castigo pulsado en el tick 110 (legal: restan 11 > 6) tiene su banda de contacto en los ticks **116–124** — el tick 120 cae dentro. *(Conteo corregido a inclusivo en la 4ª pasada (D1): la convención exclusiva anterior medía la zona de gracia como `g + 1`.)* *(La justificación anterior apelaba solo a "6–8 ticks de anticipación", con lo que el máximo era 110+8 = **118 ≠ 120** y el ejemplo no cerraba. Corregido en la 2ª pasada de `/design-review`: los ticks que faltaban salen de los fotogramas activos, que el texto no mencionaba.)* |
+| El jugador **pulsa** el botón en el último tick de `ventana_castigo` (tick 120) | **No es un Golpe de Castigo** — la pulsación se reinterpreta como Parry, según la regla de desambiguación de input de Combate. Este esqueleto nunca ve un evento de Castigo en ese tick, así que no hay transición que resolver | Propiedad de Combate, no de este GDD: su regla exige `restantes > gracia_salida_castigo` (6) para clasificar la pulsación como Castigo, y en el tick 120 resta 1 (conteo inclusivo), y `1 > 6` es **falso** ✗. **El último tick en que una pulsación puede clasificarse como Castigo es el 114**: con la convención inclusiva `restantes(T) = ventana_castigo + 1 − T` (poseída por Combate), en 114 restan **7 > 6** ✓, y en 115 restan **6**, y `6 > 6` es **falso** ✗ — verificable en ambos bordes: 114 → Castigo, 115 → Parry. Se documenta aquí porque la fila anterior habla de "conectar" y sin esta aclaración las dos se leen como contradictorias. *(Cifra corregida de 113 a **114** en la 4ª pasada (D1, adjudicación 2026-08-04): la corrección de la 2ª pasada estaba invertida — bajo conteo exclusivo la zona de gracia medía 7 ticks. Las tres formulaciones de Combate son consistentes entre sí bajo conteo inclusivo. **Se retira, por falsa, la acusación de "causa raíz señalada a Combate"** que esta fila contenía: confirmado ausente también del lado de Combate.)* |
 | El jugador para 2 de 3 golpes de un combo y falla el tercero (`i = N = 3`) | El combo se aborta (Core Rule 3): el jefe sale a **`Repliegue`**, **sin** daño de Postura parcial por los 2 golpes ya parados. Fallar el golpe **final** es un aborto como cualquier otro — no una cuarta rama | Combate manda `Repliegue` en el aborto de combo en cuatro sitios: su **Regla 4** (excepción de combos), su **Regla 9** ("Fallo a mitad de combo"), su **Fórmula 4** (excepción) y su **AC D4**. La gracia de esos 2 parries sí se conserva (propiedad de Combate, ya absorbida); la consecuencia de estado es propiedad de este GDD, pero el destino lo fija Combate. *(La versión anterior de esta fila decía `Enfriamiento` y afirmaba "Coincide con la Regla 9 de Combate" — una cita que afirmaba una comprobación que nadie había hecho. Corregido en la 2ª pasada de `/design-review`.)* |
 | Sistema 20 configura un patrón `En Combo` con N fuera del rango legal 3–5 | **Gate primario**: la validación en carga la posee el **AC C16 de Combate**, que ya exige que un patrón con `N=2` o `N≥6` falle la validación de datos al cargar, sin degradarse en silencio. **Defensa en profundidad**: además, al entrar en `En Combo`, este esqueleto asevera `3 ≤ N ≤ 5` y falla ruidosamente si no se cumple (AC **C7**) — nunca ejecuta un combo de longitud ilegal | El rango `3 ≤ N ≤ 5` es una restricción de autoría de contenido (Combate, R7 + diseño de audio), no una condición que pueda ocurrir válidamente en juego. La aserción propia no duplica la *propiedad* de la regla (sigue siendo de Combate): evita que un fallo del gate primario se manifieste como comportamiento indefinido silencioso dentro del bucle contado de la Regla 3 |
 
@@ -630,6 +685,7 @@ aquí si cambian — actualizar la referencia, no duplicar el valor):
 |---|---|---|
 | Combate de Parry-Absorción (1) | Bidireccional | Este sistema provee los eventos "inicio/fin de Golpe" y "inicio/fin de Ventana Especial"; Combate provee de vuelta el resultado de cada Golpe ("parry exitoso"/"parry fallido") y la Postura resultante, que este sistema consume para bifurcar Repliegue/Aturdido/Enfriamiento. **Requiere dos enmiendas en el doc de Combate** — ver Interactions |
 | IA de Combate de Jefes — Patrones (20) | Bidireccional, asimétrica | IA depende de este sistema para el conjunto cerrado de estados. Este sistema depende de IA para duraciones concretas y composición de patrones. **Este sistema le impone**: rango `3 ≤ N ≤ 5` (Regla 7), el piso de justicia de la **Core Rule 9**, y la prohibición de declarar Ventana Especial bajo `interrumpible_por_parry = false` (Core Rule 5) |
+| Feedback de Impacto (4) + Feedback Sonoro (16) | Consumen (fila reversa) | Estos sistemas leen `combo_abortado(i, N)` para diferenciar el feedback de "fallé el primero" vs. "clavé N−1 de N". **Evento de completación ÚNICO y declarado** (5ª pasada 2026-09-06, cierra la deuda "sin fila ni evento"): `accion_especial_completada(habilidad_id: StringName, tick: int)` — nombre + payload cerrados por ADR-002 §2, orden fijo `ventana_especial_cerrada(fue_parada=false)` → `accion_especial_completada` → `estado_ingresado(TELEGRAFIADO)` en el mismo paso de resolución; desempate E2: interrupción gana, completación cero veces. Su fila de feedback vive en Visual/Audio ("Acción Especial se completa sin interrupción", distinguible del cierre-evento 16, V7 de Combate) — desbloquea C22 de Combate y C5b-DEF de Feedback; la variante sorda provisional queda retirada a nivel de diseño (el runtime la sigue hasta la historia de cableado). `castigo_conectado(vida_restante: float, fue_letal: bool)` es un evento DISTINTO (mitad contacto de ADR-002 §5, conexión-gana en el último tick de `ventana_castigo`), nunca un segundo evento de completación |
 | Gestión de Run / Estructura de Ascenso (3) | Gestión de Run depende de este sistema | Consume el evento "duelo ganado", emitido al entrar en `Muerto` |
 | Lucifer — Dos Formas y Reactividad (11) | Futura, diferida | Sin interfaz concreta, pero **con vía de extensión declarada**: sub-estado anidado (típicamente `Acción Especial` no interrumpible), no estado top-level nuevo — ver Regla 7 |
 | Sistema de Efectos de Estado (19) | Futura, no resuelta | Si un futuro efecto de estado añade daño fuera del Golpe de Castigo, deberá declarar su interacción con `Muerto` |
@@ -664,7 +720,11 @@ aquí si cambian — actualizar la referencia, no duplicar el valor):
 > y las duraciones de Telegrafiado/Golpe/Enfriamiento) son tuning knobs de
 > otros sistemas (Combate o IA de Combate de Jefes) — ver Formulas y
 > Dependencies para las referencias cruzadas. Este esqueleto no los redefine
-> ni les añade un rango propio.
+> ni les añade un rango propio. **Propiedad explícita (5ª pasada)**:
+> `retreat_base` (42) la posee Combate — aquí se consume por referencia para
+> las tres entradas de `Repliegue` (Core Rules 2/3/4) y para el colchón
+> post-Castigo, nunca como valor propio. HUD-13 no consume nada de este
+> esqueleto (UI Requirements): Postura/Vida van Combate → HUD.
 
 ## Visual/Audio Requirements
 
@@ -756,11 +816,15 @@ de este esqueleto de estados. Sin requisitos de UI propios.
       `Repliegue` ni a `Enfriamiento`, **no** se evalúa la bifurcación de la
       Regla 2, **no** se aplica daño de Postura, y transiciona directamente a
       `Telegrafiado` del golpe `j+1`, con el índice interno incrementado a
-      `j+1`.
-      *(Añadido en la 2ª pasada a señalamiento de `qa-lead`: la transición
-      interna del combo —el caso más frecuente dentro del estado contenedor— no
-      tenía ningún AC. Es el espejo de la segunda cláusula del AC **D4** de
-      Combate, "no se dispara Repliegue en absoluto".)*
+      `j+1` — verificado por **orden y conteo de señales dentro del mismo
+      paso de resolución** (cero `state_entered(Repliegue)`, cero
+      evaluaciones de daño de Postura en el spy), **no** consultando el estado
+      tras el tick.
+      *(Endurecido en la 4ª pasada a señalamiento de proceso (B7): la versión
+      anterior verificaba por inspección de estado final — la formulación que
+      B7 declaró bloqueante en C4a/E2, reintroducida en el camino más
+      frecuente del juego. Es el espejo de la segunda cláusula del AC **D4**
+      de Combate, "no se dispara Repliegue en absoluto".)*
 - [ ] **C4a**: GIVEN `Golpe`/`En Combo` se resuelve con éxito y la Postura
       resultante llega a 0, THEN **nunca se emite la señal/callback
       `state_entered(Repliegue)`** — la máquina despacha directamente
@@ -779,7 +843,11 @@ de este esqueleto de estados. Sin requisitos de UI propios.
       (duración `retreat_base`) antes de `Telegrafiado`.
 - [ ] **C4c**: GIVEN el jefe en `Aturdido` y `ventana_castigo` expira sin
       conectar, THEN la Postura se restaura por completo y el jefe transiciona
-      directo a `Telegrafiado`, sin colchón.
+      directo a `Telegrafiado`, sin colchón. **Vía conforme (F3.1, 5ª pasada)**:
+      la expiración la resuelve el resolver por conteo entero de `DiegeticTick`
+      en su propio `_physics_process` (mismo mecanismo conforme que la Regla 8 /
+      ADR-001); prohibidos `SceneTreeTimer` / `Tween` / `await` / polling desde
+      un `_physics_process` independiente para este camino.
 - [ ] **C4d**: GIVEN el jefe en `Telegrafiado`, `Enfriamiento`, `Repliegue`,
       `Reposo` o `Acción Especial`, WHEN llega cualquier evento de Combate,
       THEN la Postura del jefe **nunca cambia de valor**.
@@ -839,14 +907,24 @@ de este esqueleto de estados. Sin requisitos de UI propios.
       de regresión el día que alguien añada un décimo estado sin pasar por el
       procedimiento de enmienda de la Regla 7.)*
 - [ ] **C9** (Config/Data, defensa en profundidad — Core Rule 9): GIVEN
-      cualquier patrón declarado por el sistema 20 que pueda seguir a un `Golpe`
-      que conectó, WHEN se valida su configuración al cargar, THEN se cumple
-      `duración(Enfriamiento) + duración(Telegrafiado) ≥ 12 + margen_reaccion_min`,
-      y un patrón que la incumpla **falla la validación de datos**, nunca se
-      ejecuta degradado en silencio. El test **no fija** `margen_reaccion_min`
-      (es propiedad del sistema 20): asevera la desigualdad sobre los valores que
-      el patrón declare. `12` es el techo del rango 8–12 de Recepción de golpe,
-      consumido de Combate por referencia, no duplicado.
+      **un par ordenado de patrones** (A = patrón que contiene el `Golpe` que
+      conectó, B = patrón que puede seguirle) declarados por el sistema 20,
+      WHEN se valida su configuración al cargar, THEN se cumple
+      `duración(Enfriamiento de A) + duración(Telegrafiado de B) ≥ 12 + margen_reaccion_min`,
+      evaluado siempre en el **techo** de Recepción (12, consumido de Combate
+      por referencia, no duplicado), con `margen_reaccion_min` dentro del
+      rango bilateral 8–28; y GIVEN la salida de `Aturdido` por expiración
+      (camino donde la propia regla de gracia de Combate induce un input que
+      produce whiff), THEN el mismo piso se verifica sobre el par
+      (Aturdido-expirado → siguiente `Telegrafiado`). Un par que incumpla
+      **falla la validación de datos**, nunca se ejecuta degradado en
+      silencio. El test **no fija** `margen_reaccion_min` (es propiedad del
+      sistema 20): asevera la desigualdad sobre los valores que los patrones
+      declaren.
+      *(Reescrito en la 4ª pasada: la versión anterior validaba un patrón
+      aislado con la variable que el propio validado suministraba — el par
+      peligroso real son dos patrones **distintos** — y no cubría la salida
+      de `Aturdido` por expiración.)*
       *(Añadido en la 2ª pasada. Sin este AC, la Core Rule 9 sería prosa
       normativa sin criterio verificable — exactamente el patrón que este
       documento critica en otros sitios.)*
@@ -871,7 +949,7 @@ de este esqueleto de estados. Sin requisitos de UI propios.
 - [ ] **E3**: GIVEN el Golpe de Castigo **impacta** (instante de contacto)
       exactamente en el último tick de `ventana_castigo` (tick 120), THEN cuenta
       como conexión (→ `Repliegue`), no como expiración. Caso de prueba
-      concreto: pulsación en el tick 110 (legal: `restantes = 120 − 110 = 10 > 6`)
+      concreto: pulsación en el tick 110 (legal: `restantes = 120 + 1 − 110 = 11 > 6`)
       cuyo contacto cae en el tick 120, dentro de la banda de contacto 116–124
       que producen los 6–8 ticks de inicio más los 4–6 fotogramas activos del
       Golpe de Castigo (Combate, Animation Feel Targets).
@@ -879,14 +957,16 @@ de este esqueleto de estados. Sin requisitos de UI propios.
       esqueleto **no recibe ningún evento de Golpe de Castigo** (Combate lo
       reinterpreta como Parry) y el jefe sale de `Aturdido` por expiración
       (→ `Telegrafiado`, sin colchón, per C4c). El último tick en que una
-      pulsación puede clasificarse como Castigo es el **113**: la regla de
+      pulsación puede clasificarse como Castigo es el **114**: la regla de
       Combate exige `restantes > gracia_salida_castigo` (desigualdad
-      **estricta**), y con `restantes(T) = 120 − T` eso da `T < 114`, es decir
-      `T ≤ 113`. Verificable en ambos lados del borde: 113 → Castigo, 114 →
-      Parry.
-      *(Cifra corregida de 114 a 113 en la 2ª pasada de `/design-review`: la
-      versión anterior resolvía `120 − 6` como igualdad en vez de la desigualdad
-      estricta, desplazando el borde un tick.)*
+      **estricta**), con `restantes(T) = ventana_castigo + 1 − T` en conteo
+      **inclusivo** (símbolo poseído por Combate, consumido aquí por referencia —
+      nunca literal). Verificable en ambos lados del borde y en ambos extremos
+      del estado: 114 → Castigo, 115 → Parry; `T = 1` → Castigo, `T = 120` →
+      Parry. **El test debe derivar el borde de los dos knobs, no codificar
+      114**: ambos son configurables y un retune lo mueve.
+      *(Cifra corregida de 113 a **114** en la 4ª pasada (D1): la corrección de
+      la 2ª pasada estaba invertida — medía la zona de gracia como `g + 1`.)*
       *(E3/E3b desdoblados en `/design-review` 2026-08-03: `systems-designer`
       leyó el AC original como una contradicción con la regla de input de
       Combate y `qa-lead` lo dio por válido. Ambas lecturas eran correctas
@@ -990,9 +1070,9 @@ de este esqueleto de estados. Sin requisitos de UI propios.
 | Si un futuro Sistema de Efectos de Estado (sistema 19) añade daño a la Vida del jefe fuera del Golpe de Castigo (p. ej. quemadura/veneno por tríada), ¿cómo interactúa con `Muerto` y con la restricción E5 ("la Vida solo cambia en Aturdido")? | GDD de Sistema de Efectos de Estado (sistema 19) | Al autorar sistema 19 | Abierta — este GDD asume una única fuente de daño (Combate, Fórmula 6); un efecto de estado que dañe fuera de Aturdido rompería E5 tal como está escrito hoy |
 | ~~¿Cómo extiende Lucifer (sistema 11) este esqueleto para sus dos formas?~~ | ~~Sistema 11~~ → **este GDD** | — | **RESUELTA** (`/design-review` 2026-08-03, decisión de usuario). Sigue sin haber estado de transición de fase top-level, pero la **vía** ya no está indefinida: sub-estado anidado dentro de un estado existente, sin enmienda (Regla 7). Cierra la crítica de `ai-programmer` de que el conjunto cerrado estaba "cerrado a la espera de una enmienda que ya sabemos que viene". Lo que sigue siendo propiedad del sistema 11 es *qué* hace la transición, no *dónde* vive |
 | ¿Qué valores de placeholder usa un ingeniero para probar este esqueleto de forma aislada (duraciones de Telegrafiado/Golpe/Enfriamiento) antes de que exista el sistema 20? | `/test-setup` / `dev-story` | Antes del primer sprint de implementación | Abierta — dependencia blanda ya documentada en Dependencies, pero sin valores concretos de prueba |
-| ¿Cuál es el **mecanismo concreto** que garantiza la resolución síncrona de la Regla 8? Es decir: ¿nodo autoritativo de tiempo que llama al FSM, `process_priority` explícito entre el nodo de Combate y el del jefe, o despacho directo por llamada de método sin señal intermedia? La Regla 8 fija **qué debe ser cierto** (nada fuera del call stack síncrono que originó la resolución) pero deliberadamente no elige el cómo — y declara conformes **tanto** la llamada directa **como** la señal no diferida | `/create-architecture` (probable ADR) | Antes del primer sprint de implementación | Abierta — **es el punto de mayor riesgo técnico de este GDD**. `godot-specialist` confirmó que Godot 4.7 no garantiza orden de ejecución entre nodos con `_physics_process` independientes salvo vía `process_priority`, y que el modo de fallo es un tick de retraso silencioso, no un crash. Debe resolverse con un ADR, no improvisarse en `dev-story`. El ADR debe además fijar los **nombres canónicos de señal** (`snake_case`, tiempo pasado, per `coding-standards.md`), que hoy solo existen en prosa |
+| ¿Cuál es el **mecanismo concreto** que garantiza la resolución síncrona de la Regla 8? Es decir: ¿nodo autoritativo de tiempo que llama al FSM, `process_priority` explícito entre el nodo de Combate y el del jefe, o despacho directo por llamada de método sin señal intermedia? La Regla 8 fija **qué debe ser cierto** (nada fuera del call stack síncrono que originó la resolución) pero deliberadamente no elige el cómo — y declara conformes **tanto** la llamada directa **como** la señal no diferida | ADR-001 + ADR-002 (Accepted 2026-09-05) | — | **RESUELTA** en la 4ª pasada: dirección Combate → FSM (ADR-001) + llamada directa con señales `B-*` síncronas de observabilidad, nunca una sin la otra (ADR-002). Pendiente como **validación, no como diseño**: V0/V1/V-batch puros en `tests/unit/jefe/fsm_contrato_spy_test.gd` (5ª pasada; gate Logic) + verificación V1 en motor 4.7.2 en escena mínima (señal por defecto emite sincrónicamente; bloqueante de la primera historia que cablee FSM) |
 | ~~La sub-ventana de Golpe que `Acción Especial` puede declarar internamente — ¿reutiliza el contrato de eventos de un Golpe normal o necesita su propio evento distinto?~~ | ~~Sistema 20~~ → **este GDD** | — | **RESUELTA** (2ª pasada de `/design-review`, 2026-08-03, decisión de usuario). **Evento propio**: `inicio`/`fin de Ventana Especial`, distinto del par de `Golpe`. Reutiliza la semántica de temporización, no la identidad de evento. `calidad_timing` (Fórmula 1) no juega ningún papel — no hay daño de Postura que modular. Ver Core Rule 5. Era la única vía de cumplir a la vez la garantía de "sin Postura ni Repliegue" y el AC **C4** de Combate |
-| ¿Qué valor toma `margen_reaccion_min` en la invariante de la Core Rule 9 (piso de justicia)? Este GDD declara la forma de la desigualdad pero deliberadamente no elige el número | Sistema 20 / playtesting | Al autorar sistema 20 | Abierta — el AC **C9** asevera la desigualdad sobre los valores que el patrón declare, así que es verificable sin fijar el número hoy |
+| ¿Qué valor toma `margen_reaccion_min` en la invariante de la Core Rule 9 (piso de justicia)? Este GDD declara la forma de la desigualdad pero deliberadamente no elige el número | Sistema 20 / playtesting | Al autorar sistema 20 | Abierta para el **valor**; cerrada la **bilateralidad** (4ª pasada): rango provisional 8–28 por referencia (#20 F1), cota sup 28 derivada del colchón 42, sin-margen o fuera-de-rango = FAIL_LOAD. El AC **C9** asevera la desigualdad sobre los valores que el patrón declare, así que es verificable sin fijar el número hoy |
 | ¿Qué sistema **consume** el índice `i` y la longitud `N` del evento de aborto de combo para diferenciar el feedback de "fallé el primero" vs. "clavé 4 de 5"? Este GDD solo expone el dato | Feedback de Impacto (4) y Feedback Sonoro (16), coordinado por `/architecture-review` | Al autorar los sistemas 4 y 16 | Abierta — señalado por `game-designer` en la 2ª pasada: el dato está expuesto pero ningún GDD declara todavía que vaya a leerlo, así que el problema de percepción original podría reaparecer intacto pese al arreglo del esqueleto. Es un hueco de **trazabilidad**, no un defecto de este documento |
 | ¿Debe el evento "duelo ganado" llevar algún dato adicional (qué jefe, qué tríada, tiempo del duelo) que Gestión de Run o Meta-progresión de Llaves necesiten, o basta con la señal booleana? | GDD de Gestión de Run (sistema 3) | Al autorar sistema 3 | Abierta — este GDD solo declara que el evento se emite, no su payload |
 | ¿Debe el colchón de `Repliegue` tras un Castigo conectado (42 ticks, reutilizando `retreat_base`) tener su propia duración distinta a la del Repliegue post-parry normal, si el playtesting revela que el contexto (justo tras un Golpe de Castigo pesado) se siente distinto a un parry en medio de un intercambio? | Playtesting | Tras el slice vertical | Abierta — decisión deliberada de reutilizar la constante existente en vez de crear una nueva; revisar si el feel lo justifica |

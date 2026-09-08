@@ -19,7 +19,7 @@ El jugador debe sentir que carga una luz que no era para él: no hacerse más fu
 
 1. **G1 — Ledger triple y vocabulario. Propiedad de #5.** El estado es exactamente tres floats `≥0` JSON-safe: `gracia_actual` (bolsa gastable), `corrupcion_actual` (progreso hacia el Clímax #6), `poso_irreversible` (suelo). Invariantes: `poso ≤ corrupcion ≤ techo`, `0 ≤ gracia ≤ techo`. No existe otro estado de gracia. Verba: `tomar / cargar / aliviar / poso / dejar ir`; jamás loot/almas/maná (Pilar 5).
 2. **G2 — ACUMULACIÓN: faucet único, event-driven.** Ante cada `parry_exitoso` de Combate (simples, intermedios de combo y VE-parada), ejecución atómica: `gracia_ganada = 1.0 × modificador_combo` (`1.0` simple/VE, `0.5` por parry en combo — consumido verbatim de Combate, R7); `gracia_actual += gracia_ganada; corrupcion_actual += gracia_ganada`. La misma barra es progresión y sufrimiento (Pilar 1). Combo N=3–5 rinde `1.5–2.5` por 1 instancia de Postura: rico en gracia, pobre en postura, por construcción.
-3. **G3 — VE-parada: el peor intercambio, nunca gratis (R9b).** Concede `1.0` a ambos ledgers con cero Postura y cero Repliegue (Regla 4 Combate): corrupción-por-progreso infinita. Mata la dominación invertida (parar dominaría a ignorar). Acotado por R9a (Combate: Σ severidad ≤ 3 por duelo, D13; #5 no asume conteo: el cap efectivo es min(3 VE, Σ ≤ 3); si #5 descontase jamás la gracia de VE, R9a debe re-derivarse).
+3. **G3 — VE-parada: el peor intercambio, nunca gratis (R9b).** Concede `1.0` a ambos ledgers con cero Postura y cero Repliegue (Regla 4 Combate): corrupción-por-progreso infinita. Mata la dominación invertida (parar dominaría a ignorar). Acotado por R9a (Combate: Σ severidad ≤ 3 por duelo, D13): #5 no asume conteo de VEs — el gate es Σ+s > 3 con el `s` declarado del patrón (stub D13 hasta el loader del sistema 20), nunca un tope de conteo; si #5 descontase jamás la gracia de VE, R9a debe re-derivarse).
 4. **G4 — ELECCIÓN EXPLÍCITA: independiente, irrevocable, post-reliquia.** Tras cada ángel, pantalla Decisión (propiedad de #5, enrutada por #15): exactamente `TOMAR / DEJAR IR`. Independiente por ángel (`decision_absorber[i] ∈ {0,1}`, `angeles_absorbidos = suma`). Commit atómico e inmediato en memoria; Guardado solo escribe SUS en `post_decision`, jamás `pre_eleccion` (R5 Guardado). Sin re-elegir por recarga, sin absorción parcial, sin omitir.
 5. **G5 — TOMAR: los tres efectos disparan juntos, nunca selectivos.** (a) `angeles_absorbidos += 1` → Fórmula 5 Combate (`+18` Vida Máx v1.0, plano); (b) `poso_irreversible += 12.0` plano v1.0 (visión-9: decreciente por conteo, G9); (c) desbloquea el poder robado de ese coro (ficción por identidad, magnitudes idénticas — preserva independencia de orden). Sin lump inmediato de gracia (evita doble-contar el ingreso por parry). Reparación de invariante: TOMAR eleva `C`: `C' = max(C, poso')` — si el suelo adelantó a `C` (gasto hasta el suelo + TOMAR), el commit levanta `C` al nuevo suelo; nunca al revés.
 6. **G6 — DEJAR IR: la pureza tiene mecánica, no solo narrativa.** Sin Vida, sin poso, sin poder. En su lugar: `corrupcion_actual = max(poso, corrupcion_actual − 6.0)`. Sin purga, absorber dominaría estrictamente en supervivencia y el dilema colapsaría; con purga: TOMAR = +supervivencia/+inevitabilidad, DEJAR IR = −supervivencia/−inevitabilidad. La run pura (`absorbidos = 0`) es válida y la más dura. R10-safe: no toca Vida, ciclos, parries/ciclo ni cobertura.
@@ -82,7 +82,7 @@ The `corrupcion_ganada` formula is defined as:
 | banda VE | `banda_R9b` | float | `(0, 1.5]` owned-#5 provisional | banda legal por ganancia (Combate R9b solo exige coste ≠ 0; este GDD fija 1.0-por-VE dentro de banda y la ofrece como constraint-handoff a #1) |
 
 **Output Range:** `{0.5, 1.0} ⊂ (0, 1.5]` (banda_R9b); satisfecha por igualdad en ambos lados.
-**Example:** simple → ambos ledgers `+1.0`; en combo → ambos `+0.5`; VE-parada → ambos `+1.0` sin Postura ni daño; máx efectivo min(3 VE a 1.0, Σ severidad ≤ 3) → ≤3.0 (ver G3/GR-08).
+**Example:** simple → ambos ledgers `+1.0`; en combo → ambos `+0.5`; VE-parada → ambos `+1.0` sin Postura ni daño; cap por Σ severidad ≤ 3 (con s≡1.0: máx 3 VE/duelo → ≤3.0; ver G3/GR-08).
 
 The `gasto` formula is defined as:
 
@@ -277,7 +277,7 @@ Gate levels: Logic/Integration = BLOCKING (`tests/unit/gracia/`, `tests/integrat
 - [ ] **GR-05 [A]** — GIVEN cero, WHEN 3 parries combo (mod 0.5), THEN G=C=1.5; con 5 → 2.5 (rico/pobre por construcción).
 - [ ] **GR-06 [A]** — GIVEN fuera de resolución de parry, WHEN whiff, daño recibido, hub idle 600 ticks o pickup reliquia, THEN ΔG=ΔC=0 en los cuatro (faucet único).
 - [ ] **GR-07 [A]** — GIVEN G=2,C=5,P=0, WHEN VE-parada, THEN G=3, C=6, postura_delta=0, repliegue=0 (el peor intercambio).
-- [ ] **GR-08 [A]** — GIVEN Σ severidad = 3 consumida (stub D13 severidad hasta sistema 20) OR 3 VE a 1.0, WHEN siguiente VE mismo duelo, THEN +0/+0 con log; GIVEN Σ < 3, THEN +1.0/+1.0 (cap efectivo min(3 VE, Σ ≤ 3); ver G3).
+- [ ] **GR-08 [A]** — GIVEN duelo con Σ_severidad consumida (suma de los `s` declarados de las VE ya resueltas; stub D13(c) hasta el loader del sistema 20), WHEN siguiente VE-parada con severidad declarada `s`, THEN si Σ+s > 3 → +0/+0 con log (cap agregado R9a); si no → +1.0/+1.0. Sin cláusula de conteo: con s≡1.0 caben hasta 3 VE/duelo como consecuencia de Σ, no como gate; con s=2.0 la 2ª VE ya puede bloquearse (Σ=4>3).
 - [ ] **GR-09 [A]** — GIVEN stub 3 duelos, WHEN TOMAR/DEJAR IR/pendiente, THEN decision_absorber=[1,0], n=1=suma, pendiente ofrece exactamente {TOMAR, DEJAR IR}.
 - [ ] **GR-10 [A]** — GIVEN TOMAR committed + SUS `post_decision` + Hub, WHEN recargar e intentar re-decidir u omitir commit, THEN decision_absorber=[1], 2º commit RECHAZADO por guardia, cero rutas victoria→Hub sin commit.
 - [ ] **GR-11 [A]** — GIVEN Decisión abierta sin SUS nueva, WHEN TOMAR, THEN memoria actualiza síncrona pre-animación; espía: 1 write `post_decision`, 0 `pre_eleccion`.
@@ -306,7 +306,7 @@ Gate levels: Logic/Integration = BLOCKING (`tests/unit/gracia/`, `tests/integrat
 
 **Fórmulas (≥1 por F)**
 - [ ] **GF-G1-01/02/03 [A]** — simple → 1.0 exacto; combo → 0.5/parry (N=3 → 1.5, conjunto cerrado); mod ∈ {0,−1,0.7,2,NaN} → descarta evento, ledgers intactos, log+contador, escala.
-- [ ] **GF-C1-01/02 [A]** — igualdad exacta en (0,1.5] (banda_R9b); VE → 1.0/1.0; 3 VE a 1.0/duelo = 3.0 (3% techo; cap efectivo min(3 VE, Σ ≤ 3)).
+- [ ] **GF-C1-01/02 [A]** — igualdad exacta en (0,1.5] (banda_R9b); VE → 1.0/1.0; con s≡1.0 hasta 3 VE/duelo = 3.0 (3% techo) como consecuencia de Σ≤3, nunca como tope propio.
 - [ ] **GF-S1-01/02 [A]** — (20,50,P24)+Purga → (12,37.0); 2ª → (4,30.5); suelo → 24 alivio 0; coste>gracia RECHAZA; gracia==coste ACEPTA a 0.0.
 - [ ] **GF-P1-01/02 [A]** — 3 TOMAR → poso 0→12→24→36, n 0→3, sin lump; rechazar (50,P24) → 44; (26,P24) → 24.
 - [ ] **GF-T1-01/02 [A]** — 103 → 100+true con exceso destruido; 67 → 67+false; `100±1e-6` satura limpio; 99.9 no.

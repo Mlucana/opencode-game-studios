@@ -1,6 +1,6 @@
 # Feedback Sonoro del Parry
 
-> **Status**: **Approved (lean re-review Rev-1 2026-09-05; residuos: ciegas SN-05/06/07/12/13, medición Deck, evento #2, back-links #1/#15)**
+> **Status**: **Approved (lean re-review Rev-1 2026-09-05; residuos: ciegas SN-05/06/07/12/13, medición Deck, evento #2)**
 > **Author**: usuario + game-designer
 > **Last Updated**: 2026-09-05
 > **Implements Pillar**: Pilar 2 (La maestría está en las manos, no en la ficha) — y es la voz del Pilar 5 (solo lo divino y la gracia robada suenan cristalino-musicales)
@@ -130,16 +130,16 @@ The `escalera_aborto` formula is defined as (punto de partida **no-normativo**, 
 
 | Sistema | Dirección | Dura / Blanda | Interfaz (qué fluye, quién posee qué) |
 |---|---|---|---|
-| Combate de Parry-Absorción (1) | Este consume | **Dura** | Consume veredictos ya resueltos (`parry_resuelto`, `combo_abortado` con `i/N`) + `calidad_timing`/predicado Justo + tabla de 16 eventos con su regla de oro y su precedencia 4-sobre-8. **No redecide, no retunea, no duplica**: `H_ref`/`B_ref`, ventanas y bonos se leen en vivo. Respeta C17 (cero feedback en lockout) y C24 (parry digital: ningún eje analógico dispara cues). Back-link pendiente: fila "consumed by Sonoro (16)" en #1 Dependencies/Cross-References (propuesta, no editada) |
+| Combate de Parry-Absorción (1) | Este consume | **Dura** | Consume veredictos ya resueltos (`parry_resuelto`, `combo_abortado` con `i/N`) + `calidad_timing`/predicado Justo + tabla de 16 eventos con su regla de oro y su precedencia 4-sobre-8. **No redecide, no retunea, no duplica**: `H_ref`/`B_ref`, ventanas y bonos se leen en vivo. Respeta C17 (cero feedback en lockout) y C24 (parry digital: ningún eje analógico dispara cues). Back-link aplicado 2026-09-07: fila "consumed by Sonoro (16)" en #1 Dependencies + cross-refs corregidos. |
 | Feedback de Impacto (4) | Este consume + expone stems | **Blanda** | Consume triggers + ventanas + prioridad (11>4>3>8>15, 9 fondo) + transient-único-intra + presupuestos interinos + oráculos. **Expone stems pre-master** para los oráculos C2 (pico único), C5b-DEF (sorda) y C6-DEF (peldaños) + método de ID ciega. La precedencia 4-sobre-8 aquí es **requisito** (ambos mensajes sobreviven); la mezcla la pone este GDD |
 | Máquina de Estados de Jefe (2) | Este consume (veredicto) | **Blanda** | Distingue VE de Golpe por el evento mismo; la completación de la `Acción Especial` suena con fila propia del sistema 2 cuando exista (deuda espejo de #1 V7: ambos cues distinguibles, ninguno leído como alivio). Opera con el sostenido provisional hasta entonces |
 | Sistema de Gracia (5) | Este consume (capas) | **Blanda** | Capas por gasto (Purga/Amparo: transients secos por coste), decisión (TOMAR grave-resuelto / DEJAR aire-ascendente-sin-menor) y saturación (handoff a #6, sin sting). Respeta la prohibición de celebrar la absorción y la verba tomar/cargar/aliviar/poso/dejar ir |
-| Menú Principal y Flujo (15) | Este consume (intenciones) | **Blanda** | Realiza el catálogo cerrado + cama `ui_vela_loop` duckeada en duelo + corte duelo→muerte <20 ms por bus. Back-link pendiente: timbres y ducking como propiedad de #16 en la fila Audio de #15 (propuesta, no editada) |
+| Menú Principal y Flujo (15) | Este consume (intenciones) | **Blanda** | Realiza el catálogo cerrado + cama `ui_vela_loop` duckeada en duelo + corte duelo→muerte <20 ms por bus. Back-link aplicado 2026-09-07: timbres y ducking como propiedad de #16 en la fila Audio de #15. |
 | HUD de Combate (13) | Hermanos (presentación) | **Blanda** | Co-emite la pata de alerta en 5/13 (presencia sorda medible, espejo de #4 C13); nunca sonoriza Postura/Vida/timer como datos —el HUD muestra, este sistema puntúa |
 | Accesibilidad (21) | Este expone (canal) | **Blanda** | El oído es canal redundante, nunca único: todo veredicto ciego tiene su par visual/háptico en #1/#4; reduced-motion colapsa lo ceremonial a corte + tick seco por bus; ningún cue crítico depende solo de croma o de pitch absoluto |
 | Consumidores futuros | Este expone (timbres) | Informativa | Hoy **ningún sistema consume timbres de #16** —este GDD no expone interfaz de gameplay; si un GDD futuro la pide, se declara entonces (contrato por anticipado, patrón de #1) |
 
-> **Trazabilidad:** #1 lista "Audio depende de Combate" ✓ (este GDD es esa mitad). #4 lista "Paralela → Sonoro (16)" ✓ (este GDD es la mitad simétrica: triggers/ventanas/prioridad consumidos, stems expuestos). #5 lista "Emite a Sonoro" ✓. #15 lista "Audio (#16): provisional hasta GDD #16" ✓ —este GDD cierra ese provisional salvo medición (OQs). Registry: `parry_resuelto` y `combo_abortado` ya listan a `feedback-sonoro-parry.md` como consumidor previsto —al aprobarse este GDD pasan a confirmados (propuesta, no editada).
+> **Trazabilidad:** #1 lista "Audio depende de Combate" ✓ (este GDD es esa mitad). #4 lista "Paralela → Sonoro (16)" ✓ (este GDD es la mitad simétrica: triggers/ventanas/prioridad consumidos, stems expuestos). #5 lista "Emite a Sonoro" ✓. #15 lista "Audio (#16): provisional hasta GDD #16" ✓ —este GDD cierra ese provisional salvo medición (OQs). Registry: `parry_resuelto` y `combo_abortado` listan a `feedback-sonoro-parry.md` como consumidor confirmado (confirmado 2026-09-07 tras Approved Rev-1).
 
 ## Tuning Knobs
 
@@ -197,4 +197,4 @@ Gate levels: Logic/mezcla = BLOCKING (`tests/unit/sonoro/`, `tests/integration/s
 | ¿Tónicas finales por tríada + brillo Justo sin romper precedencia (D-B a oído)? | audio-director + ux-designer | Playtest externo | Un solo modo; el Justo es brillo tímbrico, nunca set nuevo |
 | ¿Stings finales TOMAR/DEJAR/gastos dentro de la familia sobria (D-D a oído)? | audio-director + narrative-director | Playtest externo | Prohibido celebrar: cualquier brillo de premio falla SN-13 |
 | ¿Oráculo de stems: formato/ventana de captura pre-master + thresholds de calibración Deck? | audio-director + qa-lead | Pre-sprint | #4 los exige (C2/C5b/C6-DEF); este GDD los implementa |
-| ¿Back-links en #1 (fila "consumed by 16"), #15 (timbres/ducking propiedad #16) y registry (constantes/fórmulas de este GDD)? | systems-designer | Al aprobar este GDD | Propuestas en el resultado de autoría; verifica `/consistency-check` |
+| ¿Back-links en #1 (fila "consumed by 16"), #15 (timbres/ducking propiedad #16) y registry (constantes/fórmulas de este GDD)? | systems-designer | Al aprobar este GDD | Resuelta 2026-09-07 — filas aplicadas en #1/#15 y consumidores confirmados en registry |

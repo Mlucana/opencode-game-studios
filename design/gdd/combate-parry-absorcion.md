@@ -415,11 +415,9 @@ El bucle "parar → romper compostura → castigar" ya está declarado en
    > así que el término derivado de ella también lo es: el sistema 2 lo **consume**, no
    > lo define.
    >
-   > **Deuda registrada, no cerrable aquí**: el sistema 2 tiene hoy escrito **113** como
-   > último tick de Castigo (su AC E3b). Debe corregirse a **114** en su 4ª pasada —
-   > raíz **R5**. No puede editarse en este changeset porque ese documento está
-   > congelado, pese a que la regla operativa exige editar ambos lados de un contrato a
-   > la vez. Queda anotado aquí precisamente para que la excepción no se pierda.
+    > **Deuda pagada 2026-09-05**: el sistema 2 corrigió su AC E3b a **114** en
+    > su 4ª pasada (D1) — raíz **R5** cerrada en ambos lados. Se conserva esta
+    > nota como historia de la excepción al procedimiento.
 6. **Consecuencia de fallo de parry**: si el **Golpe** del enemigo concluye sin haber
    sido parado, conecta contra el jugador y reduce su Vida actual en
    `dano_golpe_enemigo` (**Fórmula 8**, 25 con los valores de lanzamiento), con la
@@ -1104,7 +1102,7 @@ magnitud la acota R9, no esta fórmula.
 | Máquina de Estados de Jefe (2) | Bidireccional | Consume sus eventos de ventana activa ("inicio/fin de Golpe", "inicio/fin de Ventana Especial"); le provee de vuelta el resultado del parry y la Postura resultante. Reparto de tres partes: el **20** posee duraciones y composición, el **2** posee la emisión de los eventos, y este GDD el consumo y la resolución. **El 2 impone a este GDD**: la excepción de Ventana Especial en la Regla 4 |
 | IA de Combate de Jefes — Patrones (20) | Combate depende de IA | Consume la composición de combos por patrón, `vida_max_angel`, y la cadencia variable por ángel (los eventos de ventana los emite el sistema 2). **Combate impone a IA**: `3 ≤ N ≤ 5` de longitud de combo (R7 + audio), varianza de separación intra-combo (nota de R6), hueco para el ciclo de whiff en el encuentro tutorial, y **la severidad de toda `Acción Especial` interrumpible — banda `1.0 ≤ s ≤ 2.0` por ventana y `Σ s ≤ golpes_para_morir_base − 1` por duelo, en equivalencia (nunca en Vida — ver R9a, AC D13)** |
 | Feedback de Impacto — Hitstop/Cámara (4) | Feedback depende de Combate | Consume "parry exitoso", "parry fallido", "ruptura de Postura", "golpe de castigo conectado" |
-| Feedback Sonoro del Parry (16) | Audio depende de Combate | Consume los mismos eventos que Feedback de Impacto |
+| Feedback Sonoro del Parry (16) | Audio depende de Combate | Consume `parry_resuelto` (resultado + Postura) y `combo_abortado` (`i`/`N`) ya resueltos — fila consumed-by-16 confirmada (back-link [2a-04] cerrado 2026-09-07); mismos eventos que Feedback de Impacto |
 | HUD de Combate (13) | HUD depende de Combate | Consume Postura enemiga actual, Vida del jugador, Vida enemiga |
 | Accesibilidad (21) | Accesibilidad depende de Combate | Requiere que **`parry_window` y `recuperacion_whiff`** sean configurables externamente para un modo de asistencia, y tuneados como par (bajar solo el segundo viola R6) |
 | Gestión de Run / Estructura de Ascenso (3) | Gestión de Run depende de Combate | Consume **"duelo perdido"**, que este GDD emite cuando la Vida del jugador llega a 0 (Regla 6, Fórmula 5). **"duelo ganado" NO es de este GDD** — lo posee y lo emite la Máquina de Estados de Jefe (2) al entrar en su estado terminal `Muerto`. Ver la nota de propiedad abajo |
@@ -1202,7 +1200,7 @@ magnitud la acota R9, no esta fórmula.
 | **R7** | `modificador_combo_gracia > 1 / N_min` | 0.5 > 0.3333 ✓ | La garantía de la Regla 9 ("un combo genera más gracia que un golpe simple"). Ver la nota de invariante en la Fórmula 7 |
 | **R8** | `hitstop_parry + bono_hitstop_parry_justo ≤ 8 ticks` | 5 + 2 = 7 ✓ | El flujo del combate. `hitstop_parry` declara 8 ticks como su propio punto de ruptura, pero Impact Moments **suma +1–2 ticks** de Parry Justo encima sin tope: en el techo antiguo (8) un Parry Justo daba 9–10 ticks, por encima del límite que el propio knob declara. Por eso el rango de `hitstop_parry` se recorta a **3–6** |
 | **R9a** | *(al sistema 20)* `1.0 ≤ severidad_accion_especial ≤ 2.0` por Ventana Especial, **y** `Σ severidad ≤ golpes_para_morir_base − 1` sobre un duelo. **La severidad es una EQUIVALENCIA en unidades de `dano_golpe_enemigo`, no un pago en Vida** — ver la regla de conversión abajo | banda ✓ · suma ≤ 3 ✓ | La no-dominación de la Ventana Especial, **por los dos lados**: sin el suelo, ignorarla domina; sin el techo agregado, pararla se vuelve obligatoria. Ver el bloque abajo |
-| **R9b** | *(al sistema 5)* la Gracia obtenida al parar una Ventana Especial debe tener **coste no nulo** en la economía de corrupción | pendiente del GDD de Gracia | La misma no-dominación, invertida. Ver el bloque abajo |
+| **R9b** | *(al sistema 5)* la Gracia obtenida al parar una Ventana Especial debe tener **coste no nulo** en la economía de corrupción | satisfecha por Gracia G3/F-C1 (igualdad 1.0 en banda_R9b owned-#5) | La misma no-dominación, invertida. Ver el bloque abajo |
 | **R10a** | *(al sistema 9)* `⌈vida_maxima / dano_golpe_enemigo⌉` con reliquias **excede como máximo en 1** al valor sin reliquias, **para las cuatro cuentas de absorción** (comparación con épsilon: `ceil(q−1e-9)` — escala de comparación-ceil, distinta de la igualdad-float `±1e-6` de E13/D1/D14; ver E13) | 4/5/6/7 sin reliquias; techo 8 (con valores de lanzamiento; en general `base+1` puro — regiones con base>8 fuera de alcance) | La premisa que justifica R5: absorber es **la** palanca de supervivencia. Presupuesto vinculante: **+25 de Vida** o **−20% de daño recibido** |
 | **R10b** | *(al sistema 9)* `ciclos_efectivos(tríada) = ciclos_objetivo(tríada)` exactamente, **contando ciclos de Aturdido, no golpes de castigo** | 4/5/6 ✓ | El suelo de ciclos, por **cualquier** mecanismo. R4 solo cierra el multiplicador; un castigo extra por aturdimiento lo rompe sin tocarlo |
 | **R10c** | *(al sistema 9)* `parries_por_ciclo(tríada)` a `calidad_timing = 0` `= ⌈postura_max / dano_base⌉` exactamente | 3/4/5 ✓ | La progresión 3/4/5 y el conteo 12/20/30 que la Fórmula 3 presupone |
@@ -1863,18 +1861,18 @@ esa regla existe. Verificado por el AC **C14**.
 
 | Este documento referencia | GDD objetivo | Elemento específico | Naturaleza |
 |---|---|---|---|
-| `angeles_absorbidos` alimenta Vida Máxima (F5) | `design/gdd/sistema-de-gracia.md` *(no existe aún)* | Contador de decisiones "absorber" | Data dependency |
-| Evento "parry exitoso" y `gracia_ganada` (F7) | `design/gdd/sistema-de-gracia.md` *(no existe aún)* | Entrada de gracia por parry | Ownership handoff |
+| `angeles_absorbidos` alimenta Vida Máxima (F5) | `design/gdd/gracia-tres-capas.md` | Contador de decisiones "absorber" | Data dependency |
+| Evento "parry exitoso" y `gracia_ganada` (F7) | `design/gdd/gracia-tres-capas.md` | Entrada de gracia por parry | Ownership handoff |
 | `bono_reliquias` alimenta Vida Máxima (F5) | `design/gdd/eleccion-de-reliquias.md` *(no existe aún)* | Bono de Vida de reliquias equipadas | Data dependency |
 | `multiplicador_ataque` alimenta daño de castigo (F6) — **fijado en la constante 1.0 por este GDD, cerrada en ambos sentidos (R4)** | `design/gdd/eleccion-de-reliquias.md` *(no existe aún)* | Multiplicador de ataque por reliquia | Data dependency **+ constraint handoff** |
-| Eventos "inicio/fin de Golpe", composición de combos, `vida_max_angel`, cadencia | `design/gdd/ia-combate-jefes.md` *(no existe aún)* | Ciclo de ataque y patrones por ángel | State trigger |
+| Eventos "inicio/fin de Golpe", composición de combos, `vida_max_angel`, cadencia | `design/gdd/ia-combate-jefes.md` | Ciclo de ataque y patrones por ángel | State trigger |
 | Evento **"duelo perdido"** — emitido por este GDD al llegar la Vida del jugador a 0 | `design/gdd/gestion-de-run.md` *(no existe aún)* | Transición de run | Ownership handoff |
 | Evento **"duelo ganado"** — **este GDD NO lo emite** | `design/gdd/maquina-estados-jefe.md` | Estado terminal `Muerto` | **Aclaración de propiedad** *(2026-08-04)* — anotado aquí porque este documento lo reclamaba por implicación hasta esa fecha. Ver la nota de propiedad en Dependencies |
-| **Longitud legal de combo `3 ≤ N ≤ 5`** (Regla 9) | `design/gdd/ia-combate-jefes.md` *(no existe aún)* | Rango de N por patrón | **Constraint handoff** — impuesto por R7 (Fórmula 7) y por la frase musical de los eventos 7→8 |
-| **Varianza de separación intra-combo** suficiente para que una cadencia de mash fija no la mantenga (nota de R6) | `design/gdd/ia-combate-jefes.md` *(no existe aún)* | Timing entre golpes de un mismo combo | **Constraint handoff** — es la única palanca contra el mash intra-combo, porque bajar la cobertura rompería los combos |
-| **Cadencia del encuentro tutorial** con hueco explícito para el ciclo de whiff (9 ticks) | `design/gdd/ia-combate-jefes.md` *(no existe aún)* | Patrón del primer enemigo | **Constraint handoff** — el jugador que aprende whiffea por diseño (`game-concept.md`, curva de entrada) |
+| **Longitud legal de combo `3 ≤ N ≤ 5`** (Regla 9) | `design/gdd/ia-combate-jefes.md` | Rango de N por patrón | **Constraint handoff** — impuesto por R7 (Fórmula 7) y por la frase musical de los eventos 7→8 |
+| **Varianza de separación intra-combo** suficiente para que una cadencia de mash fija no la mantenga (nota de R6) | `design/gdd/ia-combate-jefes.md` | Timing entre golpes de un mismo combo | **Constraint handoff** — es la única palanca contra el mash intra-combo, porque bajar la cobertura rompería los combos |
+| **Cadencia del encuentro tutorial** con hueco explícito para el ciclo de whiff (9 ticks) | `design/gdd/ia-combate-jefes.md` | Patrón del primer enemigo | **Constraint handoff** — el jugador que aprende whiffea por diseño (`game-concept.md`, curva de entrada) |
 | **R6 sobre valores efectivos**: toda reliquia que modifique `parry_window` o `recuperacion_whiff` debe reverificar la cobertura ≤65% | `design/gdd/eleccion-de-reliquias.md` *(no existe aún)* | Modificadores de ventana | **Constraint handoff** — verificado por el AC D10 |
-| **Regla de precedencia armónica**: el Parry Justo se subordina al cierre de combo como variante tímbrica, nunca como capa superpuesta | `design/gdd/feedback-sonoro-parry.md` *(no existe aún)* | Mezcla de eventos 4 y 8 | **Constraint handoff** — este GDD crea la coincidencia (Fórmula 1), luego declara la regla; verificado por el AC V4 |
+| **Regla de precedencia armónica**: el Parry Justo se subordina al cierre de combo como variante tímbrica, nunca como capa superpuesta | `design/gdd/feedback-sonoro-parry.md` | Mezcla de eventos 4 y 8 | **Constraint handoff** — este GDD crea la coincidencia (Fórmula 1), luego declara la regla; verificado por el AC V4 |
 | **Exposición de `parry_window` y `recuperacion_whiff`** como knobs de asistencia, tuneados como par para no violar R6 | `design/gdd/accesibilidad.md` *(no existe aún)* | Modo de asistencia de timing | **Constraint handoff** |
 | Regla visual "solo lo divino emite luz" | `design/art/art-bible.md` | Sección 1, Principio 2 | Rule dependency |
 | Presupuesto de partículas y emisores | `design/art/art-bible.md` | Sección 8.6 | Rule dependency |

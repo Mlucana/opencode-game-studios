@@ -254,9 +254,47 @@ Hay GDDs (parry-absorcion, maquina-estados-jefe, concepto) pero sin ADRs ni
 - Riesgo nuevo: bus `Hitstop` con dos dueños (#4 provisional hasta #16, propiedad final aquí) — requiere ADR con technical-director.
 - MVP 6/7 diseñados (falta #13 HUD). 8 docs iniciados.
 
+## Session Extract — /ux-design HUD #13 retrofit Rev-2 2026-09-05 (auto)
+- `design/ux/hud.md` Rev-1 (2026-09-03) → Rev-2 retrofit auto: Gracia #5 APPROVED (earn 1.0/0.5, VE 1.0 cap Σ≤3, Purga 8/Amparo 12, alivio /2, TOMAR +12+18+floor-lift, DEJAR −6, techo 100+handoff #6); fix stale freeze 4%→0% pausa total + HUD ALWAYS (Impacto R1/C14); Sonoro co-alerta 5/13 + budgets interinos; IA duraciones como constraint; Pausa/Decisión alineadas a Menú Rev2 + `decision-gracia.md` Draft. OQ Gracia cerrada; pendientes ADR tiempo/arranque/checksum + medición Deck + ciegas + evento #2 (4ª pasada). Cross-ref: 5/5 Combate + G4/G5/G6/G7/G8/G10 cubiertos, 0 patrones nuevos, 0 mismatches navegación. Siguiente: `/ux-review hud`.
 ## Session Extract — avance automático 2026-09-05 (Rev-1 IA + Sonoro, ADR-003)
 - IA #20: P1–P4 aplicados + Rev-1 lean → APPROVED (residuos menores + R1–R5 + OQ1–OQ6 + 4ª pasada #2 + harnesses).
 - Sonoro #16: P1–P7 aplicados (P2 adaptado a ratificación ADR-003) + Rev-1 lean → APPROVED (residuos: ciegas, medición Deck, evento #2, back-links).
 - ADR-003 bus Hitstop: Proposed → Accepted. Sin enmienda a #4 (solo back-link al aceptar).
 - Registry v15 (+ancha_vigilante, +derivacion_vida, escalera variables [i,N], F2 6-42). Index: 7 aprobados, MVP 6/7.
 - MVP pendiente solo #13 HUD (requiere /ux-design). Tests 62/35AC pendientes (sin godot).
+<!-- CONSISTENCY-CHECK: 2026-09-05 | GDDs checked: 9 (foco #2 4a pasada) | Conflicts found: 0 | Stale pointers: 1 (combate L418-419 deuda R5, pendiente aprobacion) | Registry: sin cambios (v15 al dia) -->
+<!-- RE-REVIEW-S2: 2026-09-05 | Verdict MAJOR (criterio <4/descendientes: FAIL) | R3 reabierta | Log: design/gdd/reviews/maquina-estados-jefe-review-log.md | Sintesis CD completa en sesion -->
+<!-- ESCALADO-PRODUCER: F2.1 spy roto cross-doc (FIX parcial hoy: aridad en signal_order_spy.gd; pendientes F2.2 stack-attribution + F2.3 tick-sourcing) + evento completacion unico (contrato+stub, D-E) + retreat_base/HUD ownership -->
+<!-- ESCALADO-TD: V0/V1/V-batch en orden antes de cablear; F3.1 mecanismo expiracion sin via conforme; F4 pause-accounting derrota-durante-freeze -->
+
+## Session Extract — /review-all-gdds 2026-09-06
+- Verdict: FAIL
+- GDDs reviewed: 8 (#1, #2, #4, #5, #12, #15, #16, #20)
+- Flagged for revision: gracia-tres-capas.md (blocking: GR-08 vs R9a); minors: combate-parry-absorcion.md, maquina-estados-jefe.md, feedback-impacto.md, guardado-de-progreso.md, menu-principal-y-flujo-de-pantallas.md, feedback-sonoro-parry.md, ia-combate-jefes.md
+- Blocking issues: 1 — GR-08 gate por conteo (min 3 VE) deja pasar violación de suma R9a (Σ≤3); reescribir GR-08 sobre Σ vía stub D13 (owner systems-designer)
+- Recommended next: fix GR-08 en #5, luego re-run /review-all-gdds consistency y entrar a /create-architecture con warnings Fase 3 (atención 7>4, curva duración vs A2, R10e+GX-13) como constraints
+- Report: design/gdd/gdd-cross-review-2026-09-06.md
+- Index: statuses #1/#4/#5/#12/#15/#16/#20 → Needs Revision (#2 ya lo estaba)
+
+## Session Extract — fix GR-08 blocker 2026-09-06 (post cross-review FAIL)
+- Blocker [2b-02]/[S1] cerrado en `gracia-tres-capas.md` (4 toques: G3, GR-08, GF-C1-01/02, ejemplo F-C1): gate OR con conteo `min(3 VE, Σ≤3)` → gate puro Σ+s>3 con `s` declarada (stub D13(c) hasta loader #20). Verificado: VE s=2.0 + VE s=2.0 → 2ª da +0/+0 (Σ=4>3); s≡1.0 → hasta 3 VE/duelo como consecuencia de Σ.
+- Pendiente: re-run `/review-all-gdds consistency` para confirmar y pasar veredicto a CONCERNS; luego `/create-architecture` con constraints Fase 3.
+
+## Session Extract — /review-all-gdds 2026-09-07 (focus consistency)
+- Verdict: CONCERNS
+- GDDs reviewed: 8 (#1, #2, #4, #5, #12, #15, #16, #20) + concepto + índice + registry v15 + reporte 2026-09-06 como baseline; Fase 3 omitida (foco consistency)
+- Flagged for revision: None blocking. Warnings: maquina ([2a-01] etiqueta enmiendas stale), combate ([2b-04] R9b stale, [2a-04] cross-refs stale), feedback ([2a-02] OQ reversa, [2f-02] sorda, [2a-09] flags+R2.2, [2c-07] bus), sonoro (back-links, registry previsto→confirmado), ia ([2a-07] lean re-confirm post-5ª pasada, [2e-04] H-Humanidad latente), menú ([2a-05/06] etiqueta #16, [2c-06] MENU_DECISION_* sin back-link), guardado ([2a-03] OQ contraparte stale), índice ([2a-10] ciclo 2↔20, [2a-11] Status vs tracker), registry ([2c-04] 2 eventos 5ª pasada, [2e-05] piso [20,40], [2c-05] equivalencia, [2e-03] freeze sin margen, [2f-07] emisores)
+- Blocking issues: None — prior FAIL [2b-02]/[S1] (GR-08 vs R9a) confirmed CLOSED in working tree (Σ+s>3, sin cláusula de conteo; G3/GR-08/F-C1/GF-C1 convergidos; R9a/D13 + IA F4 sin cambios)
+- Index: left as-is per user (all 8 already Needs Revision per 2026-09-06 action; new [2a-11] Status-vs-tracker contradiction filed as warning for producer, not auto-synced — exact-string 'Needs Revision' matching risk)
+- Working tree dirty at review time: combate/gracia/ia/maquina/menu + systems-index modificados sin commitear — commit recomendado antes de arquitectura
+- Recommended next: /create-architecture con constraints [3b] atención 7>4, [3e] curva duración vs A2, [3c] R10e+GX-13 sin evidencia + S3-harness-gate + S5-nota;/commit higiene primero
+- Report: design/gdd/gdd-cross-review-2026-09-07.md
+
+## Session Extract — /create-architecture 2026-09-08 (full mode)
+- Artifact: docs/architecture/architecture.md v1.0 (layers, ownership, 4 flows, B1–B8, audit, 5 required ADRs, principles, QQ-01…QQ-12)
+- Baseline: 55 TRs (22 registry + 33 proposed gracia/guardado/menu/sonoro/ia); 47 covered, 5 partial (4 required ADRs), 3 future-blocked, 0 orphaned
+- TD sign-off: APPROVED WITH CONCERNS (required ADRs unwritten, V1 pending, gameplay-code.md fix open)
+- LP feasibility: CONCERNS ACCEPTED, 17 findings, no INFEASIBLE; sharpest: #6 filiation table missing, #7 window-liveness tick owner, #8 input owner/names; release blockers R1 save-proof, R2 Deck-proof, R3 wiring-proof (all already gated)
+- Required ADRs remaining: checksum-confirm, preload/baker/veil, emitter-unification, HUD-40Hz, shader-TIME-convention
+- Unblocked now: project.godot pins, Config schemas, PatternData gates, l10n tables, V1 scaffolding
+- Next: required ADRs (Foundation first) → /architecture-review → /test-setup + /ux-design → /gate-check pre-production

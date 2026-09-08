@@ -28,26 +28,26 @@ Alpha → Visión Completa).
 
 | # | Sistema | Categoría | Prioridad | Estado | Doc de Diseño | Depende de |
 |---|---|---|---|---|---|---|
-| 1 | Combate de Parry-Absorción | Core | MVP | Approved (8ª pasada MAJOR → CS8 aplicado; aceptado sin re-review por decisión de usuario 2026-09-04) | design/gdd/combate-parry-absorcion.md | Sistema de Gracia (blando/circular, ver nota), Elección de Reliquias (blando), **Máquina de Estados de Jefe (2) — bidireccional: el 2 es el emisor canónico de sus eventos de ventana activa** — **impone restricciones a Reliquias (`multiplicador_ataque = 1.0` constante, R6 sobre modificadores de ventana), a IA de Jefes (`3 ≤ N ≤ 5`, varianza intra-combo, cadencia del tutorial), a Feedback Sonoro (precedencia armónica) y a Accesibilidad (2 knobs como par)** |
+| 1 | Combate de Parry-Absorción | Core | MVP | Needs Revision | design/gdd/combate-parry-absorcion.md | Sistema de Gracia (blando/circular, ver nota), Elección de Reliquias (blando), **Máquina de Estados de Jefe (2) — bidireccional: el 2 es el emisor canónico de sus eventos de ventana activa** — **impone restricciones a Reliquias (`multiplicador_ataque = 1.0` constante, R6 sobre modificadores de ventana), a IA de Jefes (`3 ≤ N ≤ 5`, varianza intra-combo, cadencia del tutorial), a Feedback Sonoro (precedencia armónica) y a Accesibilidad (2 knobs como par)** |
 | 2 | Máquina de Estados de Jefe (flujo base) (inferido) | Core | MVP | Needs Revision | design/gdd/maquina-estados-jefe.md | Combate de Parry-Absorción (dura), IA de Combate de Jefes (blanda/circular, ver Circular Dependencies) — **impone a IA de Jefes: conjunto cerrado de 9 estados top-level (Regla 7, con procedimiento de enmienda), resolución síncrona (Regla 8), piso de justicia `Enfriamiento + Telegrafiado ≥ 12 + margen` (Regla 9), y Ventana Especial de evento propio, obligatoria bajo `interrumpible_por_parry = true` y prohibida bajo `false` (Regla 5)**; **impone a Combate (1): la excepción de Ventana Especial en su Regla 4**; **impone a Lucifer (11): extensión como sub-estado anidado, no estado top-level nuevo** |
 | 3 | Gestión de Run / Estructura de Ascenso (inferido) | Core | Vertical Slice | Not Started | — | Máquina de Estados de Jefe |
-| 4 | Feedback de Impacto (Hitstop/Cámara) (inferido) | Gameplay | MVP | Approved (2ª pasada adversarial 2026-09-04 + rev2; ver `reviews/feedback-impacto-review-log.md`) | design/gdd/feedback-impacto.md | Combate de Parry-Absorción |
-| 5 | Sistema de Gracia de Tres Capas | Gameplay | MVP | Approved (lean re-review Rev-1 2026-09-05; residuos R1–R6 + OQs) | design/gdd/gracia-tres-capas.md | Combate de Parry-Absorción, Máquina de Estados de Jefe — **📌 UX Flag: pantalla Decisión con UI real → `/ux-design` (`design/ux/decision-gracia.md`) antes de épicas** |
+| 4 | Feedback de Impacto (Hitstop/Cámara) (inferido) | Gameplay | MVP | Needs Revision | design/gdd/feedback-impacto.md | Combate de Parry-Absorción |
+| 5 | Sistema de Gracia de Tres Capas | Gameplay | MVP | Needs Revision | design/gdd/gracia-tres-capas.md | Combate de Parry-Absorción, Máquina de Estados de Jefe — **📌 UX Flag: pantalla Decisión con UI real → `/ux-design` (`design/ux/decision-gracia.md`) antes de épicas** |
 | 6 | Clímax de Saturación | Gameplay | Vertical Slice | Not Started | — | Sistema de Gracia de Tres Capas |
 | 7 | Overlay de Corrupción del Protagonista | Gameplay | Vertical Slice | Not Started | — | Sistema de Gracia de Tres Capas |
 | 8 | Marchitamiento Ambiental | Gameplay | Vertical Slice | Not Started | — | Gestión de Run |
 | 9 | Elección de Reliquias entre Duelos | Gameplay | Vertical Slice | Not Started | — | Gestión de Run |
 | 10 | Meta-progresión de Llaves y Desbloqueo | Progression | Alpha | Not Started | — | Máquina de Estados de Jefe, Guardado de Progreso |
 | 11 | Lucifer — Dos Formas y Reactividad | Gameplay | Full Vision | Not Started | — | Máquina de Estados de Jefe, Overlay de Corrupción, IA de Combate de Jefes |
-| 12 | Guardado de Progreso (inferido) | Persistence | Alpha | Approved (Rev 2 — 2026-09-04: `/design-review --depth full` MAJOR con 12 bloques → revisión conjunta adjudicada; re-review omitida por decisión de usuario) | design/gdd/guardado-de-progreso.md | — **📌 UX Flag: requiere `/ux-design` antes de escribir épicas (fachada publicada en §Fachada; contraparte pendiente en #15 Rev 2)** |
+| 12 | Guardado de Progreso (inferido) | Persistence | Alpha | Needs Revision | design/gdd/guardado-de-progreso.md | — **📌 UX Flag: requiere `/ux-design` antes de escribir épicas (fachada publicada en §Fachada; contraparte pendiente en #15 Rev 2)** |
 | 13 | HUD de Combate | UI | MVP | Not Started | — | Combate de Parry-Absorción, Sistema de Gracia — **📌 UX Flag: requiere `/ux-design` antes de escribir épicas** |
 | 14 | Pantalla de Elección de Reliquias (inferido) | UI | Vertical Slice | Not Started | — | Elección de Reliquias entre Duelos |
-| 15 | Menú Principal y Flujo de Pantallas (inferido) | UI | Vertical Slice | Approved (design-review full 2026-09-04: MAJOR → Rev2, aceptado sin re-review) | design/gdd/menu-principal-y-flujo-de-pantallas.md | Guardado de Progreso -dura-, Gestión de Run -dura-, HUD/Reliquias/Gracia -blandas- — **📌 UX Flag: specs por pantalla vía `/ux-design` en Pre-Producción** |
-| 16 | Feedback Sonoro del Parry | Audio | MVP | Approved (lean re-review Rev-1 2026-09-05; ciegas + medición Deck + evento #2) | design/gdd/feedback-sonoro-parry.md | Combate (dura), Feedback de Impacto (blanda: triggers/prioridad/oráculos), Gracia + Menú (blandas: capas/intenciones) |
+| 15 | Menú Principal y Flujo de Pantallas (inferido) | UI | Vertical Slice | Needs Revision | design/gdd/menu-principal-y-flujo-de-pantallas.md | Guardado de Progreso -dura-, Gestión de Run -dura-, HUD/Reliquias/Gracia -blandas- — **📌 UX Flag: specs por pantalla vía `/ux-design` en Pre-Producción** |
+| 16 | Feedback Sonoro del Parry | Audio | MVP | Needs Revision | design/gdd/feedback-sonoro-parry.md | Combate (dura), Feedback de Impacto (blanda: triggers/prioridad/oráculos), Gracia + Menú (blandas: capas/intenciones) |
 | 17 | Fragmentos de Memoria (esposa/hija) | Narrative | Vertical Slice | Not Started | — | Gestión de Run, Hub y Acumulación Visual |
 | 18 | Hub y Acumulación Visual | Narrative | Vertical Slice | Not Started | — | Gestión de Run, Sistema de Gracia |
 | 19 | Sistema de Efectos de Estado | Gameplay | Alpha | Not Started | — | Combate de Parry-Absorción, IA de Combate de Jefes |
-| 20 | IA de Combate de Jefes — Patrones de Ataque y Movimiento | Gameplay | MVP | Approved (lean re-review Rev-1 2026-09-05; OQ1–OQ6 + 4ª pasada #2) | design/gdd/ia-combate-jefes.md | Máquina de Estados de Jefe |
+| 20 | IA de Combate de Jefes — Patrones de Ataque y Movimiento | Gameplay | MVP | Needs Revision | design/gdd/ia-combate-jefes.md | Máquina de Estados de Jefe |
 | 21 | Accesibilidad (inferido) | Meta | Alpha | Not Started | — | Combate de Parry-Absorción, HUD de Combate |
 
 ---
@@ -100,7 +100,7 @@ Reliquias se tratan como Gameplay, no como Economy.)*
 4. **Feedback de Impacto (Hitstop/Cámara)** — depende de: Combate de Parry-Absorción
 5. **Sistema de Gracia de Tres Capas** — depende de: Combate de Parry-Absorción, Máquina de Estados de Jefe
 16. **Feedback Sonoro del Parry** — depende de: Combate de Parry-Absorción
-20. **IA de Combate de Jefes** — depende de: Máquina de Estados de Jefe
+20. **IA de Combate de Jefes** — depende de: Máquina de Estados de Jefe — **ciclo 2↔20 foliado ([2a-10] cerrado 2026-09-07): bidireccional asimétrico; el reverso (2 depende blanda de 20 para duraciones/composición) vive en Circular Dependencies**
 19. **Sistema de Efectos de Estado** — depende de: Combate de Parry-Absorción, IA de Combate de Jefes
 
 ### Capa Feature (depende de Núcleo)

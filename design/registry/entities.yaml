@@ -39,7 +39,7 @@
 #   Each entry: name, status, source, referenced_by[], attributes{}, added, revised
 #   (events use emitter/consumers/payload instead of source/referenced_by)
 
-version: 15                    # v15 (2026-09-05): Rev-1 IA #20 + Sonoro #16 APPROVED: +ancha_vigilante, +derivacion_vida, escalera_aborto variables [i,N], F2 6-42 + conjunta. | v14 (2026-09-05): GDD Sonoro (16/21) Draft: +6 constants +4 formulas audio (PROVISIONAL). | v13 (2026-09-05): Rev-1 Gracia (P1-P7, APPROVED lean) + GDD IA Jefes (20/21) Draft: +banda_R9b, +decision_absorber, +margen_reaccion_min (8-28 prov 12), +duraciones jefe, +S_base/J, +H/caps cura, +vida_max_angel, +4 formulas; severidad_accion_especial +ref #20; coste_amparo tag->identidad; parry_resuelto consumo #5 confirmado. | v12 (2026-09-04): GDD Gracia (5/21): +corrupcion_ganada, +gasto, +poso, +saturacion; +gracia_base, +techo_saturacion, +poso_step, +purga_rechazo, +coste_purga/amparo, +cooldown_gasto, +cap_gastos_duelo; gracia_ganada/vida_maxima +ref gracia. | v11 (2026-09-04): /consistency-check: append_fragmentos +guarda de catálogo (Rev 2 Guardado); trauma_castigo 0.85→0.70 + ×escala_a11y (Rev 2 Feedback); consumidores parry_resuelto/combo_abortado feedback-de-impacto.md→feedback-impacto.md (existe desde 2026-09-03); sistema-de-gracia.md→gracia-tres-capas.md (esqueleto 2026-09-04, consumo pendiente); +evento run_viva_visible (provisional).
+version: 16                    # v16 (2026-09-07): cierre warnings cross-review [2a-04]+[2c-04]+[2e-05]: consumidores sonoro confirmados + 2 eventos 5a pasada + piso_regla9 [20,40]. | v15 (2026-09-05): Rev-1 IA #20 + Sonoro #16 APPROVED: +ancha_vigilante, +derivacion_vida, escalera_aborto variables [i,N], F2 6-42 + conjunta. | v14 (2026-09-05): GDD Sonoro (16/21) Draft: +6 constants +4 formulas audio (PROVISIONAL). | v13 (2026-09-05): Rev-1 Gracia (P1-P7, APPROVED lean) + GDD IA Jefes (20/21) Draft: +banda_R9b, +decision_absorber, +margen_reaccion_min (8-28 prov 12), +duraciones jefe, +S_base/J, +H/caps cura, +vida_max_angel, +4 formulas; severidad_accion_especial +ref #20; coste_amparo tag->identidad; parry_resuelto consumo #5 confirmado. | v12 (2026-09-04): GDD Gracia (5/21): +corrupcion_ganada, +gasto, +poso, +saturacion; +gracia_base, +techo_saturacion, +poso_step, +purga_rechazo, +coste_purga/amparo, +cooldown_gasto, +cap_gastos_duelo; gracia_ganada/vida_maxima +ref gracia. | v11 (2026-09-04): /consistency-check: append_fragmentos +guarda de catálogo (Rev 2 Guardado); trauma_castigo 0.85→0.70 + ×escala_a11y (Rev 2 Feedback); consumidores parry_resuelto/combo_abortado feedback-de-impacto.md→feedback-impacto.md (existe desde 2026-09-03); sistema-de-gracia.md→gracia-tres-capas.md (esqueleto 2026-09-04, consumo pendiente); +evento run_viva_visible (provisional).
                               # v10 (2026-09-03): GDD Feedback de Impacto (4/21): +freeze_total, +trauma_shake, +onset_budget, +trauma_normal/justo/castigo, +shake_max, +trauma_decay; hitstop_parry, bono_hitstop_parry_justo, recuperacion_whiff, physics_ticks_per_second +referenced_by feedback-impacto.
                               # v9 (2026-09-03): GDD Guardado de Progreso (12/21): +upsert_llaves, +append_fragmentos; vida_maxima +referenced_by guardado-de-progreso.
                               # v8 (2026-08-04): changeset 2, ítem 3 — CHANGESET COMPLETO.
@@ -90,7 +90,7 @@ version: 15                    # v15 (2026-09-05): Rev-1 IA #20 + Sonoro #16 APP
                               # v3 (2026-08-04): convención de borde de ventana_castigo
                               # REVERTIDA a conteo inclusivo (114, no 113); `restantes`
                               # registrado como fórmula; evento "duelo perdido" añadido
-last_updated: 2026-09-05
+last_updated: 2026-09-07
 
 # ─── ENTITIES ────────────────────────────────────────────────────────────────
 # Named game-world objects: enemies, NPCs, characters, factions, bosses.
@@ -626,9 +626,9 @@ formulas:
       - duracion_enfriamiento
       - duracion_telegrafiado
       - margen_reaccion_min
-    output_range: [null, 40]
+    output_range: [20, 40]
     expression: "duracion_enfriamiento + duracion_telegrafiado >= 12 + margen_reaccion_min"
-    notes: "Piso de justicia siempre en techo 12. Piso maximo 40 < 42 (colchon post-Castigo): el camino simple nunca pide mas aire."
+    notes: "Piso de justicia: suelo 20 = 12 + margen_min 8; techo 40 = 12 + margen_max 28 (IA F1). Techo 40 < 42 (colchon post-Castigo): el camino simple nunca pide mas aire. Suelo fijado 2026-09-07 ([2e-05] cerrado)."
     added: 2026-09-05
     revised: ""
 
@@ -1910,7 +1910,7 @@ events:
       - design/gdd/combate-parry-absorcion.md
       - design/gdd/gracia-tres-capas.md            # consume desde G2 (earn) — Rev-1 2026-09-05
       - design/gdd/feedback-impacto.md           # existe desde 2026-09-03 (Rev 2 aceptada 2026-09-04); era feedback-de-impacto.md, nombre corregido 2026-09-04
-      - design/gdd/feedback-sonoro-parry.md      # (no existe aún) — sistema 16
+      - design/gdd/feedback-sonoro-parry.md      # confirmado 2026-09-07 (Approved lean Rev-1) — sistema 16
     payload: "resultado (éxito/fallo) + valor de Postura resultante"
     notes: "Es el evento del que depende TODA la bifurcación de salida del sistema 2
       (Repliegue / Aturdido / Enfriamiento) — su dependencia DURA hacia Combate.
@@ -1926,18 +1926,15 @@ events:
     status: active
     emitter: design/gdd/maquina-estados-jefe.md
     consumers:
-      - design/gdd/feedback-impacto.md           # existe desde 2026-09-03 (era feedback-de-impacto.md, nombre corregido 2026-09-04) — sistema 4, PREVISTO
-      - design/gdd/feedback-sonoro-parry.md      # (no existe aún) — sistema 16, PREVISTO
+      - design/gdd/feedback-impacto.md           # confirmado (Rev 2 aceptada 2026-09-04) — sistema 4
+      - design/gdd/feedback-sonoro-parry.md      # confirmado 2026-09-07 (Approved lean Rev-1) — sistema 16
     payload: "i (índice del golpe fallado, 1 <= i <= N) + N (longitud del combo)"
     notes: "El payload es NORMATIVO, no opcional. Sin i y N, ningún sistema aguas abajo
       puede distinguir 'el jugador falló el primer golpe' de 'paró 4 de 5 y falló el
       último' — dos experiencias de peso emocional opuesto que producirían feedback
       idéntico. Verificado por el AC C3b del sistema 2, que exige LEER el payload del
       evento capturado, no inferirlo del estado resultante.
-      RIESGO ABIERTO: ningún GDD declara todavía que vaya a consumir estos campos. El
-      dato está expuesto pero podría no leerse nunca, con lo que el problema de
-      percepción original reaparecería intacto. Los consumidores listados son PREVISTOS,
-      no confirmados — cerrar al autorar los sistemas 4 y 16."
+      Consumidores confirmados: #4 (Rev 2) + #16 (Rev-1 2026-09-07) — back-link [2a-04] cerrado."
     added: 2026-08-03
     revised: ""
 
@@ -2005,4 +2002,28 @@ events:
       no Guardado. REGISTRADO 2026-09-04 (/consistency-check): aparece en 2 GDDs sin entrada
       en registry. Revisar payload/timeout/rechazo al autorar el sistema 3."
     added: 2026-09-04
+    revised: ""
+
+  - name: "accion especial completada"
+    canonical_name: accion_especial_completada   # nombre + payload cerrados por ADR-002 S2 (5a pasada #2 2026-09-06)
+    status: active
+    emitter: design/gdd/maquina-estados-jefe.md
+    consumers:
+      - design/gdd/feedback-impacto.md           # fila reversa #2 (C5b-DEF)
+      - design/gdd/feedback-sonoro-parry.md      # fila propia al desbloquearse (SN-09 2a mitad)
+    payload: "habilidad_id (StringName) + tick (int)"
+    notes: "Evento UNICO de completacion (5a pasada #2 2026-09-06, cierra la deuda 'sin fila ni evento'). Orden fijo: ventana_especial_cerrada(fue_parada=false) -> accion_especial_completada -> estado_ingresado(TELEGRAFIADO) en el mismo paso; desempate E2: interrupcion gana, completacion cero veces. Fila de feedback en Visual/Audio de #2 (distinguible del cierre-evento 16, V7 Combate). Registrado 2026-09-07 ([2c-04] cerrado)."
+    added: 2026-09-07
+    revised: ""
+
+  - name: "castigo conectado"
+    canonical_name: castigo_conectado   # mitad contacto de ADR-002 S5 (5a pasada #2 2026-09-06), evento DISTINTO
+    status: active
+    emitter: design/gdd/maquina-estados-jefe.md
+    consumers:
+      - design/gdd/feedback-impacto.md
+      - design/gdd/feedback-sonoro-parry.md
+    payload: "vida_restante (float) + fue_letal (bool)"
+    notes: "Conexion-gana en el ultimo tick de ventana_castigo; nunca un segundo evento de completacion. Declarado en #2 (fila reversa 5a pasada) y listado en IA Regla 6 / X1 como declarado-no-cableado. Registrado 2026-09-07 ([2c-04] cerrado)."
+    added: 2026-09-07
     revised: ""

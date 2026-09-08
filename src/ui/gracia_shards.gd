@@ -119,12 +119,13 @@ func _draw() -> void:
 		])
 		var encendida: bool = i < dibujadas
 		var relleno: Color = GRACIA_LUZ if encendida else GRIS_OSCURO
-		if highlight_decision and encendida:
-			relleno = GRIS_LUZ
+		# Alta luminancia en Decisión por borde/contorno (línea 134), jamás
+		# grisando el vitral: el fill sigue GRACIA_LUZ (DEC-17, art-bible 3.4).
 		draw_colored_polygon(rombo, relleno)
 		# Grieta interna vino (art-bible §4.5): densidad crece con índice.
 		# Vino nunca solo (1.28:1) — siempre sobre fill claro + borde claro.
-		if encendida and not highlight_decision:
+		# Intacto también en highlight_decision (respaldo de forma DEC-17).
+		if encendida:
 			var grieta := GRACIA_VINO
 			grieta.a = 0.9
 			# 1 línea en mitad baja, 2ª línea si corrupción alta (i >= total/2).

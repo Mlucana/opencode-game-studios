@@ -76,14 +76,14 @@ MenuPrincipal
 
 | Trigger | Source Screen / State | Transition Type | Data Passed In | Notes |
 |---------|----------------------|-----------------|----------------|-------|
-| Victoria confirmada + loadout #14 commiteado | Reliquias → Decisión (router #15) | Corte o fundido corto ≤300 ms (Menú R6); con reduced-motion siempre corte 1 frame | Snapshot de lectura: `{gracia_actual, corrupcion_actual, poso_irreversible, angeles_absorbidos, decision_log[], coro_idx, poder_desbloqueable:{id,nombre}}` + `punto_seguro=false` | La pantalla abre con foco NEUTRO (ninguno) — excepción justificada a Menú R7 (ver §7). El ángel aparece en brasas inmóvil, sin timer. |
+| Victoria confirmada + loadout #14 commiteado | Reliquias → Decisión (router #15) | Corte o fundido corto ≤300 ms (Menú R6); con reduced-motion siempre corte 1 frame | Snapshot de lectura: `{gracia_actual, corrupcion_actual, poso_irreversible, angeles_absorbidos, decision_absorber[], coro_idx, poder_desbloqueable:{id,nombre}}` + `punto_seguro=false` | La pantalla abre con foco NEUTRO (ninguno) — excepción justificada a Menú R7 (ver §7). El ángel aparece en brasas inmóvil, sin timer. |
 | Rehidratación NO aplica | — | — | — | Esta pantalla jamás se rehidrata desde SUS: SUS solo existe en `post_decision`. Si no hay commit, no hay SUS nueva. |
 
 **Exit table**:
 
 | Exit Action | Destination | Transition Type | Data Returned / Saved | Notes |
 |-------------|------------|-----------------|----------------------|-------|
-| Commit TOMAR (single-press + flanco fresco) | Hub (post-decisión) | Commit atómico en memoria SÍNCRONO pre-animación → animación (succión +1 rosetón) → corte a Hub | Memoria: `n+1, poso+12, vida_max+18, poder on, C'=max(C,poso')`, sin lump de gracia; Guardado: 1 write `post_decision` (triple + n + log verbatim), 0 `pre_eleccion` (Gracia GR-11) | Ambos botones se deshabilitan el mismo frame + swallow 200 ms. SIN hold. |
+| Commit TOMAR (single-press + flanco fresco) | Hub (post-decisión) | Commit atómico en memoria SÍNCRONO pre-animación → animación (succión +1 rosetón) → corte a Hub | Memoria: `n+1, poso+12, vida_max+18, poder on, C'=max(C,poso')`, sin lump de gracia; Guardado: 1 write `post_decision` (triple + n + decision_absorber verbatim), 0 `pre_eleccion` (Gracia GR-11) | Ambos botones se deshabilitan el mismo frame + swallow 200 ms. SIN hold. |
 | Commit DEJAR IR (single-press + flanco fresco) | Hub (post-decisión) | Commit atómico en memoria → animación (ascenso sin rosetón) → corte a Hub | Memoria: `C'=max(poso,C−6.0)`, sin Vida/poso/poder; Guardado: 1 write `post_decision` | Digno, jamás castigo: sin dimming, sin timbre menor, sin animación menor. |
 | Quit/kill con Decisión abierta | (fuera de pantalla) Al recargar: última SUS `post_decision` o S1 | Sin commit, sin SUS mutada; kill ≡ cancelar | Cero escrituras #5; Guardado: sin SUS nueva | Línea honesta `MENU_DECISION_QUIT_LINE` siempre visible (ver §5). |
 | Sleep | Misma pantalla preservada | Corte, foco preservado, jamás auto-commit | Nada | Modal preservado con foco (Menú Edge sleep-en-modal). |
@@ -161,7 +161,7 @@ estado_red/Continuar/flash #C75C4A/hold prompt/lista destructiva R4.
 | Sleep | Deck duerme | Pantalla + foco preservados al resumir | Jamás auto-commit; primer delta descartado | Modal preservado con foco (Menú Edge). |
 | Saturada (C≥100 al entrar) | Ledger clamped entrante | Mismo layout; vitral-congela es propiedad #6 (este GDD congela ledgers) | TOMAR legal (n+1, Vida+18, poso `min(+12,techo)`, C clamped, saturación NO se desengancha); DEJAR IR aplica aritmética pero handoff NO se retracta (#6 posee continuación) | Sin caso especial de layout: la saturación es handoff, no muerte (Gracia G8). GASTO deshabilitado (no hay gasto en Decisión de todos modos — I2). |
 | Purga-en-suelo visible | C==poso al entrar | Línea ledger lo muestra tal cual (UX anota, no regla) | Ambos commits legales; TOMAR levanta C al nuevo suelo (`C'=max(C,poso')`, floor-lift); DEJAR IR `max(poso,C−6)` = poso | No es error ni empty state. |
-| Error — ledger inválido (NaN, ausente, log≠n, poso decreciente, n>3 en v1.0) | Validación de entrada | Diagnóstico sobrio (sin tecnicismos en superficie; códigos owned Guardado §Fachada) | Sin commit posible; escala a Guardado/Gracia (descarte SUS entera, sin defaults que fabriquen monotonicidad) | Fuente de verdad: log es source of truth, n su checksum (Gracia Edge round-trip). |
+| Error — ledger inválido (NaN, ausente, decision_absorber≠n, poso decreciente, n>3 en v1.0) | Validación de entrada | Diagnóstico sobrio (sin tecnicismos en superficie; códigos owned Guardado §Fachada) | Sin commit posible; escala a Guardado/Gracia (descarte SUS entera, sin defaults que fabriquen monotonicidad) | Fuente de verdad: decision_absorber es source of truth, n su checksum (Gracia Edge round-trip). |
 
 Prohibido en todos los estados: Vida/Postura/timer/peek numérico/`estado_red`/Continuar/flash `#C75C4A`/hold prompt/lista destructiva R4 (Gracia UI Requirements).
 
@@ -213,7 +213,7 @@ Regla: esta pantalla nunca escribe directamente en ningún sistema. Lee ledgers 
 | `gracia_actual` (bolsa gastable) | Gracia #5 (solo-lectura: `gracia_cambiada`) | Al abrir (snapshot) — sin earn/gasto durante Decisión (I2, sin faucet en Hub/Decisión) | #5 (Gracia posee semántica y techos) | float ≥0 JSON-safe, epsilon `1e-9` identidad / `1e-6` cero | NaN/ausente → sin commit, escala a descarte (Gracia Edge round-trip: descarta SUS entera, sin defaults) |
 | `corrupcion_actual` (progreso a Clímax) | Gracia #5 (`corrupcion_cambiada`) | Al abrir | #5 | float, invariante `poso ≤ C ≤ 100` | Violación → sin commit |
 | `poso_irreversible` (suelo) | Gracia #5 (`poso_cambiado`) | Al abrir | #5 | float ∈ `{0,12,24,36}` v1.0, monótono (jamás baja al gastar) | Cargado<memoria / decreciente → descarte (requiere fila AC en Guardado — Gracia #5→#12) |
-| `angeles_absorbidos` (n) + `decision_log[]` | Gracia #5 | Al abrir | #5 (log source of truth, n checksum; `len(log)==n==TOMARs`) | int 0–3 v1.0 (0–9 versión); log Array 0/1 | `len≠n` / n>3 en v1.0 → rechazo forward-incompatible, sin clampar |
+| `angeles_absorbidos` (n) + `decision_absorber[]` | Gracia #5 | Al abrir | #5 (decision_absorber source of truth, n checksum; `len(decision_absorber)==n==TOMARs`) | int 0–3 v1.0 (0–9 versión); decision_absorber Array 0/1 | `len≠n` / n>3 en v1.0 → rechazo forward-incompatible, sin clampar |
 | `poder_desbloqueable` (identidad coro) | Gracia #5 (G5c: ficción por identidad, magnitudes idénticas) | Al abrir | #5 | `{id, nombre_key}` (magnitudes fuera de esta pantalla) | Ausente → TOMAR muestra `desbloquea:{—}` jamás inventa magnitud |
 | `punto_seguro` (false durante Decisión) | Guardado #12 (evento/booleano; `pre_eleccion==no-seguro` incluido) | Al abrir (siempre false aquí) | #12 | bool/evento | Si true aquí = bug de enrutado (nunca SUS escribible pre-commit) |
 | `resumen_continuar` / `ultimo_motivo_sin_continuar` / `destino_continuar_id` | Guardado §Fachada | NO se consumen en esta pantalla | #12 (Menú los consume en MenuPrincipal/Hub) | — | Prohibido mostrar Continuar/estado_red aquí (Gracia UI Requirements) |
@@ -363,7 +363,7 @@ Performance / Layout / Input / Events / Accessibility / Localization — verific
 
 **Datos (fachada + ledger)**
 - [ ] **DEC-11 [A]** — GIVEN ledgers mockeados, WHEN abre, THEN niveles = ledgers ±1e-9; setter desde UI falla; ledgers intactos tras tick (espejo GR-31); `-0.0`→`0.0`, `100±1e-6` satura, `99.9` no (espejo GR-32/GF-T1).
-- [ ] **DEC-12 [A]** — GIVEN variantes (poso<memoria, NaN, ausente, log≠n, n>3 v1.0), WHEN validar entrada, THEN sin commit + escala a descarte sin defaults (espejo GX-04/GX-05/GR-29).
+- [ ] **DEC-12 [A]** — GIVEN variantes (poso<memoria, NaN, ausente, decision_absorber≠n, n>3 v1.0), WHEN validar entrada, THEN sin commit + escala a descarte sin defaults (espejo GX-04/GX-05/GR-29).
 - [ ] **DEC-13 [A]** — GIVEN quit/kill con Decisión abierta (harness SIGKILL post-entrada, sin SUS nueva), WHEN relanzar, THEN estado = última SUS `post_decision` (deltas perdidos, anti-scum); Abandonar = wipe run-scoped (espejo GX-12 + Guardado AC-R9-01c).
 - [ ] **DEC-14 [A]** — GIVEN espía FS que falla ante cualquier `FileAccess/DirAccess/ConfigFile` fuera de `persistencia/` (oracle AC-R1-02/MENU-08), WHEN recorrido completo (ambos commits + cancelar), THEN 0 lecturas/escrituras directas desde assembly de pantalla; Reset/Migrar N/A aquí (sin superficie).
 

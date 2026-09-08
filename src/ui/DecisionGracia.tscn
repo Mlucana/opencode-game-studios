@@ -1,0 +1,247 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/ui/decision_gracia.gd" id="1"]
+[ext_resource type="Script" path="res://src/ui/gracia_shards.gd" id="2"]
+
+[node name="DecisionGracia" type="CanvasLayer"]
+layer = 20
+follow_viewport_enabled = false
+process_mode = 3
+script = ExtResource("1")
+
+[node name="Fondo" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.0784314, 0.0666667, 0.0549019, 1)
+
+[node name="SafeZone" type="Control" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 64.0
+offset_top = 40.0
+offset_right = -64.0
+offset_bottom = -40.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Columna" type="VBoxContainer" parent="SafeZone"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="NWGracia" type="Control" parent="SafeZone/Columna"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="GraciaShards" type="Control" parent="SafeZone/Columna/NWGracia"]
+layout_mode = 1
+offset_right = 112.0
+offset_bottom = 24.0
+mouse_filter = 2
+script = ExtResource("2")
+
+[node name="EspacioSup" type="Control" parent="SafeZone/Columna"]
+layout_mode = 2
+mouse_filter = 2
+size_flags_vertical = 3
+
+[node name="AngelBrasas" type="Panel" parent="SafeZone/Columna"]
+custom_minimum_size = Vector2(360, 168)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+
+[node name="BrasasRow" type="HBoxContainer" parent="SafeZone/Columna/AngelBrasas"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="Ember1" type="ColorRect" parent="SafeZone/Columna/AngelBrasas/BrasasRow"]
+custom_minimum_size = Vector2(14, 14)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+color = Color(0.788235, 0.721569, 0.909804, 1)
+
+[node name="Ember2" type="ColorRect" parent="SafeZone/Columna/AngelBrasas/BrasasRow"]
+custom_minimum_size = Vector2(14, 14)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+color = Color(0.788235, 0.721569, 0.909804, 1)
+
+[node name="Ember3" type="ColorRect" parent="SafeZone/Columna/AngelBrasas/BrasasRow"]
+custom_minimum_size = Vector2(14, 14)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+color = Color(0.788235, 0.721569, 0.909804, 1)
+
+[node name="ScreenTitle" type="Label" parent="SafeZone/Columna"]
+layout_mode = 2
+mouse_filter = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Diada" type="HBoxContainer" parent="SafeZone/Columna"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 48
+alignment = 1
+
+[node name="TomarCol" type="VBoxContainer" parent="SafeZone/Columna/Diada"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="TomarFila" type="HBoxContainer" parent="SafeZone/Columna/Diada/TomarCol"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="CunetaTomar" type="ColorRect" parent="SafeZone/Columna/Diada/TomarCol/TomarFila"]
+visible = false
+custom_minimum_size = Vector2(8, 24)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+color = Color(0.780392, 0.803922, 0.839216, 1)
+
+[node name="BtnTomar" type="Button" parent="SafeZone/Columna/Diada/TomarCol/TomarFila"]
+custom_minimum_size = Vector2(380, 72)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 0
+focus_mode = 2
+action_mode = 0
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="DescTomar" type="Label" parent="SafeZone/Columna/Diada/TomarCol"]
+layout_mode = 2
+mouse_filter = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="DejarCol" type="VBoxContainer" parent="SafeZone/Columna/Diada"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="DejarFila" type="HBoxContainer" parent="SafeZone/Columna/Diada/DejarCol"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="CunetaDejar" type="ColorRect" parent="SafeZone/Columna/Diada/DejarCol/DejarFila"]
+visible = false
+custom_minimum_size = Vector2(8, 24)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+color = Color(0.780392, 0.803922, 0.839216, 1)
+
+[node name="BtnDejarIr" type="Button" parent="SafeZone/Columna/Diada/DejarCol/DejarFila"]
+custom_minimum_size = Vector2(380, 72)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 0
+focus_mode = 2
+action_mode = 0
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="DescDejar" type="Label" parent="SafeZone/Columna/Diada/DejarCol"]
+layout_mode = 2
+mouse_filter = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LedgerMed" type="Label" parent="SafeZone/Columna"]
+layout_mode = 2
+mouse_filter = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="EspacioInf" type="Control" parent="SafeZone/Columna"]
+layout_mode = 2
+mouse_filter = 2
+size_flags_vertical = 3
+
+[node name="Sur" type="VBoxContainer" parent="SafeZone/Columna"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="LblIrreversible" type="Label" parent="SafeZone/Columna/Sur"]
+layout_mode = 2
+mouse_filter = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="LblQuit" type="Label" parent="SafeZone/Columna/Sur"]
+layout_mode = 2
+mouse_filter = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="SuccionFX" type="CPUParticles2D" parent="SafeZone"]
+emitting = false
+amount = 28
+lifetime = 0.9
+one_shot = true
+explosiveness = 0.05
+direction = Vector2(0, 1)
+spread = 40.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 60.0
+initial_velocity_max = 130.0
+scale_amount_min = 2.0
+scale_amount_max = 4.0
+color = Color(0.788235, 0.721569, 0.909804, 1)
+emission_shape = 1
+emission_sphere_radius = 130.0
+
+[node name="AscensoFX" type="CPUParticles2D" parent="SafeZone"]
+emitting = false
+amount = 28
+lifetime = 0.9
+one_shot = true
+explosiveness = 0.05
+direction = Vector2(0, -1)
+spread = 40.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 60.0
+initial_velocity_max = 130.0
+scale_amount_min = 2.0
+scale_amount_max = 4.0
+color = Color(0.788235, 0.721569, 0.909804, 1)
+emission_shape = 1
+emission_sphere_radius = 130.0
+
+[node name="RosetonNuevo" type="Panel" parent="SafeZone"]
+visible = false
+offset_right = 30.0
+offset_bottom = 30.0
+mouse_filter = 2
