@@ -298,3 +298,4 @@ Hay GDDs (parry-absorcion, maquina-estados-jefe, concepto) pero sin ADRs ni
 - Required ADRs remaining: checksum-confirm, preload/baker/veil, emitter-unification, HUD-40Hz, shader-TIME-convention
 - Unblocked now: project.godot pins, Config schemas, PatternData gates, l10n tables, V1 scaffolding
 - Next: required ADRs (Foundation first) → /architecture-review → /test-setup + /ux-design → /gate-check pre-production
+<!-- QA-PLAN: 2026-09-08 | System: sprint-1 (hud-combate 001-004 + menu M-004/M-006a) | Plan written: production/qa/qa-plan-sprint-1-2026-09-08.md -->
