@@ -1,6 +1,6 @@
 name: Automated Tests
 
-# `coding-standards.md`: la suite corre en cada push a main y en cada PR, y un
+# `coding-standards.md`: la suite corre en cada push a master y en cada PR, y un
 # fallo BLOQUEA el merge. Nunca desactivar ni saltar un test que falla — se
 # arregla la causa.
 
@@ -14,6 +14,11 @@ jobs:
   test:
     name: Run gdUnit4 Tests
     runs-on: ubuntu-latest
+    # La action publica check-runs: sin checks:write falla con
+    # "Resource not accessible by integration" aunque los tests pasen.
+    permissions:
+      contents: read
+      checks: write
 
     steps:
       - name: Checkout
