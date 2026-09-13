@@ -320,6 +320,8 @@ func test_presenter_abre_reenvia_y_cierra() -> void:
 	var hud = auto_free(hud_escena.instantiate())
 	add_child(hud)
 	var presentador = auto_free(PresenterScript.new(_vista))
+	# Inyección del HUD (DI opcional): sin esto `abrir()` no tiene qué ocultar.
+	presentador.set_hud(hud)
 	var reenviados: Array = []
 	var chegadas: Array = []
 	presentador.commit_tomar.connect(func(p: Dictionary) -> void: reenviados.append(p))

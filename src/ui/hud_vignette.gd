@@ -17,8 +17,10 @@ const GRIS_LUZ := Color("C7CDD6")
 
 ## Intensidad 0..1 de vignette por vida baja (progresiva) o muerte (1.0).
 var intensidad: float = 0.0
-## Flash de fallo activo (un disparo, 1-2 ticks, sin ease-in).
-var _flash_restante_ms: int = 0
+## Flash de fallo activo (un disparo, 2 frames enteros, sin ease-in).
+## Frames, nunca ms: `delta` escala en hitstop y truncaba a 3 frames (hud-001 B1).
+const FLASH_FRAMES: int = 2
+var _flash_restante_frames: int = 0
 ## Alternativa no-cromática al flash (knob `disable_damage_flash`).
 var usar_icono_en_vez_de_flash: bool = false
 ## Reduced-motion: desactiva cualquier pulsación.
@@ -31,12 +33,9 @@ var pausado: bool = false
 var _tiempo_ms: int = 0
 
 
-## Dispara el flash único de fallo (evento 5). Duración en ms (~1-2 ticks).
-func flash_fallo(duracion_ms: int = 33) -> void:
-	if usar_icono_en_vez_de_flash:
-		_flash_restante_ms = duracion_ms
-	else:
-		_flash_restante_ms = duracion_ms
+## Dispara el flash único de fallo (evento 5). 2 frames exactos.
+func flash_fallo() -> void:
+	_flash_restante_frames = FLASH_FRAMES
 	queue_redraw()
 
 
@@ -48,7 +47,7 @@ func set_intensidad(valor: float) -> void:
 
 ## Corta toda animación al estado final (animaciones skippables).
 func skip_animations() -> void:
-	_flash_restante_ms = 0
+	_flash_restante_frames = 0
 	queue_redraw()
 
 
@@ -62,8 +61,8 @@ func _process(delta: float) -> void:
 	if pausado:
 		return
 	_tiempo_ms += int(delta * 1000.0)
-	if _flash_restante_ms > 0:
-		_flash_restante_ms -= int(delta * 1000.0)
+	if _flash_restante_frames > 0:
+		_flash_restante_frames -= 1
 		queue_redraw()
 	elif intensidad > 0.0 and not reduced_motion:
 		# Sin pulso en reduced-motion. Fuera de él, latido solo como
@@ -72,7 +71,7 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
-	if intensidad <= 0.0 and _flash_restante_ms <= 0:
+	if intensidad <= 0.0 and _flash_restante_frames <= 0:
 		return
 	var rect := Rect2(Vector2.ZERO, size)
 	if intensidad > 0.0:
@@ -86,7 +85,7 @@ func _draw() -> void:
 		draw_rect(Rect2(0, size.y - grosor, size.x, grosor), c, true)
 		draw_rect(Rect2(0, 0, grosor, size.y), c, true)
 		draw_rect(Rect2(size.x - grosor, 0, grosor, size.y), c, true)
-	if _flash_restante_ms > 0:
+	if _flash_restante_frames > 0:
 		if usar_icono_en_vez_de_flash:
 			# Sustituto FORMA distinta (fotosensibilidad): patrón diagonal
 			# recto en GRIS_LUZ + marco grueso, estático sin parpadeo.

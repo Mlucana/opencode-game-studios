@@ -299,3 +299,84 @@ Hay GDDs (parry-absorcion, maquina-estados-jefe, concepto) pero sin ADRs ni
 - Unblocked now: project.godot pins, Config schemas, PatternData gates, l10n tables, V1 scaffolding
 - Next: required ADRs (Foundation first) → /architecture-review → /test-setup + /ux-design → /gate-check pre-production
 <!-- QA-PLAN: 2026-09-08 | System: sprint-1 (hud-combate 001-004 + menu M-004/M-006a) | Plan written: production/qa/qa-plan-sprint-1-2026-09-08.md -->
+
+## Session Extract — /story-done 2026-09-10
+- Verdict: COMPLETE WITH NOTES
+- Story: production/epics/hud-combate/story-001-nw-vida-gracia.md — NW Vida + Gracia widgets
+- Tech debt logged: 5 advisory (paleta, vignette-coupling, readout-stale, l10n-runtime, TR-hud-baseline) — en Completion Notes, no en register
+- Next recommended: INFRA-01 stubs (desbloquea hud-002/hud-003) o M-004 firma hold (ready, sin bloqueos)
+
+## Session Extract — cierre Sprint 1 2026-09-10
+- Smoke: PASS WITH WARNINGS (125/125 verde; perf sin medir; CI sin correr)
+- QA sign-off: APPROVED WITH CONDITIONS (captura vignette-25, Deck, qa-lead, CI verde)
+- Reports: production/qa/smoke-2026-09-10.md + qa-signoff-sprint-1-2026-09-10.md
+- Next: commit + push → CI → Sprint 2
+
+## Session Extract — /story-done 2026-09-10 (M-006a)
+- Verdict: COMPLETE WITH NOTES (hardware Deck + foco M-001a → Sprint 2, ADVISORY)
+- Test: menu_motion_readability_test — 6/6 verde (suite ui 32/32)
+- Sprint 1: Must 6/6 + Should 2/2 done. Solo quedan Nice (Sprint 2).
+- Next: suite COMPLETA (unit+integration) → smoke-check → team-qa → commit+push → CI verde
+
+## Session Extract — /story-done 2026-09-10 (hud-004)
+- Verdict: COMPLETE WITH NOTES
+- Story: production/epics/hud-combate/story-004-alertas-cola-vignette.md — Alertas + cola + vignette
+- Test: tests/integration/ui/hud_cola_vignette_test.gd — 9/9 verde (suite 26/26); fix: _anunciar es puerta, el caller ejecuta
+- Pendiente: captura hud-nw-vignette.png (vida 25) + qa-lead Sprint 2
+- Next: M-006a → cierre sprint (smoke/team-qa/commit/CI)
+
+## Session Extract — INFRA-02 2026-09-10
+- Fix: .github/workflows/tests.yml branches main→master + paths += tests/integration (YAML validado)
+-firstrun verde real pendiente del próximo push (sin commits sin orden)
+- Sprint 1 Must Have: 6/6 done + INFRA-02 done. Quedan Should Have (hud-004, M-006a)
+
+## Session Extract — /story-done 2026-09-10 (M-004)
+- Verdict: COMPLETE WITH NOTES
+- Story: production/epics/menu-principal/story-m004-firma-hold.md — Firma hold Tipo-A
+- Test: tests/unit/menu/firma_hold_test.gd — 8/8 verde, 37ms
+- Next: INFRA-02 fix CI (último Must Have abierto) → hud-004/M-006a Should Have
+
+## Session Extract — /dev-story 2026-09-10 (M-004)
+- Story: production/epics/menu-principal/story-m004-firma-hold.md — Firma hold Tipo-A
+- Files changed: src/ui/firma_hold.gd (nuevo), tests/unit/menu/firma_hold_test.gd (7 tests)
+- Test written: tests/unit/menu/firma_hold_test.gd (SIN ejecutar aquí — pendiente en estación del usuario)
+- Desviación aceptada: M-001a bloqueada → widget puro sin superficie (prescrito por el sprint); ejecución destructiva = M-005
+- Bug cazado en revisión: cancelar() tras CONFIRMADA contradecía el veredicto → no-op
+- Next: ejecutar test en Godot → /code-review → /story-done
+
+## Session Extract — /story-done 2026-09-10 (hud-003)
+- Verdict: COMPLETE WITH NOTES
+- Story: production/epics/hud-combate/story-003-timer-freeze-pausa.md — Timer S + freeze + Pausa
+- Test: tests/integration/ui/hud_timer_freeze_test.gd — 8/8 verde, 112ms (suite ui 17/17)
+- Deuda: vignette-ms → hud-004; main_scene → driver (flag decisión)
+- Next: M-004 (último Must Have) → INFRA-02 → Should Have
+
+## Session Extract — /dev-story 2026-09-10 (hud-003)
+- Story: production/epics/hud-combate/story-003-timer-freeze-pausa.md — Timer S + freeze + Pausa
+- Files changed: project.godot ([physics] pin 60Hz), tests/integration/ui/hud_timer_freeze_test.gd (8 tests)
+- Test written: tests/integration/ui/hud_timer_freeze_test.gd (SIN ejecutar aquí — pendiente en estación del usuario)
+- Hallazgo: main_scene apunta al driver throwaway de capturas (fuera de alcance hud-003 — flag al usuario)
+- Deuda diferida: flash vignette en ms (→hud-004)
+- Next: ejecutar test en Godot → /code-review → /story-done
+
+## Session Extract — /story-done 2026-09-10 (hud-002)
+- Verdict: COMPLETE WITH NOTES
+- Story: production/epics/hud-combate/story-002-ne-postura-vida-jefe.md — NE Postura + Vida jefe
+- Test: tests/integration/ui/hud_ne_test.gd — 9/9 verde, 232ms (gdUnit4 6.2.0 recién instalado; addons/ se perdió en la migración)
+- Tech debt: test reentrada solo-estado-final; TR-hud baseline pte.
+- Next: hud-003 (ready, INFRA-01 done) o M-004 (ready, independiente)
+
+## Session Extract — /dev-story 2026-09-10
+- Story: production/epics/hud-combate/story-002-ne-postura-vida-jefe.md — NE Postura + Vida jefe
+- Files changed: src/ui/hud_presenter.gd (+_violaciones_guardia, +push_aborto_combo), tests/integration/ui/hud_ne_test.gd (9 tests), tests/helpers/mock_resolver.gd + mock_fsm.gd + mock_walltick.gd (INFRA-01)
+- Test written: tests/integration/ui/hud_ne_test.gd (9 test functions, gdUnit4; SIN ejecutar aquí — sin binario en este entorno, pendiente en estación del usuario)
+- Blockers: None (INFRA-01 done desbloqueó la historia)
+- Next: ejecutar test en Godot → /code-review src/ui/hud_presenter.gd tests/integration/ui/hud_ne_test.gd → /story-done
+
+## Session Extract — /dev-story 2026-09-09
+- Story: production/epics/hud-combate/story-001-nw-vida-gracia.md — NW Vida + Gracia widgets
+- Files changed: none (audit-only; NW assembly already satisfied 5/5 ACs — hud_nw.gd, gracia_shards.gd, hud_presenter.gd, combat_hud.gd, CombatHud.tscn pre-existed and verified)
+- Test written: None — UI story (manual evidence at production/qa/evidence/hud-nw-evidence.md still required)
+- Deviations: direct-to-dev with TR-hud-??? placeholder + perf note unapplied (user-ordered); engine specialist not spawned separately (ui-programmer verified APIs vs engine-ref); pre-existing: palette GRIS_MEDIO #9AA2AF vs story #8C94A0 (kept, 5.29:1 contrast), set_vida drives _vignette (story-004 coupling, untouched), On Demand readout ≤1-frame stale (cosmetic)
+- Blockers: None
+- Next: /code-review src/ui/hud_nw.gd src/ui/gracia_shards.gd src/ui/hud_presenter.gd src/ui/combat_hud.gd then /story-done [story-path]

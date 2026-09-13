@@ -11,7 +11,12 @@ config_version=5
 [application]
 
 config/name="NOVENA"
+run/main_scene="res://prototypes/hud-nw-captures/hud_capture_driver.tscn"
 config/features=PackedStringArray("4.7")
+
+[dotnet]
+
+project/assembly_name="NOVENA"
 
 [editor_plugins]
 

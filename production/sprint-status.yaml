@@ -14,81 +14,81 @@ goal: "HUD de combate visible en duelo con freeze correcto + firma hold verifica
 start: "2026-09-08"
 end: "2026-09-19"
 generated: "2026-09-08"
-updated: "2026-09-08"
+updated: "2026-09-10"
 
 stories:
   - id: "hud-001"
     name: "NW Vida + Gracia widgets"
     file: "production/epics/hud-combate/story-001-nw-vida-gracia.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.4
     blocker: ""
-    completed: ""
+    completed: "2026-09-10"
   - id: "hud-002"
     name: "NE Postura + Vida jefe + caída ev.8"
     file: "production/epics/hud-combate/story-002-ne-postura-vida-jefe.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.7
-    blocker: "INFRA-01 stubs"
-    completed: ""
+    blocker: ""
+    completed: "2026-09-10"
   - id: "hud-003"
     name: "Timer S + freeze-ALWAYS + Pausa"
     file: "production/epics/hud-combate/story-003-timer-freeze-pausa.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.7
-    blocker: "INFRA-01 stubs"
-    completed: ""
+    blocker: ""
+    completed: "2026-09-10"
   - id: "m-004"
     name: "Firma hold Tipo-A"
     file: "production/epics/menu-principal/story-m004-firma-hold.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.4
     blocker: ""
-    completed: ""
+    completed: "2026-09-10"
   - id: "infra-stubs"
     name: "Core/WallTick signal stubs"
     file: ""
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.15
     blocker: ""
-    completed: ""
+    completed: "2026-09-10"
   - id: "infra-ci"
     name: "Fix CI branch (master)"
     file: ""
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.15
     blocker: ""
-    completed: ""
+    completed: "2026-09-10"
   - id: "hud-004"
     name: "Alertas + cola visual + vignette"
     file: "production/epics/hud-combate/story-004-alertas-cola-vignette.md"
     priority: should-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 0.3
     blocker: ""
-    completed: ""
+    completed: "2026-09-10"
   - id: "m-006a"
     name: "Reduced-motion + legibilidad Deck"
     file: "production/epics/menu-principal/story-m006a-motion-readability.md"
     priority: should-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 0.3
     blocker: ""
-    completed: ""
+    completed: "2026-09-10"
   - id: "hud-005"
     name: "Firma VE + gasto + knobs + Deck contraste"
     file: "production/epics/hud-combate/story-005-firma-ve-gasto-knobs.md"

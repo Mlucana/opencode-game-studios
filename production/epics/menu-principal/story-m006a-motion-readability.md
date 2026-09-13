@@ -1,12 +1,12 @@
 # Story M-006a: Reduced-motion + legibilidad Deck
 
 > **Epic**: Menú Principal y Flujo de Pantallas (`menu-principal`)
-> **Status**: Ready (ADVISORY gate — evidence + sign-off, never blocking)
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: UI
 > **Estimate**: S (2h + Deck session)
 > **Manifest Version**: N/A — `docs/architecture/control-manifest.md` not yet created
-> **Last Updated**: —
+> **Last Updated**: 2026-09-10
 
 ## Context
 
@@ -70,3 +70,10 @@ Mirror hud.md reduced-motion collapse (1-frame cuts); motion/hold/gyro/connectio
 
 - Depends on: M-001a (transitions to collapse)
 - Combine hardware session with hud Story 005 AC-d
+
+## Completion Notes
+**Completed**: 2026-09-10
+**Criteria**: 2/2 passing (proxy automatizado; hardware ADVISORY diferido)
+**Deviations**: sin cambios src/ (colapso preexistente verificado); sesión Deck 7" + foco M-001a pendientes Sprint 2 (combinada con story-005); TR-menu-* sin baseline
+**Test Evidence**: tests/integration/ui/menu_motion_readability_test.gd — 6/6 verde (suite ui 32/32); production/qa/evidence/menu-motion-readability-evidence.md
+**Code Review**: APPROVED (solo test + evidence nuevos)

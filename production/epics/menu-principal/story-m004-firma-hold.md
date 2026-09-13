@@ -1,12 +1,12 @@
 # Story M-004: Firma hold Tipo-A
 
 > **Epic**: Menú Principal y Flujo de Pantallas (`menu-principal`)
-> **Status**: Ready (closest to shippable — GDD APPROVED still required per PR-EPIC point 5)
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Logic
 > **Estimate**: M (3h)
 > **Manifest Version**: N/A — `docs/architecture/control-manifest.md` not yet created
-> **Last Updated**: —
+> **Last Updated**: 2026-09-10
 
 ## Context
 
@@ -83,3 +83,10 @@
 
 - Depends on: M-001a (modal surface)
 - Unlocks: M-002 (consume verdict), M-005 (destructive execution)
+
+## Completion Notes
+**Completed**: 2026-09-10
+**Criteria**: 3/3 passing (unit test, BLOCKING gate)
+**Deviations**: M-001a bloqueada → widget puro sin superficie (prescrito por sprint-1; foco mismo-frame lo asevera M-001a contra tick_apertura()); ejecución destructiva PER+SUS/SET = M-005 (aquí solo veredicto + cero efectos); TR-menu-* sin baseline (pte. architecture-review Fase 8)
+**Test Evidence**: tests/unit/menu/firma_hold_test.gd — 8/8 verde, 37ms, gdUnit4 6.2.0
+**Code Review**: APPROVED (fix propio: cancelar() tras CONFIRMADA era doble-veredicto contradictorio → no-op)

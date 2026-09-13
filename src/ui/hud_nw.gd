@@ -17,6 +17,8 @@ const TINTA := Color("14110E")
 ## Ancho de barra NW (budget NW ≤6% a 1280x800).
 const ANCHO_BARRA: float = 260.0
 const ALTO_BARRA: float = 12.0
+## Flash en frames enteros (AC 1-2 ticks; nunca ms: delta escala en hitstop vs C14).
+const FLASH_FRAMES: int = 2
 ## Tamaño mínimo de fuente aparente (legible en Deck 7" a 30-40cm).
 const FUENTE_MIN: int = 18
 
@@ -25,11 +27,11 @@ var _vida_label: Label
 var _gracia_label: Label
 var _gracia: GraciaShards
 var _exact_label: Label
-var _flash_vida_ms: int = 0
+var _flash_vida_frames: int = 0
 ## Fotosensibilidad: si true, cero cambio de color como señal (forma + outline).
 var usar_icono_en_vez_de_flash: bool = false
 ## Marca de forma (rombo/triángulo) cuando el flash es no-cromático.
-var _flash_forma_ms: int = 0
+var _flash_forma_frames: int = 0
 ## Decisión absorber/rechazar: SOLO Gracia visible (hud.md).
 var _modo_decision: bool = false
 ## Reduced-motion: se propaga a GraciaShards.
@@ -70,6 +72,8 @@ func _ready() -> void:
 
 ## Vida 0..max. Event-driven en cada cambio (daño 25/golpe, F5/F8).
 func set_vida(actual: float, maxima: float) -> void:
+	if not is_node_ready():
+		return
 	_vida_bar.max_value = maxima
 	_vida_bar.value = clampf(actual, 0.0, maxima)
 	_actualizar_exacta(actual, maxima)
@@ -77,22 +81,30 @@ func set_vida(actual: float, maxima: float) -> void:
 
 ## Gracia por absorción (cantidades propiedad del sistema 5, pendiente).
 func set_gracia(encendidas: int, total: int) -> void:
+	if not is_node_ready():
+		return
 	_gracia.set_shards(encendidas, total)
 
 
 ## Pre-light de VE (ev.14): la Gracia se ilumina, nada más.
 func set_prelight_ve(activa: bool) -> void:
+	if not is_node_ready():
+		return
 	_gracia.set_prelight(activa)
 
 
 ## Firma VE parada (ev.15): MUEVE Gracia (avanza fill/count + prelight off
 ## + tick de forma) manteniendo Postura idéntica (aquí no se toca Postura).
 func avanzar_firma_ve() -> void:
+	if not is_node_ready():
+		return
 	_gracia.mostrar_firma_parada()
 
 
 ## Limpia firma VE (cierre sin parar).
 func limpiar_firma_ve() -> void:
+	if not is_node_ready():
+		return
 	_gracia.limpiar_firma()
 
 
@@ -103,13 +115,15 @@ func set_modo_decision(solo_gracia: bool) -> void:
 	_aplicar_modo_decision()
 
 
-## Flash único al fallar (ev.5), 1-2 ticks, sin ease-in.
+## Flash único al fallar (ev.5), 2 frames (~1-2 ticks), sin ease-in.
 ## Respeta disable_damage_flash: si true → FORMA (rombo/triángulo +
 ## outline grueso 3px) con CERO cambio de color como señal.
 ## Si false → #C75C4A + borde grueso claro + forma (respaldo no-cromático).
 func flash_fallo() -> void:
-	_flash_vida_ms = 33
-	_flash_forma_ms = 33
+	if not is_node_ready():
+		return
+	_flash_vida_frames = FLASH_FRAMES
+	_flash_forma_frames = FLASH_FRAMES
 	if usar_icono_en_vez_de_flash:
 		# Cero cambio de color: fill intacto, solo outline grueso + forma.
 		_restaurar_fill_vida()
@@ -127,8 +141,10 @@ func flash_fallo() -> void:
 ## Estado final inmediato (animaciones skippables).
 ## Propaga a GraciaShards (cancela hold a valor final) y limpia forma.
 func skip_animations() -> void:
-	_flash_vida_ms = 0
-	_flash_forma_ms = 0
+	if not is_node_ready():
+		return
+	_flash_vida_frames = 0
+	_flash_forma_frames = 0
 	_restaurar_fill_vida()
 	if _gracia != null:
 		_gracia.skip_animations()
@@ -144,17 +160,15 @@ func set_exact_visible(visible_exacta: bool, vida: float, maxima: float, gracia:
 		_exact_label.text = tr("HUD_NW_EXACT").format({"vida": int(vida), "max": int(maxima), "gracia": gracia, "gtotal": gracia_total})
 
 
-func _process(delta: float) -> void:
-	if _flash_vida_ms > 0:
-		_flash_vida_ms -= int(delta * 1000.0)
-		if _flash_vida_ms <= 0:
+## Contador en frames enteros: inmune a hitstop (C14) y a truncado de ms.
+func _process(_delta: float) -> void:
+	if _flash_vida_frames > 0:
+		_flash_vida_frames -= 1
+		if _flash_vida_frames <= 0:
 			_restaurar_fill_vida()
-	if _flash_forma_ms > 0:
-		_flash_forma_ms -= int(delta * 1000.0)
-		if _flash_forma_ms <= 0:
-			queue_redraw()
-		else:
-			queue_redraw()
+	if _flash_forma_frames > 0:
+		_flash_forma_frames -= 1
+		queue_redraw()
 
 
 func _notification(what: int) -> void:
@@ -208,7 +222,7 @@ func _aplicar_outline_grueso() -> void:
 ## _draw SOLO para la marca de forma del flash (rombo/triángulo recto).
 ## No reescribe rendering: un polígono extra 1-2 ticks, reversible.
 func _draw() -> void:
-	if _flash_forma_ms <= 0:
+	if _flash_forma_frames <= 0:
 		return
 	# Triángulo de aviso recto sobre la barra de Vida + rombo lateral.
 	# Visible con y sin color (respaldo no-cromático permanente).

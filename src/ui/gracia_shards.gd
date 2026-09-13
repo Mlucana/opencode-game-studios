@@ -69,7 +69,9 @@ func set_prelight(activa: bool) -> void:
 func mostrar_firma_parada() -> void:
 	_prelit = false
 	_firma_parada = true
-	_latched_lit = mini(_lit + 1, _total)
+	# Sin pre-incremento: el +1 visible lo aplica `_draw()` (una sola vez),
+	# dentro y fuera del hold. Pre-incrementar aquí mostraba +2 con hold.
+	_latched_lit = _lit
 	_hold_restante = HOLD_FRAMES
 	queue_redraw()
 

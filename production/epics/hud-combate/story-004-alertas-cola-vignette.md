@@ -1,12 +1,12 @@
 # Story 004: Alertas + cola visual + vignette
 
 > **Epic**: HUD de Combate (`hud-combate`)
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: UI
 > **Estimate**: S (2h)
 > **Manifest Version**: N/A — `docs/architecture/control-manifest.md` not yet created
-> **Last Updated**: —
+> **Last Updated**: 2026-09-10
 
 ## Context
 
@@ -87,3 +87,10 @@
 
 - Depends on: Story 003 (freeze edges feed the queue)
 - Unlocks: Story 005 (reduced-motion collapse overrides these behaviors)
+
+## Completion Notes
+**Completed**: 2026-09-10
+**Criteria**: 4/4 passing (automated test — supera el frame-step manual exigido, ADVISORY)
+**Deviations**: test de pares asumía que `_anunciar()` ejecuta (es solo la puerta; el caller dispara) → fix con patrón caller; vignette-25 captura pendiente + qa-lead Sprint 2
+**Test Evidence**: tests/integration/ui/hud_cola_vignette_test.gd — 9/9 verde (suite ui 26/26); production/qa/evidence/hud-alert-queue-evidence.md
+**Code Review**: APPROVED (vignette flash a frames cierra deuda B1; reloj manual documentado)

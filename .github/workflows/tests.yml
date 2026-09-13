@@ -6,9 +6,9 @@ name: Automated Tests
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
-    branches: [main]
+    branches: [master]
 
 jobs:
   test:
@@ -28,10 +28,10 @@ jobs:
           # Si se cambia el motor, cambiar aquí también: un desajuste hace que
           # el CI valide contra una versión que el proyecto no usa.
           godot-version: '4.7'
-          # `tests/integration` se añadirá cuando tenga tests; apuntar a un
-          # directorio vacío hace fallar la acción.
+          # `tests/integration` tiene suites en verde desde hud-002/hud-003.
           paths: |
             tests/unit
+            tests/integration
           report-name: test-results
 
       - name: Upload Test Results

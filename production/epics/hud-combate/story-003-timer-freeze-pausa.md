@@ -1,12 +1,12 @@
 # Story 003: Timer S + freeze-ALWAYS + Pausa
 
 > **Epic**: HUD de Combate (`hud-combate`)
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Integration
 > **Estimate**: M (4h)
 > **Manifest Version**: N/A — `docs/architecture/control-manifest.md` not yet created
-> **Last Updated**: —
+> **Last Updated**: 2026-09-10
 
 ## Context
 
@@ -92,3 +92,10 @@
 - Depends on: Story 001 (HUD root + presenter)
 - Unlocks: Story 004 (queue defers relative to freeze edges)
 - External: WallTick autoload + resolver pause wiring (Foundation/Core — stub until landed)
+
+## Completion Notes
+**Completed**: 2026-09-10
+**Criteria**: 4/4 passing (integration test, BLOCKING gate)
+**Deviations**: C14 verificado a nivel lógico+config (árbol pausado real no testeable con el runner dentro — documentado en el test; Deck Sprint 2); flash vignette en ms diferido a hud-004; `run/main_scene` apunta al driver throwaway (flag pte. decisión)
+**Test Evidence**: tests/integration/ui/hud_timer_freeze_test.gd — 8/8 verde, 112ms (suite integration/ui 17/17 con hud_ne_test)
+**Code Review**: APPROVED (cambios mínimos: solo pin 60Hz en config + test nuevo; S/pausa/ALWAYS preexistentes verificados)

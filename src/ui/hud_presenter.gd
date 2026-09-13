@@ -44,6 +44,17 @@ var _hud: CombatHud
 var _aplicando: bool = false
 var _fuente: Node
 
+## Contador observable de violaciones de la guarda anti-reentrada (ADR-002 §7,
+## patrón Feedback D3). Solo lectura para tests: un tick a 40Hz no debe reentrar;
+## si lo intenta, el push se descarta y este contador lo delata (C4a/E2 aseveran
+## conteos, no solo orden — un duplicado que respete el orden pasaría sin esto).
+var _violaciones_guardia: int = 0
+
+## Descartes RUNTIME_DROP de payloads `combo_abortado` corruptos (hud-002 AC-e).
+## Clase RUNTIME_DROP del glosario C16: descarte + WARN + contador, nunca
+## FAIL_LOAD, nunca skip silencioso. Solo lectura para tests.
+var _descartes_corruptos: int = 0
+
 
 ## Inyección del HUD a gobernar. Sin singleton.
 func _init(hud: CombatHud = null) -> void:
@@ -152,6 +163,19 @@ func push_estado(estado: int) -> void:
 	_salir()
 
 
+## Aborto de combo (B-* `combo_abortado`, ADR-002 §2). Defensa de borde: valida
+## `1 ≤ i ≤ N` y `N ∈ 3..5`; lo corrupto se descarta con WARN + contador
+## (RUNTIME_DROP, hud-002 AC-e). Lo válido se acepta SIN efecto visual: el HUD
+## no consume `i`/`N` (la escalera late=heavier es de Feedback-4/Sonoro-16);
+## este push existe para que el descarte sea observable y testeable.
+func push_aborto_combo(indice_i: int, longitud_n: int) -> bool:
+	if longitud_n < 3 or longitud_n > 5 or indice_i < 1 or indice_i > longitud_n:
+		_descartes_corruptos += 1
+		push_warning("HudPresenter: combo_abortado corrupto descartado (i=%d, N=%d)" % [indice_i, longitud_n])
+		return false
+	return true
+
+
 # ─── Callbacks directos de la fuente (solo lectura) ───────────────────────
 
 func _al_recibir_vida(actual: float, maxima: float) -> void:
@@ -191,7 +215,10 @@ func _al_recibir_estado(estado: int) -> void:
 
 
 func _entrar() -> bool:
-	if _aplicando or _hud == null or not is_instance_valid(_hud):
+	if _hud == null or not is_instance_valid(_hud):
+		return false
+	if _aplicando:
+		_violaciones_guardia += 1
 		return false
 	_aplicando = true
 	return true

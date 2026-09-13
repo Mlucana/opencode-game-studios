@@ -1,12 +1,12 @@
 # Story 002: NE Postura + Vida jefe + caída ev.8
 
 > **Epic**: HUD de Combate (`hud-combate`)
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Integration
 > **Estimate**: M (4h)
 > **Manifest Version**: N/A — `docs/architecture/control-manifest.md` not yet created
-> **Last Updated**: —
+> **Last Updated**: 2026-09-10
 
 ## Context
 
@@ -99,3 +99,10 @@
 - Depends on: Story 001 (presenter pattern + P1 bar infra)
 - Unlocks: Story 005 (VE signature builds on NE absence behavior)
 - External: CombatResolver C-* + BossFSM B-* emitters (stubbed until Core epics land)
+
+## Completion Notes
+**Completed**: 2026-09-10
+**Criteria**: 5/5 passing (integration test, BLOCKING gate)
+**Deviations**: test de reentrada duelo→hub solo asevera estado final (intermedio no capturado — follow-up menor); `push_aborto_combo` válido sin efecto visual (i/N es de Feedback-4/Sonoro-16, documentado); TR-hud-* sin baseline (pte. architecture-review Fase 8)
+**Test Evidence**: tests/integration/ui/hud_ne_test.gd — 9/9 verde, 232ms, gdUnit4 6.2.0 (requirió instalar addons/gdUnit4, perdido en la migración)
+**Code Review**: APPROVED WITH SUGGESTIONS (guarda solo-cuenta-reentrada; fix `FuenteNueve: Node` para `bind()`; fix `:=` Variant en test)

@@ -59,6 +59,8 @@ var _vignette: HudVignette
 
 var _estado: int = EstadoHUD.COMBATE
 var _en_duelo: bool = false
+## Timer S visible solo en Aturdido (lo gobierna mostrar_timer_en_aturdido).
+var _timer_visible: bool = false
 var _fase_ve: int = FaseVE.CERRADA
 ## Cache de solo-lectura para el readout On Demand (no es estado de juego).
 var _cache_vida: float = 100.0
@@ -253,7 +255,7 @@ func _aplicar_estado() -> void:
 		_vignette.pausado = (_estado == EstadoHUD.PAUSA)
 	match _estado:
 		EstadoHUD.PAUSA:
-			modulate.a = hud_opacity * 0.4
+			_set_modulate_zonas(hud_opacity * 0.4)
 			if _hud_s != null:
 				_hud_s.set_visible_timer(false)
 			if _hud_nw != null:
@@ -263,7 +265,7 @@ func _aplicar_estado() -> void:
 				_hud_ne.visible = _en_duelo
 		EstadoHUD.HUB:
 			# Guarda 4.5:1: opacidad a fondos, críticos opacos (ver _aplicar_opacidad).
-			modulate.a = 1.0
+			_set_modulate_zonas(1.0)
 			if _hud_nw != null:
 				_hud_nw.visible = true
 				_hud_nw.set_modo_decision(false)
@@ -277,7 +279,7 @@ func _aplicar_estado() -> void:
 			if _vignette != null:
 				_vignette.set_intensidad(0.0)
 		EstadoHUD.ABSORBER_DECISION:
-			modulate.a = 1.0
+			_set_modulate_zonas(1.0)
 			if _hud_nw != null:
 				_hud_nw.visible = true
 				# SOLO Gracia: oculta VidaBar + labels Vida, alta luminancia.
@@ -291,13 +293,13 @@ func _aplicar_estado() -> void:
 				_hud_s.set_opacidad_fondos(hud_opacity)
 		EstadoHUD.CUTSCENE:
 			visible = true
-			modulate.a = 0.0
 			for hijo in get_children():
-				(hijo as CanvasItem).visible = false
+				if hijo is CanvasItem:
+					(hijo as CanvasItem).visible = false
 			return
 		_:
 			# COMBATE: opacidad a fondos, críticos opacos (guarda 4.5:1).
-			modulate.a = 1.0
+			_set_modulate_zonas(1.0)
 			if _hud_nw != null:
 				_hud_nw.set_modo_decision(false)
 				_hud_nw.set_opacidad_fondos(hud_opacity)
@@ -306,15 +308,19 @@ func _aplicar_estado() -> void:
 			if _hud_s != null:
 				_hud_s.set_opacidad_fondos(hud_opacity)
 	for hijo in get_children():
-		(hijo as CanvasItem).visible = true
+		if hijo == _hud_s:
+			continue
+		if hijo is CanvasItem:
+			(hijo as CanvasItem).visible = true
 	if _hud_ne != null:
 		_hud_ne.visible = _en_duelo and en_combate_real
-	if _hud_s != null and _estado != EstadoHUD.COMBATE:
-		_hud_s.set_visible_timer(false)
+	if _hud_s != null:
+		_hud_s.set_visible_timer(_timer_visible and _estado == EstadoHUD.COMBATE)
 
 
 ## Muestra el timer S solo en Aturdido (lo llama el presentador vía duelo/timer).
 func mostrar_timer_en_aturdido(en_aturdido: bool) -> void:
+	_timer_visible = en_aturdido
 	if _estado != EstadoHUD.COMBATE:
 		return
 	if _hud_s != null:
@@ -378,18 +384,26 @@ func _aplicar_opacidad() -> void:
 		return
 	if _estado == EstadoHUD.PAUSA:
 		# Pausa: atenuado 40% por diseño (S oculto, timer congelado).
-		modulate.a = hud_opacity * 0.4
+		_set_modulate_zonas(hud_opacity * 0.4)
 		return
 	# Guarda 4.5:1: la opacidad va a FONDOS, nunca a fills/labels críticos
-	# (que quedan opacos). El modulate global NO se baja para no fundir
+	# (que quedan opacos). El modulate de las zonas NO se baja para no fundir
 	# contraste (a 0.6, #C7CDD6 fundido = 4.08:1, no pasa; opaco = 8.51:1).
-	modulate.a = 1.0
+	_set_modulate_zonas(1.0)
 	if _hud_nw != null:
 		_hud_nw.set_opacidad_fondos(hud_opacity)
 	if _hud_ne != null:
 		_hud_ne.set_opacidad_fondos(hud_opacity)
 	if _hud_s != null:
 		_hud_s.set_opacidad_fondos(hud_opacity)
+
+
+## Alpha solo sobre las zonas (CanvasItems). El CanvasLayer no tiene
+## `modulate`: tocarlo es error en tiempo de ejecución.
+func _set_modulate_zonas(a: float) -> void:
+	for zona in [_hud_nw, _hud_ne, _hud_s, _vignette]:
+		if zona != null and is_instance_valid(zona):
+			(zona as CanvasItem).modulate.a = a
 
 
 func _aplicar_escala() -> void:
@@ -431,12 +445,10 @@ func _aplicar_reduced_motion() -> void:
 func _es_deck() -> bool:
 	if OS.has_feature("steam_deck"):
 		return true
-	var ancho := 0.0
-	if get_viewport() != null:
-		ancho = get_viewport().get_visible_rect().size.x
-	if ancho <= 0.0:
-		ancho = get_viewport_rect().size.x
-	return ancho > 0.0 and ancho <= 1300.0
+	var vp := get_viewport()
+	if vp != null:
+		return vp.get_visible_rect().size.x <= 1300.0
+	return DisplayServer.window_get_size().x <= 1300
 
 
 ## Foco mínimo On Demand (no menú): cadena lineal NW → NE → S.

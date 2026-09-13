@@ -1,12 +1,12 @@
 # Story 001: NW Vida + Gracia widgets
 
 > **Epic**: HUD de Combate (`hud-combate`)
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: UI
 > **Estimate**: M (3h)
 > **Manifest Version**: N/A — `docs/architecture/control-manifest.md` not yet created (run `/create-control-manifest`)
-> **Last Updated**: —
+> **Last Updated**: 2026-09-10
 
 ## Context
 
@@ -28,10 +28,10 @@
 *From `design/ux/hud.md`, scoped to this story:*
 
 - [ ] Vida bar NW tracks every HP change event (F5: base 100 +18/absorber + relic passthrough) in 1–2 ticks, no ease-in
-- [ ] Gracia shards NW below Vida (rombos ◆◆◇◇ + `set_prelight`); earn/spend/saturation interpolate only — never compute (owner #5)
-- [ ] Single #C75C4A flash on fail event ev.5; death = hard cut + candle-out, suppress all 800ms
-- [ ] Zero hardcoded strings in NW assembly (grep: all text via `tr()`)
-- [ ] NW bounding box ≤6% screen area @1280×800, 5% safe-zone clear
+- [ ] Gracia shards NW below Vida (rombos ◆◆◇◇ + `set_prelight`); discrete ints + 2-render-frame hold — never compute earn/spend (owner #5)
+- [ ] Single #C75C4A flash on fail event ev.5 (2 frames, measured without active suppressor; death candle-out + 800ms suppress belong to story-004)
+- [ ] Zero hardcoded strings in NW assembly (grep .gd+.tscn: all text via `tr()`)
+- [ ] NW bounding box ≤6% screen area @1280×800, 5% safe-zone clear (measured at hud_scale=1.0, EstadoHUD.COMBATE)
 
 ---
 
@@ -97,3 +97,10 @@
 
 - Depends on: None (first story; uses Ledger/Resolver stubs until Core epics exist)
 - Unlocks: Story 002 (NE reuses P1 bar infra + presenter pattern)
+
+## Completion Notes
+**Completed**: 2026-09-10
+**Criteria**: 5/5 passing (manual evidence, UI gate ADVISORY)
+**Deviations**: paleta #9AA2AF vs #8C94A0 (ruling pte. hud.md/art-bible); set_vida→vignette coupling (story-004); readout On Demand ≤1-frame stale; labels runtime sin traducir (l10n futura); TR-hud-* sin baseline en tr-registry
+**Test Evidence**: production/qa/evidence/hud-nw-evidence.md (3/3 capturas 1280×800 verificadas)
+**Code Review**: Complete (re-review APPROVED WITH SUGGESTIONS; fix B1 flash 2 frames + tscn duplicado + AC-b reformulado + _es_deck CanvasLayer)

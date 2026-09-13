@@ -434,7 +434,7 @@ func _unhandled_input(evento: InputEvent) -> void:
 
 
 func _notification(que: int) -> void:
-	if que == NOTIFICATION_WM_SIZE_CHANGED or que == NOTIFICATION_RESIZED:
+	if que == NOTIFICATION_WM_SIZE_CHANGED or que == Control.NOTIFICATION_RESIZED:
 		_recolocar_fx()
 	elif que == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
 		# Sleep: preserva pantalla + foco, jamás auto-commit.
