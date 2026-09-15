@@ -1,12 +1,12 @@
 # Story M-003: Pausa + Muerte muda + Hub
 
 > **Epic**: Menú Principal y Flujo de Pantallas (`menu-principal`)
-> **Status**: Ready (open items tracked, non-blocking: muerte-object anillo/zapato owner narrative; Hub-focus provisional → #18; Abandonar semantics need Run #3)
+> **Status**: Complete (opens tracked as TODOs: narrative object, #18 Hub-focus, Run #3 Abandonar semantics, MENU-05 p95 + Deck)
 > **Layer**: Presentation
 > **Type**: UI
 > **Estimate**: M (3h)
 > **Manifest Version**: N/A — `docs/architecture/control-manifest.md` not yet created
-> **Last Updated**: —
+> **Last Updated**: 2026-09-13
 
 ## Context
 
@@ -64,6 +64,10 @@ Pausa assembly mirrors Decisión modal discipline (consume/inhibit 200ms, focus 
   - Setup: S0, FS spy
   - Verify: adjusting a setting mutates only `settings.save`
   - Pass condition: profile/suspend still absent
+- **Sprint 2 additions (qa-plan 2026-09-13, GDD-derived):**
+  - Pausa gating: 120-tick castigo pauses without counting; trauma-decay skipped in both freezes; latch-stamps suppressed in menu (ADR-001 Feedback R12)
+  - Surface built pure against M-001a mock; `set_pausa_visual` final wiring flagged TODO (arranque/router ADR)
+  - Continuar/retry absent from pausa tree by construction (MENU-04 + R9: tree dump asserts absence, not disabled state)
 
 ---
 
@@ -72,7 +76,7 @@ Pausa assembly mirrors Decisión modal discipline (consume/inhibit 200ms, focus 
 **Story Type**: UI
 **Required evidence**: `production/qa/evidence/menu-pausa-muerte-hub-evidence.md`
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created `production/qa/evidence/menu-pausa-muerte-hub-evidence.md` (automatizado PASS 18/18; 3 capturas + Deck PENDING por diseño)
 
 ---
 
@@ -80,3 +84,12 @@ Pausa assembly mirrors Decisión modal discipline (consume/inhibit 200ms, focus 
 
 - Depends on: M-001a (shell focus infra)
 - Open (non-blocking): narrative object choice; #18 Hub-focus; #3 Abandonar semantics
+
+---
+
+## Completion Notes
+**Completed**: 2026-09-13
+**Criteria**: 4/4 passing (MENU-04, muerte muda, Hub, MENU-14) + gating R12 lado-UI
+**Deviations**: 1 menor intencional — sin `transicion_solicitada` (el router M-001a decide; documentado en presenter). Advisory → tech-debt: asimetría connect-`_construir`/disconnect-`_exit_tree` (re-add sin free pierde hook mando).
+**Test Evidence**: UI — `tests/integration/ui/menu_pausa_muerte_hub_test.gd` (18/18 green; suite ui 63/63) + `production/qa/evidence/menu-pausa-muerte-hub-evidence.md` (3 capturas + Deck + es-MX final + R12-full pendientes)
+**Code Review**: APPROVED WITH SUGGESTIONS 1ª pasada → fixes W1/W2/W4/W5 + es_muda scan + 3 tests → LP-CODE-REVIEW APPROVE + QL-TEST-COVERAGE ADEQUATE 2ª pasada
