@@ -38,4 +38,4 @@ manual (`set_process(false)` en capa/NW/vignette/gracia para determinismo):
 
 ## Sign-off
 
-- [ ] Corrida 9/9 verde + captura `hud-nw-vignette.png` + qa-lead (Sprint 2 Deck)
+- [x] Captura `hud-nw-vignette.png` (vida 25, 1280×800, auto-driver Sprint 2) — PASS; pendiente: corrida 9/9 en Godot + qa-lead + sesión Deck (Sprint 2)

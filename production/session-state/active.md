@@ -306,6 +306,21 @@ Hay GDDs (parry-absorcion, maquina-estados-jefe, concepto) pero sin ADRs ni
 - Tech debt logged: 5 advisory (paleta, vignette-coupling, readout-stale, l10n-runtime, TR-hud-baseline) — en Completion Notes, no en register
 - Next recommended: INFRA-01 stubs (desbloquea hud-002/hud-003) o M-004 firma hold (ready, sin bloqueos)
 
+## Session Extract — CI verde 2026-09-10
+- Run #2 sobre 7f62f94: SUCCESS 47s. INFRA-02 COMPLETO (trigger + primer verde)
+- Warnings restantes (no bloquean): Node20 deprecation en actions de terceros; "tests with warnings" (orphan pte. cazar)
+- SPRINT 1 CERRADO DEL TODO. Siguiente: /retrospective + /sprint-plan new (Sprint 2)
+
+## Session Extract — CI fix 2026-09-10
+- Commit 7f62f94 (checks:write) + push. El run anterior: tests OK, fallo solo publicando checks
+- Verificar en Actions el run sobre 7f62f94 (esperado: verde)
+- Ojo al warning "completed with warnings" (posible orphan visto en editor) si persiste
+
+## Session Extract — push Sprint 1 2026-09-10
+- Commit d6c4ff2 (578 files) + push master OK — CI (tests.yml en master) debe estar corriendo
+- Verificar: GitHub → Actions → run "Automated Tests" en verde
+- Sprint 1 CERRADO en código. Siguiente: Sprint 2 (Nice + deuda) o retrospective
+
 ## Session Extract — cierre Sprint 1 2026-09-10
 - Smoke: PASS WITH WARNINGS (125/125 verde; perf sin medir; CI sin correr)
 - QA sign-off: APPROVED WITH CONDITIONS (captura vignette-25, Deck, qa-lead, CI verde)
@@ -380,3 +395,56 @@ Hay GDDs (parry-absorcion, maquina-estados-jefe, concepto) pero sin ADRs ni
 - Deviations: direct-to-dev with TR-hud-??? placeholder + perf note unapplied (user-ordered); engine specialist not spawned separately (ui-programmer verified APIs vs engine-ref); pre-existing: palette GRIS_MEDIO #9AA2AF vs story #8C94A0 (kept, 5.29:1 contrast), set_vida drives _vignette (story-004 coupling, untouched), On Demand readout ≤1-frame stale (cosmetic)
 - Blockers: None
 - Next: /code-review src/ui/hud_nw.gd src/ui/gracia_shards.gd src/ui/hud_presenter.gd src/ui/combat_hud.gd then /story-done [story-path]
+
+## Session Extract — /dev-story 2026-09-13
+- Story: production/epics/hud-combate/story-005-firma-ve-gasto-knobs.md — Firma VE + gasto + knobs
+- Files changed: src/ui/gracia_shards.gd, src/ui/postura_blocks.gd, src/ui/hud_nw.gd, src/ui/hud_vignette.gd, src/ui/combat_hud.gd, src/ui/hud_presenter.gd (mod); tests/helpers/mock_ledger_gracia.gd, tests/integration/ui/hud_ve_gasto_knobs_test.gd (13 tests), production/qa/evidence/hud-ve-knobs-evidence.md (nuevos); tests/integration/ui/menu_motion_readability_test.gd (comentario precedencia 005)
+- Test written: tests/integration/ui/hud_ve_gasto_knobs_test.gd (13 tests — EJECUTADOS 2026-09-13: suite ui 45/45 verde, 0 fallos; exit 101 por orphans-at-exit conocido, no bloqueante)
+- Deviations: ninguna de Out-of-Scope; decisiones usuario P2 precedencia-005 (hold desactivado, riesgo tick-40Hz anotado) + P3 cola + P4 audio inmediato + P5 ints a mano + P6 saturación OUT; historia estaba ~70% pre-implementada (audit del agente)
+- Blockers: None (externo: sesión Deck AC-d)
+- Next: ejecutar suite en Godot → /code-review (6 ficheros src + mock + test) → /story-done
+
+## Session Extract — /story-done 2026-09-13
+- Verdict: COMPLETE WITH NOTES
+- Story: production/epics/hud-combate/story-005-firma-ve-gasto-knobs.md — Firma VE + gasto + knobs
+- Tech debt logged: 6 items in docs/tech-debt-register.md (new file)
+- Next recommended: m-003 Pausa + Muerte muda + Hub (production/epics/menu-principal/story-m003-pausa-muerte-hub.md, Must Have Sprint 2)
+
+## Session Extract — /dev-story 2026-09-13 (m-003)
+- Story: production/epics/menu-principal/story-m003-pausa-muerte-hub.md — Pausa + Muerte muda + Hub
+- Files changed: src/ui/menu_pausa.gd, src/ui/menu_muerte.gd, src/ui/menu_hub.gd, src/ui/menu_presenter.gd, src/ui/menu_settings_store.gd (nuevos); tests/integration/ui/menu_pausa_muerte_hub_test.gd (14 tests, nuevo); production/qa/evidence/menu-pausa-muerte-hub-evidence.md (nueva)
+- Test written: tests/integration/ui/menu_pausa_muerte_hub_test.gd — EJECUTADOS 2026-09-13: suite ui 63/63 verde (45 previas + 18 m-003: 14 + 4 post-review), 0 fallos; exit 101 por orphans-at-exit conocido
+- Review fixes aplicados: W1/W2/W4/W5 + extra reset-swallow + `es_muda()` scan real + 3 tests (+1 foco) ; fix propio test: `:= auto_free` → tipado explícito (warning-as-error)
+- Test fix propio: umbral etiquetas 5→4 + aserto fuente en botones (bug del test, implementación correcta con tallas 20/24/36)
+- Deviations: 1 menor intencional — sin `transicion_solicitada` (el router M-001a decide; documentado)
+- Blockers: None (TODOs: router/change_scene M-001a, objeto narrative, foco Hub #18, MENU-05 p95 + Deck)
+- Next: /code-review (5 src + store + test) → /story-done
+
+## Session Extract — /story-done 2026-09-13 (m-003)
+- Verdict: COMPLETE WITH NOTES
+- Story: production/epics/menu-principal/story-m003-pausa-muerte-hub.md — Pausa + Muerte muda + Hub
+- Tech debt logged: 1 item (asimetría connect/_exit_tree)
+- Next recommended: m-002 Continuar + SUS lifecycle (production/epics/menu-principal/story-m002-continuar-sus.md, Must Have Sprint 2, último Must pendiente)
+
+## Session Extract — /dev-story 2026-09-13 (m-002)
+- Story: production/epics/menu-principal/story-m002-continuar-sus.md — Continuar + SUS lifecycle
+- Files changed: src/ui/menu_continuar_controller.gd (nuevo); tests/helpers/save_io_spy.gd, run_gateway_stub.gd, sus_comparator_interim.gd (nuevos); tests/integration/menu/continuar_sus_test.gd (14 tests, nuevo)
+- Test written: tests/integration/menu/continuar_sus_test.gd — EJECUTADOS 2026-09-13: 17/17 verde; suite TOTAL 173/173 verde 0 fallos (exit 101 orphans conocido)
+- Review fixes aplicados: guards fail-closed W1-W7 + W10/W11 + fix W12 + G1/G2/G3 + asserts G5-G7; fixes propios: `is true` inválido → `!= true` (2 sitios, rompía parseo), revert sobre-aserción blip S2b (código correcto: botón disabled mismo frame)
+- Gate conditions aplicadas: C1 firmas Run #3 congeladas (stub doc) + C2 comparador interim solo-test pineado
+- Deviations: sin scene_runner (RefCounted puro + mock M-001a); spy en memoria (FS real innecesario); sin manifest
+- Blockers: None (persisten historia: interior Run #3, hold M-004)
+- Next: /code-review (controller + 3 helpers + test) → /story-done
+
+## Session Extract — /story-done 2026-09-13 (m-002)
+- Verdict: COMPLETE WITH NOTES
+- Story: production/epics/menu-principal/story-m002-continuar-sus.md — Continuar + SUS lifecycle
+- Tech debt logged: 2 items (null-checks Run #3; deferred C1/C2/FS-real/vista)
+- Next recommended: QA-COND (captura vignette-25 + verificar CI) — último Should; luego /smoke-check sprint → /team-qa sprint (cierre Sprint 2: Must 3/3 done)
+
+## Session Extract — QA-COND 2026-09-13
+- Captura `hud-nw-vignette.png` (vida 25, 1280×800, auto-driver throwaway `prototypes/hud-nw-captures/auto_vignette_capture.gd`) — PASS verificado visual + píxeles
+- CI verde confirmado: run 34781844639 sobre 7f62f94 (master) SUCCESS 47s (el run d6c4ff2 falló por checks:write, ya corregido)
+- qa-cond → done. Deck hardware (hud-005 AC-d + M-006a + tick-40Hz P2) = carryover explícito, sin hardware en estación
+<!-- QA RUN: 2026-09-13 | Sprint: 2 | Verdict: APPROVED WITH CONDITIONS | Report: production/qa/qa-signoff-sprint-2-2026-09-13.md -->
+- Next: commit changeset Sprint 2 → /retrospective → /sprint-plan new (Sprint 3)

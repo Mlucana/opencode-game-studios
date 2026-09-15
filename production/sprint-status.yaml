@@ -9,113 +9,50 @@
 #   done           ↔  Complete
 #   blocked        ↔  Blocked
 
-sprint: 1
-goal: "HUD de combate visible en duelo con freeze correcto + firma hold verificada + CI resucitado"
-start: "2026-09-08"
-end: "2026-09-19"
-generated: "2026-09-08"
-updated: "2026-09-10"
+sprint: 2
+goal: "Cerrar backlog implementable menu+HUD (firma VE, pausa/muerte/hub, continuar/SUS) + saldar condiciones QA Sprint 1; ADRs en track paralelo"
+start: "2026-09-13"
+end: "2026-09-27"
+generated: "2026-09-13"
+updated: "2026-09-13"
 
 stories:
-  - id: "hud-001"
-    name: "NW Vida + Gracia widgets"
-    file: "production/epics/hud-combate/story-001-nw-vida-gracia.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.4
-    blocker: ""
-    completed: "2026-09-10"
-  - id: "hud-002"
-    name: "NE Postura + Vida jefe + caída ev.8"
-    file: "production/epics/hud-combate/story-002-ne-postura-vida-jefe.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.7
-    blocker: ""
-    completed: "2026-09-10"
-  - id: "hud-003"
-    name: "Timer S + freeze-ALWAYS + Pausa"
-    file: "production/epics/hud-combate/story-003-timer-freeze-pausa.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.7
-    blocker: ""
-    completed: "2026-09-10"
-  - id: "m-004"
-    name: "Firma hold Tipo-A"
-    file: "production/epics/menu-principal/story-m004-firma-hold.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.4
-    blocker: ""
-    completed: "2026-09-10"
-  - id: "infra-stubs"
-    name: "Core/WallTick signal stubs"
-    file: ""
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.15
-    blocker: ""
-    completed: "2026-09-10"
-  - id: "infra-ci"
-    name: "Fix CI branch (master)"
-    file: ""
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.15
-    blocker: ""
-    completed: "2026-09-10"
-  - id: "hud-004"
-    name: "Alertas + cola visual + vignette"
-    file: "production/epics/hud-combate/story-004-alertas-cola-vignette.md"
-    priority: should-have
-    status: done
-    owner: ""
-    estimate_days: 0.3
-    blocker: ""
-    completed: "2026-09-10"
-  - id: "m-006a"
-    name: "Reduced-motion + legibilidad Deck"
-    file: "production/epics/menu-principal/story-m006a-motion-readability.md"
-    priority: should-have
-    status: done
-    owner: ""
-    estimate_days: 0.3
-    blocker: ""
-    completed: "2026-09-10"
   - id: "hud-005"
-    name: "Firma VE + gasto + knobs + Deck contraste"
+    name: "Firma VE + gasto + knobs"
     file: "production/epics/hud-combate/story-005-firma-ve-gasto-knobs.md"
-    priority: nice-to-have
-    status: backlog
+    priority: must-have
+    status: done
     owner: ""
     estimate_days: 0.4
-    blocker: "Sprint 2 (Deck hardware)"
-    completed: ""
+    blocker: "AC-d deferred Deck hardware"
+    completed: "2026-09-13"
   - id: "m-003"
     name: "Pausa + Muerte muda + Hub"
     file: "production/epics/menu-principal/story-m003-pausa-muerte-hub.md"
-    priority: nice-to-have
-    status: backlog
+    priority: must-have
+    status: done
     owner: ""
     estimate_days: 0.4
-    blocker: "Sprint 2 (needs M-001a)"
-    completed: ""
+    blocker: "M-001a mock surface (patron M-004)"
+    completed: "2026-09-13"
   - id: "m-002"
     name: "Continuar + SUS lifecycle"
     file: "production/epics/menu-principal/story-m002-continuar-sus.md"
-    priority: nice-to-have
-    status: backlog
+    priority: must-have
+    status: done
     owner: ""
     estimate_days: 0.7
-    blocker: "Sprint 2 (partial Run #3 block)"
-    completed: ""
+    blocker: "Run #3 stub interface (C1 frozen)"
+    completed: "2026-09-13"
+  - id: "qa-cond"
+    name: "Cierre condiciones QA Sprint 1"
+    file: ""
+    priority: should-have
+    status: done
+    owner: ""
+    estimate_days: 0.3
+    blocker: "Deck hardware (carryover explicito)"
+    completed: "2026-09-13"
   - id: "m-001a"
     name: "Shell S0/S1/S2 + foco"
     file: "production/epics/menu-principal/story-m001a-shell-focus.md"
@@ -134,15 +71,6 @@ stories:
     estimate_days: 0.3
     blocker: "preload/baker/veil ADR unwritten"
     completed: ""
-  - id: "m-005"
-    name: "S4/S5 + cero-IO"
-    file: "production/epics/menu-principal/story-m005-s4-s5-zeroio.md"
-    priority: nice-to-have
-    status: blocked
-    owner: ""
-    estimate_days: 0.7
-    blocker: "checksum ADR unwritten"
-    completed: ""
   - id: "m-006b"
     name: "PERF-MENU budgets"
     file: "production/epics/menu-principal/story-m006b-perf-budgets.md"
@@ -151,4 +79,13 @@ stories:
     owner: ""
     estimate_days: 0.3
     blocker: "budgets unratified + preload ADR"
+    completed: ""
+  - id: "m-005"
+    name: "S4/S5 + cero-IO"
+    file: "production/epics/menu-principal/story-m005-s4-s5-zeroio.md"
+    priority: nice-to-have
+    status: blocked
+    owner: ""
+    estimate_days: 0.7
+    blocker: "checksum ADR unwritten + M-002"
     completed: ""
