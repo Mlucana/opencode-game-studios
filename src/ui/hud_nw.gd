@@ -34,11 +34,19 @@ var usar_icono_en_vez_de_flash: bool = false
 var _flash_forma_frames: int = 0
 ## Decisión absorber/rechazar: SOLO Gracia visible (hud.md).
 var _modo_decision: bool = false
-## Reduced-motion: se propaga a GraciaShards.
+## Reduced-motion (precedencia story-005): cero flashes (el bus lleva el
+## feedback) + se propaga a GraciaShards (corte exacto, sin hold). Al activarse
+## colapsa flashes en vuelo a estado final.
 var reduced_motion: bool = false:
 	set(valor):
 		reduced_motion = valor
-		if is_node_ready() and _gracia != null:
+		if not is_node_ready():
+			return
+		if valor:
+			_flash_vida_frames = 0
+			_flash_forma_frames = 0
+			_restaurar_fill_vida()
+		if _gracia != null:
 			_gracia.reduced_motion = valor
 
 
@@ -119,8 +127,12 @@ func set_modo_decision(solo_gracia: bool) -> void:
 ## Respeta disable_damage_flash: si true → FORMA (rombo/triángulo +
 ## outline grueso 3px) con CERO cambio de color como señal.
 ## Si false → #C75C4A + borde grueso claro + forma (respaldo no-cromático).
+## Precedencia story-005: con reduced-motion, cero flashes (ni color ni forma
+## transitoria) — el feedback viaja por bus; la barra queda en estado final.
 func flash_fallo() -> void:
 	if not is_node_ready():
+		return
+	if reduced_motion:
 		return
 	_flash_vida_frames = FLASH_FRAMES
 	_flash_forma_frames = FLASH_FRAMES
@@ -205,6 +217,8 @@ func _nueva_barra(maximo: float, relleno: Color, fondo: Color) -> ProgressBar:
 
 
 func _restaurar_fill_vida() -> void:
+	if _vida_bar == null:
+		return
 	var fill := _vida_bar.get_theme_stylebox(&"fill") as StyleBoxFlat
 	if fill != null:
 		fill.bg_color = GRIS_LUZ

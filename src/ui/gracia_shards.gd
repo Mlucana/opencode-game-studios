@@ -39,8 +39,19 @@ var _hold_restante: int = 0
 var highlight_decision: bool = false
 ## Firma VE parada (ev.15): tick/forma además de color. No muta Postura.
 var _firma_parada: bool = false
-## Reduced-motion: sin pulso/latido; hold anti-40Hz intacto (no es decoración).
-var reduced_motion: bool = false
+## Reduced-motion (precedencia story-005): sin pulso/latido y SIN latch+hold
+## anti-40Hz — el tick crítico se verifica por corte exacto, nunca por hold.
+## Riesgo conocido y aceptado: posible pérdida de tick a 40Hz en Deck (ver
+## evidencia hud-ve-knobs; se mide en la sesión Deck, no se mitiga aquí).
+var reduced_motion: bool = false:
+	set(valor):
+		reduced_motion = valor
+		if valor:
+			# Colapso inmediato al valor exacto (corte 1 frame).
+			_hold_restante = 0
+			_latched_lit = _lit
+			if is_node_ready():
+				queue_redraw()
 
 
 ## Fija el valor a mostrar. Solo lectura del juego; no muta estado externo.
@@ -48,7 +59,8 @@ func set_shards(encendidas: int, total: int) -> void:
 	_total = maxi(1, total)
 	_lit = clampi(encendidas, 0, _total)
 	_latched_lit = _lit
-	_hold_restante = HOLD_FRAMES
+	# Precedencia story-005: con reduced-motion no hay hold (corte exacto).
+	_hold_restante = 0 if reduced_motion else HOLD_FRAMES
 	# El valor real sustituye la anticipación visual de firma parada.
 	_firma_parada = false
 	queue_redraw()
@@ -71,8 +83,9 @@ func mostrar_firma_parada() -> void:
 	_firma_parada = true
 	# Sin pre-incremento: el +1 visible lo aplica `_draw()` (una sola vez),
 	# dentro y fuera del hold. Pre-incrementar aquí mostraba +2 con hold.
+	# Precedencia story-005: con reduced-motion no hay hold (corte exacto).
 	_latched_lit = _lit
-	_hold_restante = HOLD_FRAMES
+	_hold_restante = 0 if reduced_motion else HOLD_FRAMES
 	queue_redraw()
 
 

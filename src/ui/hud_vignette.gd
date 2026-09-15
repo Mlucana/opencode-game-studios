@@ -23,8 +23,15 @@ const FLASH_FRAMES: int = 2
 var _flash_restante_frames: int = 0
 ## Alternativa no-cromática al flash (knob `disable_damage_flash`).
 var usar_icono_en_vez_de_flash: bool = false
-## Reduced-motion: desactiva cualquier pulsación.
-var reduced_motion: bool = false
+## Reduced-motion (precedencia story-005): sin pulsación y cero flashes.
+## Al activarse colapsa cualquier flash en vuelo a estado final (corte 1 frame).
+var reduced_motion: bool = false:
+	set(valor):
+		reduced_motion = valor
+		if valor:
+			_flash_restante_frames = 0
+			if is_node_ready():
+				queue_redraw()
 ## Pausa: congela vignette (no queue_redraw pulsante, no avanza reloj).
 ## Lo fija CombatHud._aplicar_estado (PAUSA → true). S oculto + timer
 ## congelado ya existen en CombatHud.
@@ -34,7 +41,11 @@ var _tiempo_ms: int = 0
 
 
 ## Dispara el flash único de fallo (evento 5). 2 frames exactos.
+## Precedencia story-005: con reduced-motion, cero flashes — el feedback
+## viaja por bus y la vignette queda en su intensidad estática.
 func flash_fallo() -> void:
+	if reduced_motion:
+		return
 	_flash_restante_frames = FLASH_FRAMES
 	queue_redraw()
 

@@ -198,7 +198,8 @@ func notificar_fallo() -> void:
 
 
 ## Firma VE (inv. #7): Gracia se mueve, Postura no (ev.15). Pre-light (ev.14)
-## ilumina Gracia; cierre sin parar (ev.16) repliega la luz.
+## ilumina Gracia; cierre sin parar (ev.16) repliega la luz con arbitraje de
+## nivel FIRMA_VE (story-005: el fold participa en la cola, nunca doble flash).
 ## PARADA distinguible: MUEVE Gracia (avanza fill/count + prelight off +
 ## tick de forma) manteniendo Postura idéntica (aquí jamás se toca Postura).
 func set_firma_ve(fase: int) -> void:
@@ -214,10 +215,11 @@ func set_firma_ve(fase: int) -> void:
 			if not _anunciar(Prioridad.FIRMA_VE, 0, ef_par):
 				return
 			_aplicar_firma_parada()
-		_:
-			if _hud_nw != null:
-				_hud_nw.limpiar_firma_ve()
-				_hud_nw.set_prelight_ve(false)
+		_:  # CERRADA / CIERRE_SIN_PARAR: repliegue sobrio, arbitrado nivel 3.
+			var ef_cierre := Callable(self, "_aplicar_cierre_ve")
+			if not _anunciar(Prioridad.FIRMA_VE, 0, ef_cierre):
+				return
+			_aplicar_cierre_ve()
 
 
 ## Estados: pausa (atenuado 40%, S oculto, timer pausado, sin vignette
@@ -379,6 +381,16 @@ func _aplicar_firma_parada() -> void:
 		_hud_nw.avanzar_firma_ve()
 
 
+## Repliegue sobrio de VE (ev.16, cierre sin parar): retira prelight + firma
+## sin celebración ("esto ya va a ocurrir", cue irresoluto). Re-despachable
+## desde la cola visual (story-005); con reduced-motion es corte 1 frame por
+## construcción (limpiar_firma solo fija flags + redibuja).
+func _aplicar_cierre_ve() -> void:
+	if _hud_nw != null:
+		_hud_nw.limpiar_firma_ve()
+		_hud_nw.set_prelight_ve(false)
+
+
 func _aplicar_opacidad() -> void:
 	if not is_node_ready():
 		return
@@ -431,6 +443,8 @@ func _aplicar_modo_flash() -> void:
 func _aplicar_reduced_motion() -> void:
 	if not is_node_ready():
 		return
+	# Precedencia story-005: los setters de cada zona auto-colapsan su
+	# transitorio en vuelo (holds a cero, flashes a cero); aquí solo se propaga.
 	if _vignette != null:
 		_vignette.reduced_motion = reduced_motion
 	if _hud_nw != null:

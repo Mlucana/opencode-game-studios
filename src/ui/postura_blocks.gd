@@ -22,8 +22,19 @@ const SEGMENTOS: int = 4
 var _fraccion: float = 1.0
 var _latched_fraccion: float = 1.0
 var _hold_restante: int = 0
-## Reduced-motion: sin pulso/latido. Hold anti-40Hz intacto (no es decoración).
-var reduced_motion: bool = false
+## Reduced-motion (precedencia story-005): sin pulso/latido y SIN latch+hold
+## anti-40Hz — la caída se verifica por corte exacto, nunca por hold.
+## Riesgo conocido y aceptado: posible pérdida de tick a 40Hz en Deck (ver
+## evidencia hud-ve-knobs; se mide en la sesión Deck, no se mitiga aquí).
+var reduced_motion: bool = false:
+	set(valor):
+		reduced_motion = valor
+		if valor:
+			# Colapso inmediato al valor exacto (corte 1 frame).
+			_hold_restante = 0
+			_latched_fraccion = _fraccion
+			if is_node_ready():
+				queue_redraw()
 
 
 ## Fija la fracción 0..1 a mostrar. Solo lectura; no muta estado externo.
@@ -33,7 +44,8 @@ func set_postura(actual: float, maxima: float) -> void:
 	else:
 		_fraccion = clampf(actual / maxima, 0.0, 1.0)
 	_latched_fraccion = _fraccion
-	_hold_restante = HOLD_FRAMES
+	# Precedencia story-005: con reduced-motion no hay hold (corte exacto).
+	_hold_restante = 0 if reduced_motion else HOLD_FRAMES
 	queue_redraw()
 
 

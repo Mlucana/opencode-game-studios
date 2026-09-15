@@ -156,6 +156,26 @@ func push_firma_ve(fase: int) -> void:
 	_salir()
 
 
+## Reflejo de gasto de Gracia (story-005, frontera G7): el HUD no decide.
+## La legalidad vive en el sistema #5 (en tests, el mock Ledger como fuente
+## de verdad); aquí solo se refleja su veredicto con valores dados a mano por
+## el emisor (P5: sin cuantización en el mock — los ints los fija el test):
+## ACEPTA → mueve el medidor NW existente + click seco por bus; RECHAZO →
+## blip de denegación por bus, sin tocar medidor, cap ni cooldown (el HUD no
+## los posee; el rechazo es no-buffer por construcción: no hay cola aquí).
+## Audio inmediato por bus (ducking owner #16); sin zona ni flash nuevos
+## (reusa NW + throb de vetas del cuerpo + click — hud.md Feedback gasto).
+func push_gasto(aceptado: bool, encendidas: int, total: int) -> void:
+	if not _entrar():
+		return
+	if aceptado:
+		_hud.set_gracia(encendidas, total)
+		hud_audio_requested.emit(&"hud_gasto_aceptado")
+	else:
+		hud_audio_requested.emit(&"hud_gasto_denegado")
+	_salir()
+
+
 func push_estado(estado: int) -> void:
 	if not _entrar():
 		return

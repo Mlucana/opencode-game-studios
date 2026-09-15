@@ -40,8 +40,10 @@ func _controles(n: Node, salida: Array) -> void:
 func test_reduced_motion_se_propaga_a_las_6_zonas() -> void:
 	# Arrange — Act.
 	_hud.reduced_motion = true
-	# Assert — NW, NE, S, vignette, esquirlas y bloques (hold intacto: no es
-	# decoración, es anti-40Hz y no se toca).
+	# Assert — NW, NE, S, vignette, esquirlas y bloques (precedencia
+	# story-005: reduced-motion ON desactiva el latch+hold anti-40Hz de
+	# story-004 → corte exacto 1 frame; riesgo tick-crítico en Deck 40Hz
+	# anotado en evidencia hud-ve-knobs, no mitigado aquí).
 	assert_that(_hud._hud_nw.reduced_motion).is_equal(true)
 	assert_that(_hud._hud_ne.reduced_motion).is_equal(true)
 	assert_that(_hud._hud_s.reduced_motion).is_equal(true)
