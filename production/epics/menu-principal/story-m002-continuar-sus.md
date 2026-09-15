@@ -1,12 +1,12 @@
 # Story M-002: Continuar + SUS lifecycle
 
 > **Epic**: Menú Principal y Flujo de Pantallas (`menu-principal`)
-> **Status**: Ready (partial BLOCK: `instantiate_run` / `run_viva_visible` need Run #3 designed — surface + consume logic implementable against Guardado backend interface)
+> **Status**: Complete (partial block resuelto vía stub C1 frozen; interior Run #3 sigue Out of Scope)
 > **Layer**: Presentation
 > **Type**: Integration
 > **Estimate**: L (5h)
 > **Manifest Version**: N/A — `docs/architecture/control-manifest.md` not yet created
-> **Last Updated**: —
+> **Last Updated**: 2026-09-13
 
 ## Context
 
@@ -63,6 +63,11 @@
   - When: double-press <200ms incl. two-device same-tick
   - Then: 2nd = no-op `SUS_CONSUMED`, `instantiations==1`, button disabled same-frame
   - Edge cases: cancel/kill mid-firma → sha256 identical, still S2; Hub→menu exit → sha identical at flush-confirm
+- **Sprint 2 additions (qa-plan 2026-09-13, GDD-derived):**
+  - Staged-journal order per Guardado R9: rename(save→validating) < validate < promote < delete at `run_viva_visible`; second Continuar re-reads disk → SUS_CONSUMED no-op
+  - Crash-validating without live marker: ONE recovery iff no `suspend.recovered` marker; second strike → S1, PER intact (AC-R9-01e)
+  - Comparator interim field-by-field: `posicion_rng` advances, `semilla_run` preserved (AC-R9-03 BLOCKED-note honored)
+  - "Todo idéntico" excludes timestamp/playtime; invalid SUS → discard → S1 + exact `MENU_REASON_*`
 
 ---
 
@@ -71,7 +76,7 @@
 **Story Type**: Integration
 **Required evidence**: `tests/integration/menu/continuar_sus_test.gd` — must exist and pass (OR documented playtest)
 
-**Status**: [ ] Not yet created
+**Status**: [x] Created `tests/integration/menu/continuar_sus_test.gd` — 17/17 green (suite total 173/173)
 
 ---
 
@@ -80,3 +85,12 @@
 - Depends on: M-001a (surface), M-004 (firma verdict protocol)
 - Partial block: Run #3 (`instantiate_run`, `run_viva_visible`) — stub interface until #3 designed
 - Unlocks: M-005 (S4/S5 reuse the validating/consume machinery)
+
+---
+
+## Completion Notes
+**Completed**: 2026-09-13
+**Criteria**: 4/4 passing (consume, doble-press, firma, Hub) + edges (staged, ONE-recovery, second-strike, hilos, timeout-stub, G1/G2/G3)
+**Deviations**: None blocking. C1/C2 pineados (stub Run #3 frozen, comparador interim solo-test). Advisory → tech-debt: comparador oficial, FS real, interior Run #3, vista M-001a, endurecer null-checks en Run #3.
+**Test Evidence**: Integration — `tests/integration/menu/continuar_sus_test.gd` (17/17 green; suite total 173/173, 0 failures)
+**Code Review**: APPROVED WITH SUGGESTIONS → fixes W1-W12 + G1-G3 + asserts → QL-TEST-COVERAGE ADEQUATE + LP-CODE-REVIEW APPROVE (2ª pasada)
